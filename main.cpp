@@ -1,4 +1,5 @@
 #include <iostream>
+#include <tokenizer.h>
 #include "includes/args.hxx"
 
 int main(int argc, char **argv)
@@ -31,5 +32,9 @@ int main(int argc, char **argv)
     }
     if (tokenize) std::cout << "Tokenizing..." << std::endl;
     if (sourceFile) std::cout << args::get(sourceFile);
+    Tokenizer t;
+    auto tokens = t.Tokenize(sourceFile.Get());
+    for (int i = 0; i < tokens.size(); i++)
+        std::cout << tokens[i]->type;
 	return 0;
 }
