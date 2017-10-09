@@ -12,11 +12,8 @@ Tokenizer::Tokenizer()
 
 std::vector<Token *> Tokenizer::Tokenize(std::string fileName)
 {
-    currentState = 0;
+    OpenFile(fileName);
     std::vector<Token *> result;
-    currentFile.close();
-    currentFile.open(fileName, std::ifstream::in);
-    Token *currentToken = nullptr;
     while(currentToken = Next())
     {
         result.push_back(currentToken);
@@ -52,6 +49,14 @@ Token *Tokenizer::Next()
 Token *Tokenizer::Current()
 {
     return currentToken;
+}
+
+void Tokenizer::OpenFile(std::string fileName)
+{
+    currentState = 0;
+    currentFile.close();
+    currentFile.open(fileName, std::ifstream::in);
+    Token *currentToken = nullptr;
 }
 
 

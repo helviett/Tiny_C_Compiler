@@ -51,6 +51,7 @@ public:
     std::vector<Token *> Tokenize(std::string fileName);
     Token *Next();
     Token *Current();
+    void OpenFile(std::string fileName);
 private:
     int currentState = 0;
     char currentCharacter = 'a';
