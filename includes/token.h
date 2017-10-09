@@ -9,7 +9,7 @@
 
 enum TokenType
 {
-    ID
+    ID, NUM_INT, NUM_FLOAT
 };
 
 struct Token

@@ -30,13 +30,15 @@ Token *Tokenizer::Next()
     while (currentFile.get(currentCharacter))
     {
         int newState = FiniteAutomata[currentState][currentCharacter];
-        if (newState == -1)
+        if (newState == -1 && currentState != 0)
         {
             auto res = AcceptStates.find(currentState);
             if (res == AcceptStates.end())
                 throw new std::exception();
             else
             {
+                currentFile.putback(currentCharacter);
+                currentState = 0;
                 return new Token(res->second);
             }
 
@@ -45,6 +47,11 @@ Token *Tokenizer::Next()
             currentState = newState;
     }
     return nullptr;
+}
+
+Token *Tokenizer::Current()
+{
+    return currentToken;
 }
 
 
