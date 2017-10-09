@@ -53,13 +53,14 @@ public:
     Token *Current();
 private:
     int currentState = 0;
-    char currentCharacter = 'a';
+    char currentCharacter = 0;
     int currentRow = 1;
     int currentCol = 1;
 
     Token *currentToken;
     std::ifstream currentFile;
 
+    Token *getToken();
 };
 
 #endif //TINY_C_COMPILER_TOKENIZER_H

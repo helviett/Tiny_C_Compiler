@@ -31,27 +31,31 @@ Token *Tokenizer::Next()
     {
         int newState = FiniteAutomata[currentState][currentCharacter];
         if (newState == -1 && currentState != 0)
-        {
-            auto res = AcceptStates.find(currentState);
-            if (res == AcceptStates.end())
-                throw new std::exception();
-            else
-            {
-                currentFile.putback(currentCharacter);
-                currentState = 0;
-                return new Token(res->second);
-            }
-
-        }
+            return getToken();
         else
             currentState = newState;
     }
+    if (currentState != 0)
+        return getToken();
     return nullptr;
 }
 
 Token *Tokenizer::Current()
 {
     return currentToken;
+}
+
+Token *Tokenizer::getToken()
+{
+    auto res = AcceptStates.find(currentState);
+    if (res == AcceptStates.end())
+        throw new std::exception();
+    else
+    {
+        currentFile.putback(currentCharacter);
+        currentState = 0;
+        return new Token(res->second);
+    }
 }
 
 
