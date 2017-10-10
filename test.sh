@@ -4,7 +4,10 @@ if [ "$tccpath" = "" ];
 then
 	echo "tcc executable not found"
 	echo "Trying to compile it by myself"
-	cmake . && make
+	mkdir build
+	cd build
+	cmake .. && make
+	cd ..
 	tccpath=$(find -name "tcc" -print0)
 else
 	echo "tcc was found"

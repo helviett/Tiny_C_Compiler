@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     {
         Tokenizer t;
         auto tokens = t.Tokenize(sourceFile.Get());
-        printf("Position\tType\tValue\tText\n\n");
+        printf("Position\tType\tValue\t\t\tText\n\n");
         for (int i = 0; i < tokens.size(); i++)
             printf("(%d, %d)\t\t%s\t\t\t%s\n", tokens[i]->row, tokens[i]->col, TokenTypeToString[tokens[i]->type].c_str(),
                     tokens[i]->text.c_str());
