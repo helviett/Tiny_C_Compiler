@@ -1,0 +1,3 @@
+Position	Type	Value			Text
+
+(1, 1)		NUM_FLOAT			43.65e+13

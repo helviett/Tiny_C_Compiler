@@ -1,0 +1,7 @@
+Position	Type	Value			Text
+
+(1, 1)		KEYWORD			char
+(1, 6)		ID			b
+(1, 8)		ASSIGNMENT			=
+(1, 10)		CHARACTER			'\\'
+(1, 14)		SEMICOLON			;

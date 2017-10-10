@@ -1,0 +1,17 @@
+Position	Type	Value			Text
+
+(1, 1)		ID			A
+(1, 3)		ASTERIX			*
+(1, 4)		ID			a
+(1, 6)		ASSIGNMENT			=
+(1, 8)		ID			malloc
+(1, 14)		LBRACKET			(
+(1, 15)		KEYWORD			sizeof
+(1, 21)		LBRACKET			(
+(1, 22)		ID			A
+(1, 23)		RBRACKET			)
+(1, 24)		RBRACKET			)
+(1, 25)		SEMICOLON			;
+(3, 1)		ID			a
+(3, 2)		ARROW			->
+(3, 4)		ID			b

@@ -12,8 +12,20 @@ then
 else
 	echo "tcc was found"
 fi
-
+i=1
+j=1
 for file in $(ls tests/tokenizer/ -1 | sort -n) 
 do
-	eval "./$tccpath -t tests/tokenizer/$file"
+	j=$(($j + 1))
+	eval "./$tccpath -t tests/tokenizer/$file > tests/tokenizerEtalons/temp"
+	cmp -s "tests/tokenizer/$file tests/tokenizerEtalons/temp > /dev/null"
+	if [ $? -eq 1 ]; then
+		echo "$file test failed"
+	else
+		echo "$file test succed"
+		i=$(($i + 1))
+	fi
 done
+rm tests/tokenizerEtalons/temp
+
+echo "passed $i/$j"

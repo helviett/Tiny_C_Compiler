@@ -1,0 +1,12 @@
+Position	Type	Value			Text
+
+(1, 1)		KEYWORD			char
+(1, 6)		ASTERIX			*
+(1, 7)		ID			c
+(1, 8)		SEMICOLON			;
+(3, 1)		ID			a
+(3, 2)		DOUBLE_PLUS			++
+(3, 4)		SEMICOLON			;
+(3, 6)		ID			b
+(3, 7)		DOUBLE_MINUS			--
+(3, 9)		SEMICOLON			;

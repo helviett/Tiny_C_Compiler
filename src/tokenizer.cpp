@@ -116,7 +116,9 @@ void Tokenizer::parseMultilineComment()
 
 void Tokenizer::parseComment()
 {
-    while (currentFile.get(currentCharacter) && currentCharacter != '\n') ;
+    while (currentFile.get(currentCharacter))
+        if (currentCharacter == '\n') break;
+    buffer.resize(0);
     currentState = 0;
 }
 

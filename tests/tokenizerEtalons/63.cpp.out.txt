@@ -1,0 +1,9 @@
+Position	Type	Value			Text
+
+(1, 1)		ID			a
+(1, 3)		ASSIGNMENT			=
+(1, 5)		ID			ord
+(1, 8)		LBRACKET			(
+(1, 9)		CHARACTER			'\''
+(1, 13)		RBRACKET			)
+(1, 14)		SEMICOLON			;

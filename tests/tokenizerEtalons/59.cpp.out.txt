@@ -1,0 +1,9 @@
+Position	Type	Value			Text
+
+(1, 1)		KEYWORD			int
+(1, 5)		ID			res
+(1, 9)		ASSIGNMENT			=
+(1, 11)		CHARACTER			'a'
+(1, 15)		MINUS			-
+(1, 17)		CHARACTER			'A'
+(1, 20)		SEMICOLON			;

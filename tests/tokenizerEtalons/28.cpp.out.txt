@@ -1,0 +1,3 @@
+Position	Type	Value			Text
+
+(1, 1)		NUM_FLOAT			-3493949.349394e19
