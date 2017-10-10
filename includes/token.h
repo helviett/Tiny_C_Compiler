@@ -7,6 +7,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <utility>
 
 enum class TokenType
 {
@@ -48,12 +49,10 @@ static std::unordered_map<TokenType, std::string> TokenTypeToString(
 struct Token
 {
     TokenType type;
+    int row, col;
     std::string text;
 
-    Token(TokenType type)
-    {
-        this->type = type;
-    }
+    Token(TokenType type, int row, int col, std::string text): type(type), row(row), col(col), text(std::move(text)) {}
 };
 
 #endif //TINY_C_COMPILER_TOKEN_H

@@ -5,11 +5,6 @@
 #include <tokenizer.h>
 #include <iostream>
 
-Tokenizer::Tokenizer()
-{
-
-}
-
 void Tokenizer::OpenFile(std::string fileName)
 {
 
@@ -17,6 +12,7 @@ void Tokenizer::OpenFile(std::string fileName)
 
 std::vector<Token *> Tokenizer::Tokenize(std::string fileName)
 {
+    buffer.reserve(256);
     currentState = 0;
     std::vector<Token *> result;
     currentFile.close();
@@ -32,13 +28,20 @@ std::vector<Token *> Tokenizer::Tokenize(std::string fileName)
 
 Token *Tokenizer::Next()
 {
+    currentlyProcessingTokenPos = currentPos;
     while (currentFile.get(currentCharacter))
     {
-        int newState = FiniteAutomata[currentState][currentCharacter];
-        if (newState == -1 && currentState != 0)
+        if (currentCharacter == '\n')
+        {
+            currentPos.col = 0;
+            currentPos.row++;
+        }
+        currentPos.col++;
+        buffer.push_back(currentCharacter);
+        bool getNewToken = false;
+        processNewState(FiniteAutomata[currentState][currentCharacter], getNewToken);
+        if (getNewToken)
             return getToken();
-        else
-            currentState = newState;
     }
     if (currentState != 0)
         return getToken();
@@ -52,15 +55,65 @@ Token *Tokenizer::Current()
 
 Token *Tokenizer::getToken()
 {
+
     auto res = AcceptStates.find(currentState);
     if (res == AcceptStates.end())
         throw new std::exception();
     else
     {
+        currentPos.col--;
         currentFile.putback(currentCharacter);
         currentState = 0;
-        return new Token(res->second);
+        Token *t = new Token(res->second, currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
+        buffer.resize(0);
+        currentlyProcessingTokenPos = currentPos;
+        return t;
     }
+}
+
+void Tokenizer::processNewState(int newState, bool &getTokenResult)
+{
+
+    if (newState == (int)SpecialFAStates::MultilineComment)
+        parseMultilineComment();
+    else if (newState == (int)SpecialFAStates::Comment)
+        parseComment();
+    else if (newState == -1 && currentState != 0)
+    {
+        buffer.pop_back();
+        getTokenResult = true;
+    }
+    else
+    {
+        if (!newState)
+        {
+            buffer.resize(0);
+            currentlyProcessingTokenPos = currentPos;
+        }
+        currentState = newState;
+    }
+}
+
+void Tokenizer::parseMultilineComment()
+{
+    int nesting = 1;
+    char buffer[2];
+    while (nesting && currentFile.get(currentCharacter))
+    {
+        buffer[0] = buffer[1];
+        buffer[1] = currentCharacter;
+        if (buffer[0] == '/' && buffer[1] == '*')
+            nesting++;
+        if (buffer[0] == '*' && buffer[1] == '/')
+            nesting--;
+    }
+    currentState = 0;
+}
+
+void Tokenizer::parseComment()
+{
+    while (currentFile.get(currentCharacter) && currentCharacter != '\n') ;
+    currentState = 0;
 }
 
 

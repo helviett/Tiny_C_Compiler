@@ -30,11 +30,16 @@ int main(int argc, char **argv)
         std::cerr << parser;
         return 1;
     }
-    if (tokenize) std::cout << "Tokenizing..." << std::endl;
-    if (sourceFile) std::cout << args::get(sourceFile);
-    Tokenizer t;
-    auto tokens = t.Tokenize(sourceFile.Get());
-    for (int i = 0; i < tokens.size(); i++)
-        std::cout << TokenTypeToString[tokens[i]->type];
+    if (!sourceFile)
+        throw new std::exception();
+    if (tokenize)
+    {
+        Tokenizer t;
+        auto tokens = t.Tokenize(sourceFile.Get());
+        printf("Position\tType\tValue\tText\n\n");
+        for (int i = 0; i < tokens.size(); i++)
+            printf("(%d, %d)\t\t%s\t\t\t%s\n", tokens[i]->row, tokens[i]->col, TokenTypeToString[tokens[i]->type].c_str(),
+                    tokens[i]->text.c_str());
+    }
 	return 0;
 }
