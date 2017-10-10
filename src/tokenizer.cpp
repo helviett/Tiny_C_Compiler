@@ -65,12 +65,16 @@ Token *Tokenizer::getToken()
         currentFile.putback(currentCharacter);
         currentState = 0;
         Token *t = new Token(res->second, currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
+        if (t->type == TokenType::ID)
+        {
+            if (Keywords.find(t->text) != Keywords.end())
+                t->type = TokenType::KEYWORD;
+        }
         buffer.resize(0);
         currentlyProcessingTokenPos = currentPos;
         return t;
     }
 }
-
 void Tokenizer::processNewState(int newState, bool &getTokenResult)
 {
 
