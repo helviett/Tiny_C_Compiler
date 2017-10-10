@@ -6,10 +6,9 @@ set(CMAKE_CXX_STANDARD 11)
 set(SOURCE_FILES
         includes/args.hxx
         main.cpp
-        README.md includes/tokenizer.h includes/token.h src/tokenizer.cpp)
+        README.md includes/tokenizer.h includes/token.h src/tokenizer.cpp src/token.cpp)
 
-include_directories(includes)
-include_directories(src)
-include_directories(tests)
+include_directories(includes src)
+
 
 add_executable(tcc ${SOURCE_FILES})

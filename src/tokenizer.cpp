@@ -10,6 +10,11 @@ Tokenizer::Tokenizer()
 
 }
 
+void Tokenizer::OpenFile(std::string fileName)
+{
+
+}
+
 std::vector<Token *> Tokenizer::Tokenize(std::string fileName)
 {
     currentState = 0;
@@ -57,5 +62,7 @@ Token *Tokenizer::getToken()
         return new Token(res->second);
     }
 }
+
+
 
 

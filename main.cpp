@@ -35,6 +35,6 @@ int main(int argc, char **argv)
     Tokenizer t;
     auto tokens = t.Tokenize(sourceFile.Get());
     for (int i = 0; i < tokens.size(); i++)
-        std::cout << tokens[i]->type;
+        std::cout << TokenTypeToString[tokens[i]->type];
 	return 0;
 }
