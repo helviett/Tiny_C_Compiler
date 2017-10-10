@@ -5,6 +5,7 @@
 #include <tokenizer.h>
 #include <iostream>
 
+
 void Tokenizer::OpenFile(std::string fileName)
 {
 
@@ -58,7 +59,7 @@ Token *Tokenizer::getToken()
 
     auto res = AcceptStates.find(currentState);
     if (res == AcceptStates.end())
-        throw new std::exception();
+        throw new LexicalError(currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
     else
     {
         currentPos.col--;

@@ -5,6 +5,7 @@
 #ifndef TINY_C_COMPILER_TOKENIZER_H
 #define TINY_C_COMPILER_TOKENIZER_H
 
+#include "tcc_exceptions.h"
 #include "dfa.h"
 #include "token.h"
 
