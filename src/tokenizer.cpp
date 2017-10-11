@@ -3,12 +3,12 @@
 //
 
 #include <tokenizer.h>
-#include <iostream>
 
 
 void Tokenizer::OpenFile(std::string fileName)
 {
-
+    currentFile.close();
+    currentFile.open(fileName, std::ifstream::in);
 }
 
 std::vector<Token *> Tokenizer::Tokenize(std::string fileName)
@@ -16,13 +16,9 @@ std::vector<Token *> Tokenizer::Tokenize(std::string fileName)
     buffer.reserve(256);
     currentState = 0;
     std::vector<Token *> result;
-    currentFile.close();
-    currentFile.open(fileName, std::ifstream::in);
-    Token *currentToken = nullptr;
-    while(currentToken = Next())
-    {
+    OpenFile(std::move(fileName));
+    while(Next()->type != TokenType::END_OF_FILE)
         result.push_back(currentToken);
-    }
     return result;
 
 }
@@ -39,14 +35,12 @@ Token *Tokenizer::Next()
         }
         currentPos.col++;
         buffer.push_back(currentCharacter);
-        bool getNewToken = false;
-        processNewState(FiniteAutomata[currentState][currentCharacter], getNewToken);
-        if (getNewToken)
-            return getToken();
+        if (processNewState(FiniteAutomata[currentState][currentCharacter]))
+            return currentToken = getToken();
     }
     if (currentState != 0)
-        return getToken();
-    return nullptr;
+        return currentToken = getToken();
+    return new Token(TokenType::END_OF_FILE, currentPos.row, currentPos.col, "");
 }
 
 Token *Tokenizer::Current()
@@ -59,24 +53,42 @@ Token *Tokenizer::getToken()
 
     auto res = AcceptStates.find(currentState);
     if (res == AcceptStates.end())
-        throw new LexicalError(currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
+        throw LexicalError(currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
     else
     {
         currentPos.col--;
         currentFile.putback(currentCharacter);
         currentState = 0;
         Token *t = new Token(res->second, currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
-        if (t->type == TokenType::ID)
+        try
         {
-            if (Keywords.find(t->text) != Keywords.end())
+            if (t->type == TokenType::ID && Keywords.find(t->text) != Keywords.end())
                 t->type = TokenType::KEYWORD;
+            if (t->type == TokenType::NUM_INT)
+                t->intValue = std::stoull(buffer);
+            else if (t->type == TokenType::NUM_FLOAT)
+                t->floatValue = std::stold(buffer);
+
+            else
+            {
+                t->stringValue = (char *)malloc(buffer.length() + 1);
+                strcpy(t->stringValue, buffer.c_str());
+            }
+        }
+        catch (std::out_of_range &e)
+        {
+            throw LexicalError(currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
+        }
+        catch (std::invalid_argument &e)
+        {
+            throw LexicalError(currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
         }
         buffer.resize(0);
         currentlyProcessingTokenPos = currentPos;
         return t;
     }
 }
-void Tokenizer::processNewState(int newState, bool &getTokenResult)
+bool Tokenizer::processNewState(int newState)
 {
 
     if (newState == (int)SpecialFAStates::MultilineComment)
@@ -86,7 +98,7 @@ void Tokenizer::processNewState(int newState, bool &getTokenResult)
     else if (newState == -1 && currentState != 0)
     {
         buffer.pop_back();
-        getTokenResult = true;
+        return true;
     }
     else
     {
@@ -97,6 +109,7 @@ void Tokenizer::processNewState(int newState, bool &getTokenResult)
         }
         currentState = newState;
     }
+    return false;
 }
 
 void Tokenizer::parseMultilineComment()

@@ -1,4 +1,0 @@
-Position	Type	Value			Text
-
-(1, 1)		LCURLY_BRACKET			{
-(1, 2)		RCURLY_BRACKET			}

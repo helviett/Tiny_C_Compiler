@@ -1,4 +1,0 @@
-Position	Type	Value			Text
-
-(1, 1)		LBRACKET			(
-(1, 2)		RBRACKET			)

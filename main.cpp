@@ -35,13 +35,26 @@ int main(int argc, char **argv)
     if (tokenize)
     {
         Tokenizer t;
-        auto tokens = t.Tokenize(sourceFile.Get());
         printf("Position\tType\tValue\t\t\tText\n\n");
         try
         {
+            auto tokens = t.Tokenize(sourceFile.Get());
             for (int i = 0; i < tokens.size(); i++)
-                printf("(%d, %d)\t\t%s\t\t\t%s\n", tokens[i]->row, tokens[i]->col, TokenTypeToString[tokens[i]->type].c_str(),
-                       tokens[i]->text.c_str());
+                switch (tokens[i]->type)
+                {
+                    case TokenType::NUM_INT:
+                        printf("(%d, %d)\t\t%s\t%llu\t\t%s\n", tokens[i]->row, tokens[i]->col,
+                               TokenTypeToString[tokens[i]->type].c_str(), tokens[i]->intValue,tokens[i]->text.c_str());
+                        break;
+                    case TokenType::NUM_FLOAT:
+                        printf("(%d, %d)\t\t%s\t%llf\t\t%s\n", tokens[i]->row,
+                               tokens[i]->col, TokenTypeToString[tokens[i]->type].c_str(), tokens[i]->floatValue, tokens[i]->text.c_str());
+                        break;
+                    default:
+                        printf("(%d, %d)\t\t%s\t%s\t\t%s\n", tokens[i]->row, tokens[i]->col,
+                               TokenTypeToString[tokens[i]->type].c_str(), tokens[i]->stringValue,tokens[i]->text.c_str());
+                }
+
         }
         catch (LexicalError e)
         {

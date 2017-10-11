@@ -1,4 +1,0 @@
-Position	Type	Value			Text
-
-(1, 1)		LSQUARE_BRACKET			[
-(1, 2)		RSQUARE_BRACKER			]

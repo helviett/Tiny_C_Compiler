@@ -12,6 +12,10 @@
 #include <fstream>
 #include <vector>
 #include <unordered_set>
+#include <cstring>
+#include <algorithm>
+#include <iostream>
+#include <utility>
 
 static std::unordered_set<std::string> Keywords =
 {
@@ -45,7 +49,7 @@ private:
     std::ifstream currentFile;
     std::string buffer;
     Token *getToken();
-    void processNewState(int state, bool &getTokenResult);
+    bool processNewState(int state);
     void parseMultilineComment();
     void parseComment();
 };
