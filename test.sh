@@ -18,7 +18,7 @@ for file in $(ls tests/tokenizer/ -1 | sort -n)
 do
 	j=$(($j + 1))
 	eval "./$tccpath -t tests/tokenizer/$file > tests/tokenizerEtalons/temp.txt"
-	cmp -s "tests/tokenizer/$file" "tests/tokenizerEtalons/temp"
+	cmp -s "tests/tokenizer/$file.out" "tests/tokenizerEtalons/temp.txt"
 	if [ $? -eq 1 ]; then
 		echo "$file test failed"
 	else
