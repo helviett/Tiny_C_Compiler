@@ -14,12 +14,12 @@ else
 fi
 i=0
 j=0
-for file in $(ls tests/tokenizer/ --ignore=*.out | sort -n) 
+for file in $(ls tests/scanner/ --ignore=*.out | sort -n)
 do
 	j=$(($j + 1))
 	prefix=$( echo "$file" | sed -e "s/\.cpp//g" )
-	eval "./$tccpath -t tests/tokenizer/$file > tests/tokenizer/temp.txt"
-	cmp -s "tests/tokenizer/$prefix.out" "tests/tokenizer/temp.txt"
+	eval "./$tccpath -t tests/scanner/$file > tests/scanner/temp.txt"
+	cmp -s "tests/scanner/$prefix.out" "tests/scanner/temp.txt"
 	if [ $? -eq 1 ]; then
 		echo "$file test failed"
 	else
@@ -27,7 +27,7 @@ do
 		i=$(($i + 1))
 	fi
 done
-rm tests/tokenizer/temp.txt
+rm tests/scanner/temp.txt
 echo "passed $i/$j"
 
 

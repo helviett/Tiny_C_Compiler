@@ -35,6 +35,7 @@ class Tokenizer
 {
 public:
     Tokenizer(): currentPos(1, 1) {}
+    Tokenizer(std::string fileName);
 
     std::vector<Token *> Tokenize(std::string fileName);
     Token *Next();

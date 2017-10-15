@@ -4,6 +4,11 @@
 
 #include <tokenizer.h>
 
+Tokenizer::Tokenizer(std::string fileName)
+{
+    OpenFile(fileName);
+}
+
 
 void Tokenizer::OpenFile(std::string fileName)
 {
@@ -144,7 +149,6 @@ void Tokenizer::parseComment()
     buffer.resize(0);
     currentState = 0;
 }
-
 
 
 
