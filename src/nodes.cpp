@@ -11,15 +11,12 @@ BinOpNode::BinOpNode(Token *op, ExprNode *left, ExprNode *right)
     this->right = right;
 }
 
-void BinOpNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
+void printAbove(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
 {
-    depth++;
-    right->Print(os, depth, depths, SubtreeType::Right);
     if (depth >= 2)
         depths[depth - 2] = 0;
     if (type == SubtreeType::Right && depth >= 2)
         depths[depth - 2] = 1;
-    depths[depth - 1] = 1;
     os << std::endl;
 
     for (int i = 0; i < depth - 1; ++i)
@@ -37,9 +34,10 @@ void BinOpNode::Print(std::ostream &os, int depth, std::vector<int> &depths, Sub
                 os << '-';
 
     }
+}
 
-    os << op->stringValue << std::endl;
-
+void printBelow(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
+{
     for (int i = 0; i < depth; ++i)
     {
         if (depths[i])
@@ -51,44 +49,25 @@ void BinOpNode::Print(std::ostream &os, int depth, std::vector<int> &depths, Sub
             os << ' ';
     }
 
+}
+
+void BinOpNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
+{
+    depth++;
+    right->Print(os, depth, depths, SubtreeType::Right);
+    depths[depth - 1] = 1;
+    printAbove(os, depth, depths, type);
+    os << op->stringValue << std::endl;
+    printBelow(os, depth, depths, type);
     left->Print(os, depth, depths, SubtreeType::Left);
 }
 
 void IntConstNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
 {
     depth++;
-    if (depth >= 2)
-        depths[depth - 2] = 0;
-    if (type == SubtreeType::Right && depth >= 2)
-        depths[depth - 2] = 1;
-    os << std::endl;
-
-    for (int i = 0; i < depth - 1; ++i)
-    {
-        if (i == depth - 2)
-            os << 'x';
-        else if (depths[i])
-            os << '|';
-        else
-            os << ' ';
-        for (int j = 1; j < 5; ++j)
-            if (i < depth - 2)
-                os << ' ';
-            else
-                os << '-';
-
-    }
+    printAbove(os, depth, depths, type);
 
     os << value << std::endl;
 
-    for (int i = 0; i < depth; ++i)
-    {
-        if (depths[i])
-            os << '|';
-        else
-            os << ' ';
-
-        for (int j = 1; j < 5; ++j)
-            os << ' ';
-    }
+    printBelow(os, depth, depths, type);
 }

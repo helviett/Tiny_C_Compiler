@@ -56,7 +56,6 @@ class IntConstNode: public ConstNode
 {
 public:
     explicit IntConstNode(uint64_t value): value(value) {}
-
     void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
 private:
     uint64_t value;
