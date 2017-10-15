@@ -7,6 +7,7 @@
 
 #include "token.h"
 #include <iostream>
+#include <utility>
 #include <vector>
 
 enum class SubtreeType
@@ -24,12 +25,6 @@ public:
 };
 
 class ExprNode: public Node
-{
-public:
-    void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override = 0;
-};
-
-class IdNode: public ExprNode
 {
 public:
     void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override = 0;
@@ -59,6 +54,24 @@ public:
     void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
 private:
     uint64_t value;
+};
+
+class FloatConstNode: public ConstNode
+{
+public:
+    explicit FloatConstNode(long double value): value(value) {}
+    void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
+private:
+    long double value;
+};
+
+class IdNode: public ExprNode
+{
+public:
+    explicit IdNode(std::string value): value(std::move(value)) {}
+    void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
+private:
+    std::string value;
 };
 
 #endif //TINY_C_COMPILER_NODE_H

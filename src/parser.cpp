@@ -44,23 +44,24 @@ ExprNode *Parser::parseTerm()
 ExprNode *Parser::parseFactor()
 {
     Token *t = scanner->Current();
-    if (t->type == TokenType::ID)
+    switch (t->type)
     {
-        //return IdNode;
-    }
-    if (t->type == TokenType::NUM_INT)
-    {
-        scanner->Next();
-        return new IntConstNode(t->intValue);
-    }
-    if (t->type == TokenType::LBRACKET)
-    {
-        scanner->Next();
-        ExprNode *e = parseExpr();
-        if (scanner->Current()->type != TokenType::RBRACKET)
-            throw "";
-        scanner->Next();
-        return e;
+        case TokenType::NUM_INT:
+            scanner->Next();
+            return new IntConstNode(t->intValue);
+        case TokenType::NUM_FLOAT:
+            scanner->Next();
+            return new FloatConstNode(t->floatValue);
+        case TokenType::ID:
+            scanner->Next();
+            return new IdNode(t->stringValue);
+        case TokenType::LBRACKET:
+            scanner->Next();
+            ExprNode *e = parseExpr();
+            if (scanner->Current()->type != TokenType::RBRACKET)
+                throw "";
+            scanner->Next();
+            return e;
     }
     throw "";
 }

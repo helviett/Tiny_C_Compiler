@@ -20,7 +20,7 @@ void SyntaxTree::Print()
 
 std::ostream &operator<<(std::ostream &os, SyntaxTree &st)
 {
-    std::vector<int> v(500, 0);
-    st.root->Print(os, 0, v, SubtreeType::Left);
+    std::vector<int> depths(512, 0);
+    st.root->Print(os, 0, depths, SubtreeType::Left);
     return os;
 }
