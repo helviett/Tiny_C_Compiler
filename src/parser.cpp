@@ -24,7 +24,9 @@ ExprNode *Parser::parseExpr()
     while (t->type == TokenType::PLUS || t->type == TokenType::MINUS)
     {
         scanner->Next();
-        return new BinOpNode(t, e, parseExpr());
+        auto right = parseTerm();
+        e = new BinOpNode(t, e, right);
+        t = scanner->Current();
     }
     return e;
 }
@@ -36,7 +38,9 @@ ExprNode *Parser::parseTerm()
     while (t->type == TokenType::ASTERIX || t->type == TokenType::FORWARD_SLASH)
     {
         scanner->Next();
-        return new BinOpNode(t, e, parseTerm());
+        auto right = parseFactor();
+        e =  new BinOpNode(t, e, right);
+        t = scanner->Current();
     }
     return e;
 }
