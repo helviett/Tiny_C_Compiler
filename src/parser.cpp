@@ -21,7 +21,7 @@ ExprNode *Parser::parseExpr()
 {
     ExprNode *e = parseTerm();
     Token *t = scanner->Current();
-    if (t->type == TokenType::PLUS || t->type == TokenType::MINUS)
+    while (t->type == TokenType::PLUS || t->type == TokenType::MINUS)
     {
         scanner->Next();
         return new BinOpNode(t, e, parseExpr());
@@ -33,7 +33,7 @@ ExprNode *Parser::parseTerm()
 {
     ExprNode *e = parseFactor();
     Token *t = scanner->Current();
-    if (t->type == TokenType::ASTERIX || t->type == TokenType::FORWARD_SLASH)
+    while (t->type == TokenType::ASTERIX || t->type == TokenType::FORWARD_SLASH)
     {
         scanner->Next();
         return new BinOpNode(t, e, parseTerm());
