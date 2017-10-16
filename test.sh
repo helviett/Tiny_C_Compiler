@@ -35,7 +35,7 @@ for file in $(ls tests/parser/ --ignore=*.out | sort -n)
 do
 	pj=$(($pj + 1))
 	prefix=$( echo "$file" | sed -e "s/\.cpp//g" )
-	eval "./$tccpath -t tests/parser/$file > tests/parser/temp.txt"
+	eval "./$tccpath -p tests/parser/$file > tests/parser/temp.txt"
 	cmp -s "tests/parser/$prefix.out" "tests/parser/temp.txt"
 	if [ $? -eq 1 ]; then
 		echo "$file test failed"
