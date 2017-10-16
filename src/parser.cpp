@@ -63,11 +63,11 @@ ExprNode *Parser::parseFactor()
             scanner->Next();
             ExprNode *e = parseExpr();
             if (scanner->Current()->type != TokenType::RBRACKET)
-                throw "";
+                throw SyntaxError(t);
             scanner->Next();
             return e;
     }
-    throw "";
+    throw SyntaxError(t);
 }
 
 void Parser::Print()
