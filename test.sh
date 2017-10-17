@@ -14,12 +14,12 @@ else
 fi
 ti=0
 tj=0
-for file in $(ls tests/tokenizer/ --ignore=*.out | sort -n)
+for file in $(ls tests/tokenizer/ --ignore=*.etalon | sort -n)
 do
 	tj=$(($tj + 1))
 	prefix=$( echo "$file" | sed -e "s/\.cpp//g" )
 	eval "./$tccpath -t tests/tokenizer/$file > tests/tokenizer/temp.txt"
-	cmp -s "tests/tokenizer/$prefix.out" "tests/tokenizer/temp.txt"
+	cmp -s "tests/tokenizer/$prefix.etalon" "tests/tokenizer/temp.txt"
 	if [ $? -eq 1 ]; then
 		echo "$file test failed"
 	else
@@ -31,12 +31,12 @@ rm tests/tokenizer/temp.txt
 echo "Tokenizer: passed $ti/$tj"
 pi=0
 pj=0
-for file in $(ls tests/parser/ --ignore=*.out | sort -n)
+for file in $(ls tests/parser/ --ignore=*.etalon | sort -n)
 do
 	pj=$(($pj + 1))
 	prefix=$( echo "$file" | sed -e "s/\.cpp//g" )
 	eval "./$tccpath -p tests/parser/$file > tests/parser/temp.txt"
-	cmp -s "tests/parser/$prefix.out" "tests/parser/temp.txt"
+	cmp -s "tests/parser/$prefix.etalon" "tests/parser/temp.txt"
 	if [ $? -eq 1 ]; then
 		echo "$file test failed"
 	else

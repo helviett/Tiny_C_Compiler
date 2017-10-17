@@ -1,0 +1,10 @@
+Position		Type			Value			Text
+
+(1, 1)			CHARACTER		' '		' '
+(3, 1)			CHARACTER		'\\'		'\\'
+(5, 1)			CHARACTER		'\0'		'\0'
+(7, 1)			CHARACTER		'\n'		'\n'
+(9, 1)			STRING		""		""
+(11, 1)			STRING		"abcsd 12334 \n \\ \"\""		"abcsd 12334 \n \\ \"\""
+(13, 1)			STRING		"\v_here_is_the_string\t"		"\v_here_is_the_string\t"
+(15, 1)			STRING		"piu\apiu\apiu"		"piu\apiu\apiu"

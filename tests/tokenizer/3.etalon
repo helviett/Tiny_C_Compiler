@@ -1,0 +1,32 @@
+Position		Type			Value			Text
+
+(1, 1)			KEYWORD		break		break
+(1, 7)			KEYWORD		case		case
+(1, 12)			KEYWORD		char		char
+(1, 17)			KEYWORD		const		const
+(1, 23)			KEYWORD		continue		continue
+(1, 32)			KEYWORD		default		default
+(1, 40)			KEYWORD		do		do
+(1, 43)			KEYWORD		double		double
+(1, 50)			KEYWORD		else		else
+(1, 55)			KEYWORD		enum		enum
+(3, 5)			KEYWORD		extern		extern
+(3, 12)			KEYWORD		float		float
+(3, 18)			KEYWORD		for		for
+(3, 22)			KEYWORD		goto		goto
+(3, 27)			KEYWORD		if		if
+(3, 30)			KEYWORD		int		int
+(3, 34)			KEYWORD		long		long
+(3, 39)			KEYWORD		register		register
+(3, 48)			KEYWORD		return		return
+(3, 55)			KEYWORD		short		short
+(5, 1)			KEYWORD		signed		signed
+(5, 8)			KEYWORD		sizeof		sizeof
+(5, 15)			KEYWORD		static		static
+(5, 22)			KEYWORD		struct		struct
+(5, 29)			KEYWORD		typedef		typedef
+(5, 37)			KEYWORD		union		union
+(5, 43)			KEYWORD		unsigned		unsigned
+(5, 52)			KEYWORD		void		void
+(5, 57)			KEYWORD		volatile		volatile
+(5, 66)			KEYWORD		while		while
