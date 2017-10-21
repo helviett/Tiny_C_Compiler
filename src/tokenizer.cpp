@@ -45,7 +45,7 @@ Token *Tokenizer::Next()
     }
     if (currentState != 0)
         return currentToken = getToken();
-    return new Token(TokenType::END_OF_FILE, currentPos.row, currentPos.col, "");
+    return (currentToken = new Token(TokenType::END_OF_FILE, currentPos.row, currentPos.col, ""));
 }
 
 Token *Tokenizer::Current()
@@ -154,7 +154,6 @@ void Tokenizer::parseComment()
 
 void Tokenizer::error(int state)
 {
-    std::cout << state << std::endl;
     switch (state)
     {
         case 5:case 10:case 70:case 11:case 68:
