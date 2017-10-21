@@ -18,7 +18,7 @@ void TokenizeOnly()
     while ((t = tok.Next())->type != TokenType::END_OF_FILE)
         switch (t->type)
         {
-            case TokenType::NUM_INT:
+            case TokenType::NUM_INT:case TokenType::CHARACTER:
                 printf("(%d, %d)\t\t\t%s\t\t\t%llu\t\t\t\t  %s\n", t->row, t->col,
                        TokenTypeToString[t->type].c_str(), t->intValue,t->text.c_str());
                 break;
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
     catch (CompilationError &e)
     {
         std::cout << e.what() << std::endl;
-        return 1;
+        exit(1);
     }
 	return 0;
 }

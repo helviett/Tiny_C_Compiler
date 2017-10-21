@@ -53,6 +53,10 @@ private:
     bool processNewState(int state);
     void parseMultilineComment();
     void parseComment();
+    void error(int state);
+    char toChar();
+    char *toString();
+    char toEscape(char c);
 };
 
 #endif //TINY_C_COMPILER_TOKENIZER_H

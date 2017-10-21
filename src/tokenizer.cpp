@@ -58,7 +58,7 @@ Token *Tokenizer::getToken()
 
     auto res = AcceptStates.find(currentState);
     if (res == AcceptStates.end())
-        throw LexicalError(currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
+        error(currentState);
     else
     {
         currentPos.col--;
@@ -78,6 +78,8 @@ Token *Tokenizer::getToken()
                 else
                     t->intValue = std::stoull(buffer, nullptr, 10);
             }
+            else if (t->type == TokenType::CHARACTER)
+                t->intValue = (uint64_t)toChar();
             else if (t->type == TokenType::NUM_FLOAT)
             {
                 t->floatValue = std::stold(buffer);
@@ -85,17 +87,16 @@ Token *Tokenizer::getToken()
 
             else
             {
-                t->stringValue = (char *)malloc(buffer.length() + 1);
-                strcpy(t->stringValue, buffer.c_str());
+                t->stringValue = toString();
             }
         }
         catch (std::out_of_range &e)
         {
-            throw LexicalError(currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
+            throw NumberOutOfRange(currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
         }
         catch (std::invalid_argument &e)
         {
-            throw LexicalError(currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
+            throw WrongNumberLiteral(currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
         }
         buffer.resize(0);
         currentlyProcessingTokenPos = currentPos;
@@ -111,6 +112,7 @@ bool Tokenizer::processNewState(int newState)
         parseComment();
     else if (newState == -1 && currentState != 0)
     {
+        error(currentState);
         buffer.pop_back();
         return true;
     }
@@ -148,6 +150,80 @@ void Tokenizer::parseComment()
         if (currentCharacter == '\n') break;
     buffer.resize(0);
     currentState = 0;
+}
+
+void Tokenizer::error(int state)
+{
+    std::cout << state << std::endl;
+    switch (state)
+    {
+        case 5:case 10:case 70:case 11:case 68:
+            throw WrongNumberLiteral(currentPos.row, currentPos.col, buffer);
+        case 59:case 58:case 60:
+            throw WrongStringLiteral(currentPos.row, currentPos.col, buffer);
+        case -1:
+            throw UnknownSymbol(currentPos.row, currentPos.col, buffer);
+        case 63:case 65:case 62:
+            throw WrongCharacterLiteral(currentPos.row, currentPos.col, buffer);
+    }
+}
+
+char Tokenizer::toChar()
+{
+    if (buffer.length() == 3)
+        return buffer[1];
+
+    toEscape(buffer[3]);
+}
+
+char *Tokenizer::toString()
+{
+    char *res = new char[buffer.length()];
+    int i = 0;
+    bool isEscape = false;
+    for (char j : buffer)
+    {
+        if (j == '"' && !isEscape)
+            continue;
+        if (j == '\\' && !isEscape)
+        {
+            isEscape = true;
+            continue;
+        }
+        res[i++] = isEscape ? toEscape(j) : j;
+        if (isEscape) isEscape = false;
+    }
+    res[i++] = '\0';
+    return res;
+}
+
+char Tokenizer::toEscape(char c)
+{
+    switch (c)
+    {
+        case 'n':
+            return '\n';
+        case 'a':
+            return '\a';
+        case 't':
+            return '\t';
+        case 'v':
+            return '\v';
+        case '?':
+            return '\?';
+        case '\\':
+            return '\\';
+        case '\'':
+            return '\'';
+        case 'b':
+            return '\b';
+        case 'f':
+            return '\f';
+        case '0':
+            return '\0';
+        case '\"':
+            return '\"';
+    }
 }
 
 

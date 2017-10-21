@@ -6,7 +6,9 @@ set(CMAKE_CXX_STANDARD 11)
 set(SOURCE_FILES
         includes/args.hxx
         main.cpp
-        includes/tokenizer.h includes/token.h src/tokenizer.cpp src/token.cpp includes/dfa.h includes/tcc_exceptions.h includes/nodes.h includes/syntax_tree.h includes/parser.h src/parser.cpp src/nodes.cpp src/syntax_tree.cpp)
+        includes/tokenizer.h includes/token.h src/tokenizer.cpp src/token.cpp includes/dfa.h
+        includes/tcc_exceptions.h includes/nodes.h includes/syntax_tree.h includes/parser.h src/parser.cpp
+        src/nodes.cpp src/syntax_tree.cpp)
 
 include_directories(includes src)
 
