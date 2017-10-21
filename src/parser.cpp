@@ -63,11 +63,11 @@ ExprNode *Parser::parseFactor()
             scanner->Next();
             ExprNode *e = parseExpr();
             if (scanner->Current()->type != TokenType::RBRACKET)
-                throw SyntaxError(t);
+                throw SyntaxError(t, "Missing closing bracket. ");
             scanner->Next();
             return e;
     }
-    throw SyntaxError(t);
+    throw SyntaxError(t, "Missing operand. ");
 }
 
 void Parser::Print()
