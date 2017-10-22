@@ -52,10 +52,10 @@ ExprNode *Parser::parseFactor()
     {
         case TokenType::NUM_INT:
             scanner->Next();
-            return new IntConstNode(t->intValue);
+            return new IntConstNode(t);
         case TokenType::NUM_FLOAT:
             scanner->Next();
-            return new FloatConstNode(t->floatValue);
+            return new FloatConstNode(t);
         case TokenType::ID:
             scanner->Next();
             return new IdNode(t->stringValue);

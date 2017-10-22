@@ -50,19 +50,19 @@ public:
 class IntConstNode: public ConstNode
 {
 public:
-    explicit IntConstNode(uint64_t value): value(value) {}
+    explicit IntConstNode(Token *t): intToken(t) {}
     void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
 private:
-    uint64_t value;
+    Token *intToken;
 };
 
 class FloatConstNode: public ConstNode
 {
 public:
-    explicit FloatConstNode(long double value): value(value) {}
+    explicit FloatConstNode(Token *t): floatToken(t) {}
     void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
 private:
-    long double value;
+    Token *floatToken;
 };
 
 class IdNode: public ExprNode

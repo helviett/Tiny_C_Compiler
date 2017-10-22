@@ -66,7 +66,7 @@ void IntConstNode::Print(std::ostream &os, int depth, std::vector<int> &depths, 
 {
     depth++;
     printAbove(os, depth, depths, type);
-    os << value << std::endl;
+    os << intToken->intValue << std::endl;
     printBelow(os, depth, depths, type);
 }
 
@@ -74,7 +74,7 @@ void FloatConstNode::Print(std::ostream &os, int depth, std::vector<int> &depths
 {
     depth++;
     printAbove(os, depth, depths, type);
-    os << value << std::endl;
+    os << floatToken->floatValue << std::endl;
     printBelow(os, depth, depths, type);
 }
 
