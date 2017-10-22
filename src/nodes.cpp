@@ -4,13 +4,6 @@
 
 #include "../includes/nodes.h"
 
-BinOpNode::BinOpNode(Token *op, ExprNode *left, ExprNode *right)
-{
-    this->op = op;
-    this->left = left;
-    this->right = right;
-}
-
 void printAbove(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
 {
     if (depth >= 2)
@@ -49,17 +42,6 @@ void printBelow(std::ostream &os, int depth, std::vector<int> &depths, SubtreeTy
             os << ' ';
     }
 
-}
-
-void BinOpNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
-{
-    depth++;
-    right->Print(os, depth, depths, SubtreeType::Right);
-    depths[depth - 1] = 1;
-    printAbove(os, depth, depths, type);
-    os << op->stringValue << std::endl;
-    printBelow(os, depth, depths, type);
-    left->Print(os, depth, depths, SubtreeType::Left);
 }
 
 void IntConstNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
@@ -111,5 +93,5 @@ void StringLiteralNode::Print(std::ostream &os, int depth, std::vector<int> &dep
 
 StringLiteralNode::StringLiteralNode(Token *token): token(token)
 {
-
+    if (token->type != TokenType::STRING) throw "";
 }

@@ -14,38 +14,10 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseExpr();
+    tree.root = parsePrimaryExpr();
 }
 
-ExprNode *Parser::parseExpr()
-{
-    ExprNode *e = parseTerm();
-    Token *t = scanner->Current();
-    while (t->type == TokenType::PLUS || t->type == TokenType::MINUS)
-    {
-        scanner->Next();
-        auto right = parseTerm();
-        e = new BinOpNode(t, e, right);
-        t = scanner->Current();
-    }
-    return e;
-}
-
-ExprNode *Parser::parseTerm()
-{
-    ExprNode *e = parseFactor();
-    Token *t = scanner->Current();
-    while (t->type == TokenType::ASTERIX || t->type == TokenType::FORWARD_SLASH)
-    {
-        scanner->Next();
-        auto right = parseFactor();
-        e =  new BinOpNode(t, e, right);
-        t = scanner->Current();
-    }
-    return e;
-}
-
-ExprNode *Parser::parseFactor()
+PrimaryExprNode *Parser::parsePrimaryExpr()
 {
     Token *t = scanner->Current();
     switch (t->type)
@@ -59,9 +31,12 @@ ExprNode *Parser::parseFactor()
         case TokenType::ID:
             scanner->Next();
             return new IdNode(t);
+        case TokenType::STRING:
+            scanner->Next();
+            return new StringLiteralNode(t);
         case TokenType::LBRACKET:
             scanner->Next();
-            ExprNode *e = parseExpr();
+            PrimaryExprNode *e = parsePrimaryExpr();
             if (scanner->Current()->type != TokenType::RBRACKET)
                 throw SyntaxError(t, "Missing closing bracket. ");
             scanner->Next();

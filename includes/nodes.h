@@ -24,24 +24,13 @@ public:
     virtual void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) = 0;
 };
 
-class ExprNode: public Node
+class PrimaryExprNode: public Node
 {
 public:
     void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override = 0;
 };
 
-class BinOpNode: public ExprNode
-{
-public:
-    BinOpNode(Token *op, ExprNode *left, ExprNode *right);
-
-    void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
-private:
-    ExprNode *left, *right;
-    Token *op;
-};
-
-class ConstNode: public ExprNode
+class ConstNode: public PrimaryExprNode
 {
 public:
     ConstNode(Token *token): token(token) {}
@@ -64,7 +53,7 @@ public:
     void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
 };
 
-class IdNode: public ExprNode
+class IdNode: public PrimaryExprNode
 {
 public:
     explicit IdNode(Token *token);
@@ -73,7 +62,7 @@ private:
     Token *token;
 };
 
-class StringLiteralNode: public ExprNode
+class StringLiteralNode: public PrimaryExprNode
 {
 public:
     explicit StringLiteralNode(Token *token);

@@ -18,9 +18,7 @@ public:
     void Print();
     friend std::ostream &operator<<(std::ostream &os, Parser &parser);
 private:
-    ExprNode *parseExpr();
-    ExprNode *parseTerm();
-    ExprNode *parseFactor();
+    PrimaryExprNode *parsePrimaryExpr();
 
     Tokenizer *scanner;
     SyntaxTree tree;
