@@ -44,34 +44,42 @@ private:
 class ConstNode: public ExprNode
 {
 public:
+    ConstNode(Token *token): token(token) {}
     void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override = 0;
+protected:
+    Token *token;
 };
 
 class IntConstNode: public ConstNode
 {
 public:
-    explicit IntConstNode(Token *t): intToken(t) {}
+    explicit IntConstNode(Token *token);
     void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
-private:
-    Token *intToken;
 };
 
 class FloatConstNode: public ConstNode
 {
 public:
-    explicit FloatConstNode(Token *t): floatToken(t) {}
+    explicit FloatConstNode(Token *token);
     void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
-private:
-    Token *floatToken;
 };
 
 class IdNode: public ExprNode
 {
 public:
-    explicit IdNode(std::string value): value(std::move(value)) {}
+    explicit IdNode(Token *token);
     void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
 private:
-    std::string value;
+    Token *token;
+};
+
+class StringLiteralNode: public ExprNode
+{
+public:
+    explicit StringLiteralNode(Token *token);
+    void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
+private:
+    Token *token;
 };
 
 #endif //TINY_C_COMPILER_NODE_H

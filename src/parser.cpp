@@ -58,7 +58,7 @@ ExprNode *Parser::parseFactor()
             return new FloatConstNode(t);
         case TokenType::ID:
             scanner->Next();
-            return new IdNode(t->stringValue);
+            return new IdNode(t);
         case TokenType::LBRACKET:
             scanner->Next();
             ExprNode *e = parseExpr();

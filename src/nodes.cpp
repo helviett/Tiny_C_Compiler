@@ -66,22 +66,50 @@ void IntConstNode::Print(std::ostream &os, int depth, std::vector<int> &depths, 
 {
     depth++;
     printAbove(os, depth, depths, type);
-    os << intToken->intValue << std::endl;
+    os << token->intValue << std::endl;
     printBelow(os, depth, depths, type);
+}
+
+IntConstNode::IntConstNode(Token *token): ConstNode(token)
+{
+    if (token->type != TokenType::NUM_INT) throw "";
 }
 
 void FloatConstNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
 {
     depth++;
     printAbove(os, depth, depths, type);
-    os << floatToken->floatValue << std::endl;
+    os << token->floatValue << std::endl;
     printBelow(os, depth, depths, type);
+}
+
+FloatConstNode::FloatConstNode(Token *token): ConstNode(token)
+{
+    if (token->type != TokenType::NUM_FLOAT) throw "";
 }
 
 void IdNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
 {
     depth++;
     printAbove(os, depth, depths, type);
-    os << value << std::endl;
+    os << token->stringValue << std::endl;
     printBelow(os, depth, depths, type);
+}
+
+IdNode::IdNode(Token *token): token(token)
+{
+
+}
+
+void StringLiteralNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
+{
+    depth++;
+    printAbove(os, depth, depths, type);
+    os << token->stringValue << std::endl;
+    printBelow(os, depth, depths, type);
+}
+
+StringLiteralNode::StringLiteralNode(Token *token): token(token)
+{
+
 }
