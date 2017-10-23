@@ -15,9 +15,6 @@ public:
 
     Node *root;
     friend std::ostream &operator<<(std::ostream &os, SyntaxTree &st);
-    void Print();
-private:
-    void print(std::ostream &os, uint64_t deph, const Node *n) const;
 };
 
 #endif //TINY_C_COMPILER_SYNTAX_TREE_H

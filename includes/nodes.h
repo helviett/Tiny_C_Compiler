@@ -18,13 +18,34 @@ enum class SubtreeType
 class Node
 {
 public:
-    Node *parent = nullptr;
-    Node *child = nullptr;
-
     virtual void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) = 0;
 };
 
-class PrimaryExprNode: public Node
+class PostfixExprNode: public Node
+{
+public:
+    virtual void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) = 0;
+};
+
+class PostfixIncrementNode: public PostfixExprNode
+{
+public:
+    explicit PostfixIncrementNode(PostfixExprNode *node): node(node) {}
+    virtual void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type);
+private:
+    PostfixExprNode *node;
+};
+
+class PostfixDecrementNode: public PostfixExprNode
+{
+public:
+    explicit PostfixDecrementNode(PostfixExprNode *node): node(node) {}
+    virtual void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type);
+private:
+    PostfixExprNode *node;
+};
+
+class PrimaryExprNode: public PostfixExprNode
 {
 public:
     void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override = 0;
@@ -33,7 +54,7 @@ public:
 class ConstNode: public PrimaryExprNode
 {
 public:
-    ConstNode(Token *token): token(token) {}
+    explicit ConstNode(Token *token): token(token) {}
     void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override = 0;
 protected:
     Token *token;

@@ -80,7 +80,7 @@ void IdNode::Print(std::ostream &os, int depth, std::vector<int> &depths, Subtre
 
 IdNode::IdNode(Token *token): token(token)
 {
-
+    if (token->type != TokenType::ID) throw "";
 }
 
 void StringLiteralNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
@@ -94,4 +94,22 @@ void StringLiteralNode::Print(std::ostream &os, int depth, std::vector<int> &dep
 StringLiteralNode::StringLiteralNode(Token *token): token(token)
 {
     if (token->type != TokenType::STRING) throw "";
+}
+
+void PostfixIncrementNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
+{
+    depth++;
+    node->Print(os, depth, depths, SubtreeType::Right);
+    printAbove(os, depth, depths, type);
+    os << "++" << std::endl;
+    printBelow(os, depth, depths, type);
+}
+
+void PostfixDecrementNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
+{
+    depth++;
+    node->Print(os, depth, depths, SubtreeType::Right);
+    printAbove(os, depth, depths, type);
+    os << "--" << std::endl;
+    printBelow(os, depth, depths, type);
 }

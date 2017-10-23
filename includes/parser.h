@@ -15,10 +15,10 @@ public:
     Parser();
 
     void Parse();
-    void Print();
     friend std::ostream &operator<<(std::ostream &os, Parser &parser);
 private:
     PrimaryExprNode *parsePrimaryExpr();
+    PostfixExprNode *parsePostrixExpr();
 
     Tokenizer *scanner;
     SyntaxTree tree;

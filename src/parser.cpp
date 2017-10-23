@@ -14,8 +14,10 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parsePrimaryExpr();
+    tree.root = parsePostrixExpr();
 }
+
+// primary-expr ::= id | constant | string-literal | (expr)
 
 PrimaryExprNode *Parser::parsePrimaryExpr()
 {
@@ -36,7 +38,7 @@ PrimaryExprNode *Parser::parsePrimaryExpr()
             return new StringLiteralNode(t);
         case TokenType::LBRACKET:
             scanner->Next();
-            PrimaryExprNode *e = parsePrimaryExpr();
+            PrimaryExprNode *e = parsePrimaryExpr(); // that's temporary function call;
             if (scanner->Current()->type != TokenType::RBRACKET)
                 throw SyntaxError(t, "Missing closing bracket. ");
             scanner->Next();
@@ -45,13 +47,31 @@ PrimaryExprNode *Parser::parsePrimaryExpr()
     throw SyntaxError(t, "Missing operand. ");
 }
 
-void Parser::Print()
-{
-    tree.Print();
-}
 
 std::ostream &operator<<(std::ostream &os, Parser &parser)
 {
     os << parser.tree;
     return os;
+}
+
+PostfixExprNode *Parser::parsePostrixExpr()
+{
+    PostfixExprNode *pe = parsePrimaryExpr();
+    Token *t = scanner->Current();
+    bool canBeContinued = true;
+    while (canBeContinued)
+        switch (t->type)
+        {
+            case TokenType::DOUBLE_PLUS:
+                t = scanner->Next();
+                pe = new PostfixIncrementNode(pe);
+                break;
+            case TokenType ::DOUBLE_MINUS:
+                t = scanner->Next();
+                pe = new PostfixDecrementNode(pe);
+                break;
+            default:
+                canBeContinued = false;
+        }
+    return pe;
 }
