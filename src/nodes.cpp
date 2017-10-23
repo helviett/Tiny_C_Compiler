@@ -4,52 +4,9 @@
 
 #include "../includes/nodes.h"
 
-void printAbove(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
+void IntConstNode::Print(std::ostream &os)
 {
-    if (depth >= 2)
-        depths[depth - 2] = 0;
-    if (type == SubtreeType::Right && depth >= 2)
-        depths[depth - 2] = 1;
-    os << std::endl;
-
-    for (int i = 0; i < depth - 1; ++i)
-    {
-        if (i == depth - 2)
-            os << 'x';
-        else if (depths[i])
-            os << '|';
-        else
-            os << ' ';
-        for (int j = 1; j < 5; ++j)
-            if (i < depth - 2)
-                os << ' ';
-            else
-                os << '-';
-
-    }
-}
-
-void printBelow(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
-{
-    for (int i = 0; i < depth; ++i)
-    {
-        if (depths[i])
-            os << '|';
-        else
-            os << ' ';
-
-        for (int j = 1; j < 5; ++j)
-            os << ' ';
-    }
-
-}
-
-void IntConstNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
-{
-    depth++;
-    printAbove(os, depth, depths, type);
-    os << token->intValue << std::endl;
-    printBelow(os, depth, depths, type);
+    os << token->intValue;
 }
 
 IntConstNode::IntConstNode(Token *token): ConstNode(token)
@@ -57,12 +14,9 @@ IntConstNode::IntConstNode(Token *token): ConstNode(token)
     if (token->type != TokenType::NUM_INT) throw "";
 }
 
-void FloatConstNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
+void FloatConstNode::Print(std::ostream &os)
 {
-    depth++;
-    printAbove(os, depth, depths, type);
-    os << token->floatValue << std::endl;
-    printBelow(os, depth, depths, type);
+    os << token->floatValue;
 }
 
 FloatConstNode::FloatConstNode(Token *token): ConstNode(token)
@@ -70,12 +24,9 @@ FloatConstNode::FloatConstNode(Token *token): ConstNode(token)
     if (token->type != TokenType::NUM_FLOAT) throw "";
 }
 
-void IdNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
+void IdNode::Print(std::ostream &os)
 {
-    depth++;
-    printAbove(os, depth, depths, type);
-    os << token->stringValue << std::endl;
-    printBelow(os, depth, depths, type);
+    os << token->stringValue;
 }
 
 IdNode::IdNode(Token *token): token(token)
@@ -83,12 +34,9 @@ IdNode::IdNode(Token *token): token(token)
     if (token->type != TokenType::ID) throw "";
 }
 
-void StringLiteralNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
+void StringLiteralNode::Print(std::ostream &os)
 {
-    depth++;
-    printAbove(os, depth, depths, type);
-    os << token->stringValue << std::endl;
-    printBelow(os, depth, depths, type);
+    os << token->stringValue;
 }
 
 StringLiteralNode::StringLiteralNode(Token *token): token(token)
@@ -96,20 +44,21 @@ StringLiteralNode::StringLiteralNode(Token *token): token(token)
     if (token->type != TokenType::STRING) throw "";
 }
 
-void PostfixIncrementNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
+void PostfixIncrementNode::Print(std::ostream &os)
 {
-    depth++;
-    node->Print(os, depth, depths, SubtreeType::Right);
-    printAbove(os, depth, depths, type);
-    os << "++" << std::endl;
-    printBelow(os, depth, depths, type);
+    node->Print(os);
+    os << "++";
 }
 
-void PostfixDecrementNode::Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type)
+void PostfixDecrementNode::Print(std::ostream &os)
 {
-    depth++;
-    node->Print(os, depth, depths, SubtreeType::Right);
-    printAbove(os, depth, depths, type);
-    os << "--" << std::endl;
-    printBelow(os, depth, depths, type);
+    node->Print(os);
+    os << "--";
+}
+
+void StructureOrUnionMemberAccess::Print(std::ostream &os)
+{
+    structureOrUnion->Print(os);
+    os << ".";
+    member->Print(os);
 }

@@ -66,9 +66,15 @@ PostfixExprNode *Parser::parsePostrixExpr()
                 t = scanner->Next();
                 pe = new PostfixIncrementNode(pe);
                 break;
-            case TokenType ::DOUBLE_MINUS:
+            case TokenType::DOUBLE_MINUS:
                 t = scanner->Next();
                 pe = new PostfixDecrementNode(pe);
+                break;
+            case TokenType::DOT:
+                t = scanner->Next();
+                if (t->type != TokenType::ID) throw "";
+                pe = new StructureOrUnionMemberAccess(pe, new IdNode(t));
+                t = scanner->Next();
                 break;
             default:
                 canBeContinued = false;

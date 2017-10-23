@@ -18,20 +18,20 @@ enum class SubtreeType
 class Node
 {
 public:
-    virtual void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) = 0;
+    virtual void Print(std::ostream &os) = 0;
 };
 
 class PostfixExprNode: public Node
 {
 public:
-    virtual void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) = 0;
+    virtual void Print(std::ostream &os) = 0;
 };
 
 class PostfixIncrementNode: public PostfixExprNode
 {
 public:
     explicit PostfixIncrementNode(PostfixExprNode *node): node(node) {}
-    virtual void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type);
+    virtual void Print(std::ostream &os);
 private:
     PostfixExprNode *node;
 };
@@ -40,7 +40,7 @@ class PostfixDecrementNode: public PostfixExprNode
 {
 public:
     explicit PostfixDecrementNode(PostfixExprNode *node): node(node) {}
-    virtual void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type);
+    virtual void Print(std::ostream &os);
 private:
     PostfixExprNode *node;
 };
@@ -48,14 +48,36 @@ private:
 class PrimaryExprNode: public PostfixExprNode
 {
 public:
-    void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override = 0;
+    void Print(std::ostream &os) override = 0;
 };
+
+
+class IdNode: public PrimaryExprNode
+{
+public:
+    explicit IdNode(Token *token);
+    void Print(std::ostream &os) override;
+private:
+    Token *token;
+};
+
+class StructureOrUnionMemberAccess: public PostfixExprNode
+{
+public:
+    StructureOrUnionMemberAccess(PostfixExprNode *structureOrUnion, IdNode *member): member(member),
+                                                                                             structureOrUnion(structureOrUnion) {}
+    virtual void Print(std::ostream &os);
+private:
+    PostfixExprNode *structureOrUnion;
+    IdNode *member;
+};
+
 
 class ConstNode: public PrimaryExprNode
 {
 public:
     explicit ConstNode(Token *token): token(token) {}
-    void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override = 0;
+    void Print(std::ostream &os) override = 0;
 protected:
     Token *token;
 };
@@ -64,30 +86,21 @@ class IntConstNode: public ConstNode
 {
 public:
     explicit IntConstNode(Token *token);
-    void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
+    void Print(std::ostream &os) override;
 };
 
 class FloatConstNode: public ConstNode
 {
 public:
     explicit FloatConstNode(Token *token);
-    void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
-};
-
-class IdNode: public PrimaryExprNode
-{
-public:
-    explicit IdNode(Token *token);
-    void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
-private:
-    Token *token;
+    void Print(std::ostream &os) override;
 };
 
 class StringLiteralNode: public PrimaryExprNode
 {
 public:
     explicit StringLiteralNode(Token *token);
-    void Print(std::ostream &os, int depth, std::vector<int> &depths, SubtreeType type) override;
+    void Print(std::ostream &os) override;
 private:
     Token *token;
 };
