@@ -10,17 +10,17 @@
 #include <utility>
 #include <vector>
 
-enum class SubtreeType
-{
-    Left, Right
-};
-
+// Abstract Class
 class Node
 {
 public:
     virtual void Print(std::ostream &os) = 0;
 };
 
+//
+//postfix-expr ::= primary-expr | postifx-expr [expr] | postfix-expr (`argument-expr-list)
+//                | postfix-expr . id | postfix-expr -> id | postfix-expr ++ | postfix-expr --
+//                | (type-name) {initializer-list} | (type-name) {initializer-list, }
 class PostfixExprNode: public Node
 {
 public:
@@ -45,12 +45,37 @@ private:
     PostfixExprNode *node;
 };
 
+class IdNode;
+
+class StructureOrUnionMemberAccess: public PostfixExprNode
+{
+public:
+    StructureOrUnionMemberAccess(PostfixExprNode *structureOrUnion, IdNode *member): member(member),
+                                                                                     structureOrUnion(structureOrUnion) {}
+    virtual void Print(std::ostream &os);
+private:
+    PostfixExprNode *structureOrUnion;
+    IdNode *member;
+};
+
+class StructureOrUnionMemberAccessByPointer: public PostfixExprNode
+{
+public:
+    StructureOrUnionMemberAccessByPointer(PostfixExprNode *structureOrUnion, IdNode *member): member(member),
+                                                                                     structureOrUnion(structureOrUnion) {}
+    virtual void Print(std::ostream &os);
+private:
+    PostfixExprNode *structureOrUnion;
+    IdNode *member;
+};
+
+// primary-expr ::= id | constant | string-literal | (expr)
+
 class PrimaryExprNode: public PostfixExprNode
 {
 public:
     void Print(std::ostream &os) override = 0;
 };
-
 
 class IdNode: public PrimaryExprNode
 {
@@ -60,18 +85,6 @@ public:
 private:
     Token *token;
 };
-
-class StructureOrUnionMemberAccess: public PostfixExprNode
-{
-public:
-    StructureOrUnionMemberAccess(PostfixExprNode *structureOrUnion, IdNode *member): member(member),
-                                                                                             structureOrUnion(structureOrUnion) {}
-    virtual void Print(std::ostream &os);
-private:
-    PostfixExprNode *structureOrUnion;
-    IdNode *member;
-};
-
 
 class ConstNode: public PrimaryExprNode
 {

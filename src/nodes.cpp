@@ -62,3 +62,10 @@ void StructureOrUnionMemberAccess::Print(std::ostream &os)
     os << ".";
     member->Print(os);
 }
+
+void StructureOrUnionMemberAccessByPointer::Print(std::ostream &os)
+{
+    structureOrUnion->Print(os);
+    os << "->";
+    member->Print(os);
+}

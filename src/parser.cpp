@@ -76,6 +76,12 @@ PostfixExprNode *Parser::parsePostrixExpr()
                 pe = new StructureOrUnionMemberAccess(pe, new IdNode(t));
                 t = scanner->Next();
                 break;
+            case TokenType::ARROW:
+                t = scanner->Next();
+                if (t->type != TokenType::ID) throw "";
+                pe = new StructureOrUnionMemberAccessByPointer(pe, new IdNode(t));
+                t = scanner->Next();
+                break;
             default:
                 canBeContinued = false;
         }
