@@ -170,6 +170,14 @@ public:
     void Print(std::ostream &os, int depth) override = 0;
 };
 
+//exclusive-OR-expr ::= AND-expr | exclusive-OR-expr ^ AND-expr
+
+class ExclusiveOrExpr: public AndExpr
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
 // primary-expr ::= id | constant | string-literal | (expr)
 
 class PrimaryExprNode: public PostfixExprNode
