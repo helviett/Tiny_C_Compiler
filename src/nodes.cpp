@@ -6,7 +6,7 @@
 
 void IntConstNode::Print(std::ostream &os, int depth)
 {
-    os << std::string(depth * 4, ' ') << token->intValue;
+    os << std::string(depth * 4, ' ') << token->intValue << std::endl;
 }
 
 IntConstNode::IntConstNode(Token *token): ConstNode(token)
@@ -16,7 +16,7 @@ IntConstNode::IntConstNode(Token *token): ConstNode(token)
 
 void FloatConstNode::Print(std::ostream &os, int depth)
 {
-    os << std::string(depth * 4, ' ') << token->floatValue;
+    os << std::string(depth * 4, ' ') << token->floatValue << std::endl;
 }
 
 FloatConstNode::FloatConstNode(Token *token): ConstNode(token)

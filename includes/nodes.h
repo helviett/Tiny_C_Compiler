@@ -162,6 +162,14 @@ public:
     void Print(std::ostream &os, int depth) override = 0;
 };
 
+//AND-expr ::= eq-expr | AND-expr & eq-expr
+
+class AndExpr: public EqualityExpr
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
 // primary-expr ::= id | constant | string-literal | (expr)
 
 class PrimaryExprNode: public PostfixExprNode

@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseEqualityExpr();
+    tree.root = parseAndExpr();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -182,4 +182,18 @@ PostfixExprNode *Parser::parseEqualityExpr()
         t = scanner->Current();
     }
     return re;
+}
+
+PostfixExprNode *Parser::parseAndExpr()
+{
+    PostfixExprNode *ee = parseEqualityExpr();
+    Token *t = scanner->Current();
+    while (t->type == TokenType::BITWISE_AND)
+    {
+        scanner->Next();
+        auto right = parseEqualityExpr();
+        ee = new BinOpNode(ee, right, t);
+        t = scanner->Current();
+    }
+    return ee;
 }
