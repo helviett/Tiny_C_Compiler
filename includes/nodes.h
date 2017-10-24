@@ -18,9 +18,10 @@ public:
 };
 
 //
-//postfix-expr ::= primary-expr | postifx-expr [expr] | postfix-expr (`argument-expr-list)
+//postfix-expr ::= primary-expr | postfix-expr [expr] | postfix-expr (`argument-expr-list)
 //                | postfix-expr . id | postfix-expr -> id | postfix-expr ++ | postfix-expr --
 //                | (type-name) {initializer-list} | (type-name) {initializer-list, }
+
 class PostfixExprNode: public Node
 {
 public:
@@ -69,6 +70,15 @@ public:
 private:
     PostfixExprNode *structureOrUnion;
     IdNode *member;
+};
+
+class ArrayAccess: public PostfixExprNode
+{
+public:
+    ArrayAccess(PostfixExprNode *left, PostfixExprNode *inBrackets): left(left), inBrackets(inBrackets) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    PostfixExprNode *left, *inBrackets;
 };
 
 //unary-expr ::= postfix-expr | ++ unary-expr | -- unary-expr | unary-op cast-expr

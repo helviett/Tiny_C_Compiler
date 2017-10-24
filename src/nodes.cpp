@@ -88,3 +88,10 @@ void BinOpNode::Print(std::ostream &os, int depth)
     os << std::string(depth * 4, ' ') << op->stringValue << std::endl;
     right->Print(os, depth + 1);
 }
+
+void ArrayAccess::Print(std::ostream &os, int depth)
+{
+    left->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << "[]" << std::endl;
+    inBrackets->Print(os, depth + 1);
+}

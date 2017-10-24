@@ -18,7 +18,7 @@ public:
     void Parse();
     friend std::ostream &operator<<(std::ostream &os, Parser &parser);
 private:
-    PrimaryExprNode *parsePrimaryExpr();
+    PostfixExprNode *parsePrimaryExpr();
     PostfixExprNode *parsePostrixExpr();
     PostfixExprNode *parseUnaryExpr();
     PostfixExprNode *parseCastExpr();

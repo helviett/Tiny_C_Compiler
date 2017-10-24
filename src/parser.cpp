@@ -19,7 +19,7 @@ void Parser::Parse()
 
 // primary-expr ::= id | constant | string-literal | (expr)
 
-PrimaryExprNode *Parser::parsePrimaryExpr()
+PostfixExprNode *Parser::parsePrimaryExpr()
 {
     Token *t = scanner->Current();
     switch (t->type)
@@ -38,7 +38,7 @@ PrimaryExprNode *Parser::parsePrimaryExpr()
             return new StringLiteralNode(t);
         case TokenType::LBRACKET:
             scanner->Next();
-            PrimaryExprNode *e = parsePrimaryExpr(); // that's temporary function call;
+            PostfixExprNode *e = parseExpr(); // that's temporary function call;
             if (scanner->Current()->type != TokenType::RBRACKET)
                 throw SyntaxError(t, "Missing closing bracket. ");
             scanner->Next();
@@ -82,6 +82,11 @@ PostfixExprNode *Parser::parsePostrixExpr()
                 pe = new StructureOrUnionMemberAccessByPointerNode(pe, new IdNode(t));
                 t = scanner->Next();
                 break;
+            case TokenType::LSQUARE_BRACKET:
+                t = scanner->Next();
+                pe = new ArrayAccess(pe, parseExpr());
+                if ((t = scanner->Current())->type != TokenType::RSQUARE_BRACKER) throw "";
+                scanner->Next();
             default:
                 canBeContinued = false;
         }
