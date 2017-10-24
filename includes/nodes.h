@@ -145,6 +145,15 @@ public:
     void Print(std::ostream &os, int depth) override = 0;
 };
 
+//rel-expr ::= shift-expr | rel-expr < shift-expr | rel-expr > shift-expr
+//             | rel-expr <= shift expr | rel-expr >= shift-expr
+
+class RelationalExpr: public ShiftExpr
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
 // primary-expr ::= id | constant | string-literal | (expr)
 
 class PrimaryExprNode: public PostfixExprNode

@@ -24,6 +24,7 @@ private:
     PostfixExprNode *parseMultiplicativeExpr();
     PostfixExprNode *parseAddictiveExpr();
     PostfixExprNode *parseShiftExpr();
+    PostfixExprNode *parseRelationalExpr();
 
     Tokenizer *scanner;
     SyntaxTree tree;
