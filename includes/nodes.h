@@ -105,10 +105,6 @@ public:
     void Print(std::ostream &os) override = 0;
 };
 
-//multiplicative-expr ::= cast-expr | multiplicative-expr * cast-expr
-//                       | multiplicative-expr / cast-expr
-//                       | multiplicative-expr % cast-expr
-
 class BinOpNode: public CastExprNode
 {
 public:
@@ -119,7 +115,21 @@ private:
     Token *op;
 };
 
+//multiplicative-expr ::= cast-expr | multiplicative-expr * cast-expr
+//                       | multiplicative-expr / cast-expr
+//                       | multiplicative-expr % cast-expr
+
 class MultiplicativeExprNode: public CastExprNode
+{
+public:
+    void Print(std::ostream &os) override = 0;
+};
+
+//addictive-expr ::= multiplicative-expr
+//                   | addictive-expr + multiplicative-expr
+//                   | addictive-expr - multiplicative-expr
+
+class AddictiveExprNode: public CastExprNode
 {
 public:
     void Print(std::ostream &os) override = 0;
