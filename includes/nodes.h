@@ -14,7 +14,7 @@
 class Node
 {
 public:
-    virtual void Print(std::ostream &os) = 0;
+    virtual void Print(std::ostream &os, int depth) = 0;
 };
 
 //
@@ -24,14 +24,14 @@ public:
 class PostfixExprNode: public Node
 {
 public:
-    virtual void Print(std::ostream &os) = 0;
+    virtual void Print(std::ostream &os, int depth) = 0;
 };
 
 class PostfixIncrementNode: public PostfixExprNode
 {
 public:
     explicit PostfixIncrementNode(PostfixExprNode *node): node(node) {}
-    virtual void Print(std::ostream &os);
+    virtual void Print(std::ostream &os, int depth);
 private:
     PostfixExprNode *node;
 };
@@ -40,7 +40,7 @@ class PostfixDecrementNode: public PostfixExprNode
 {
 public:
     explicit PostfixDecrementNode(PostfixExprNode *node): node(node) {}
-    virtual void Print(std::ostream &os);
+    virtual void Print(std::ostream &os, int depth);
 private:
     PostfixExprNode *node;
 };
@@ -53,7 +53,7 @@ public:
     StructureOrUnionMemberAccessNode(PostfixExprNode *structureOrUnion, IdNode *member): member(member),
                                                                                      structureOrUnion(structureOrUnion) {}
 
-    void Print(std::ostream &os) override;
+    void Print(std::ostream &os, int depth) override;
 private:
     PostfixExprNode *structureOrUnion;
     IdNode *member;
@@ -65,7 +65,7 @@ public:
     StructureOrUnionMemberAccessByPointerNode(PostfixExprNode *structureOrUnion, IdNode *member): member(member),
                                                                                      structureOrUnion(structureOrUnion) {}
 
-    void Print(std::ostream &os) override;
+    void Print(std::ostream &os, int depth) override;
 private:
     PostfixExprNode *structureOrUnion;
     IdNode *member;
@@ -76,14 +76,14 @@ private:
 class UnaryExprNode: public PostfixExprNode
 {
 public:
-    void Print(std::ostream &os) override = 0;
+    void Print(std::ostream &os, int depth) override = 0;
 };
 
 class PrefixIncrementNode: public UnaryExprNode
 {
 public:
     explicit PrefixIncrementNode(PostfixExprNode *node): node(node){}
-    void Print(std::ostream &os) override;
+    void Print(std::ostream &os, int depth) override;
 private:
     PostfixExprNode *node;
 };
@@ -92,7 +92,7 @@ class PrefixDecrementNode: public UnaryExprNode
 {
 public:
     explicit PrefixDecrementNode(PostfixExprNode *node): node(node){}
-    void Print(std::ostream &os) override;
+    void Print(std::ostream &os, int depth) override;
 private:
     PostfixExprNode *node;
 };
@@ -102,14 +102,14 @@ class CastExprNode: public UnaryExprNode
 {
 public:
     CastExprNode(){}
-    void Print(std::ostream &os) override = 0;
+    void Print(std::ostream &os, int depth) override = 0;
 };
 
 class BinOpNode: public CastExprNode
 {
 public:
     BinOpNode(PostfixExprNode *left, PostfixExprNode *right, Token *op): left(left), right(right), op(op) {}
-    void Print(std::ostream &os) override;
+    void Print(std::ostream &os, int depth) override;
 private:
     PostfixExprNode *left, *right;
     Token *op;
@@ -122,7 +122,7 @@ private:
 class MultiplicativeExprNode: public CastExprNode
 {
 public:
-    void Print(std::ostream &os) override = 0;
+    void Print(std::ostream &os, int depth) override = 0;
 };
 
 //addictive-expr ::= multiplicative-expr
@@ -132,7 +132,7 @@ public:
 class AddictiveExprNode: public CastExprNode
 {
 public:
-    void Print(std::ostream &os) override = 0;
+    void Print(std::ostream &os, int depth) override = 0;
 };
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -140,14 +140,14 @@ public:
 class PrimaryExprNode: public PostfixExprNode
 {
 public:
-    void Print(std::ostream &os) override = 0;
+    void Print(std::ostream &os, int depth) override = 0;
 };
 
 class IdNode: public PrimaryExprNode
 {
 public:
     explicit IdNode(Token *token);
-    void Print(std::ostream &os) override;
+    void Print(std::ostream &os, int depth) override;
 private:
     Token *token;
 };
@@ -156,7 +156,7 @@ class ConstNode: public PrimaryExprNode
 {
 public:
     explicit ConstNode(Token *token): token(token) {}
-    void Print(std::ostream &os) override = 0;
+    void Print(std::ostream &os, int depth) override = 0;
 protected:
     Token *token;
 };
@@ -165,21 +165,21 @@ class IntConstNode: public ConstNode
 {
 public:
     explicit IntConstNode(Token *token);
-    void Print(std::ostream &os) override;
+    void Print(std::ostream &os, int depth) override;
 };
 
 class FloatConstNode: public ConstNode
 {
 public:
     explicit FloatConstNode(Token *token);
-    void Print(std::ostream &os) override;
+    void Print(std::ostream &os, int depth) override;
 };
 
 class StringLiteralNode: public PrimaryExprNode
 {
 public:
     explicit StringLiteralNode(Token *token);
-    void Print(std::ostream &os) override;
+    void Print(std::ostream &os, int depth) override;
 private:
     Token *token;
 };

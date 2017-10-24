@@ -120,7 +120,7 @@ PostfixExprNode *Parser::parseMultiplicativeExpr()
     while (t->type == TokenType::ASTERIX || t->type == TokenType::FORWARD_SLASH || t->type == TokenType::REMINDER)
     {
         scanner->Next();
-        auto right = parseMultiplicativeExpr();
+        auto right = parseCastExpr();
         ce = new BinOpNode(ce, right, t);
         t = scanner->Current();
     }
@@ -134,7 +134,7 @@ PostfixExprNode *Parser::parseAddictiveExpr()
     while (t->type == TokenType::MINUS || t->type == TokenType::PLUS)
     {
         scanner->Next();
-        auto right = parseAddictiveExpr();
+        auto right = parseMultiplicativeExpr();
         me = new BinOpNode(me, right, t);
         t = scanner->Current();
     }

@@ -6,7 +6,7 @@
 
 std::ostream &operator<<(std::ostream &os, SyntaxTree &st)
 {
-    st.root->Print(os);
+    st.root->Print(os, 0);
     os << std::endl;
     return os;
 }
