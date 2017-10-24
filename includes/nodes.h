@@ -220,6 +220,15 @@ public:
     void Print(std::ostream &os, int depth) override = 0;
 };
 
+class TernaryOperator: public ConditionalExpr
+{
+public:
+    TernaryOperator(PostfixExprNode *condition, PostfixExprNode *iftrue, PostfixExprNode *iffalse):
+                    condition(condition), iftrue(iftrue), iffalse(iffalse) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    PostfixExprNode *condition, *iftrue, *iffalse;
+};
 //assignment-expr ::= conditional-expr | unary-expr assignment-op assignment-expr
 
 class AssignmentExpr: public ConditionalExpr

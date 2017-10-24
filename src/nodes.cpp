@@ -95,3 +95,12 @@ void ArrayAccess::Print(std::ostream &os, int depth)
     os << std::string(depth * 4, ' ') << "[]" << std::endl;
     inBrackets->Print(os, depth + 1);
 }
+
+void TernaryOperator::Print(std::ostream &os, int depth)
+{
+    condition->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << "?" << std::endl;
+    iftrue->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << ":" << std::endl;
+    iffalse->Print(os, depth + 1);
+}

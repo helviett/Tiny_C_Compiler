@@ -196,7 +196,20 @@ PostfixExprNode *Parser::parseGeneral(Parser *self, PostfixExprNode *(Parser::*f
 
 PostfixExprNode *Parser::parseConditionalExpr()
 {
-    return parseLogicalOrExpr();
+    PostfixExprNode *loe =  parseLogicalOrExpr();
+    Token *t = scanner->Current();
+    if (t->type == TokenType::QUESTION_MARK)
+    {
+        t = scanner->Next();
+        PostfixExprNode *then = parseExpr();
+        t = scanner->Current();
+        if (t->type != TokenType::COLON)
+            throw "";
+        t = scanner->Next();
+        PostfixExprNode *lse = parseConditionalExpr();
+        return new TernaryOperator(loe, then, lse);
+    }
+    return loe;
 }
 
 PostfixExprNode *Parser::parseAssignmentExpr()
