@@ -47,26 +47,54 @@ private:
 
 class IdNode;
 
-class StructureOrUnionMemberAccess: public PostfixExprNode
+class StructureOrUnionMemberAccessNode: public PostfixExprNode
 {
 public:
-    StructureOrUnionMemberAccess(PostfixExprNode *structureOrUnion, IdNode *member): member(member),
+    StructureOrUnionMemberAccessNode(PostfixExprNode *structureOrUnion, IdNode *member): member(member),
                                                                                      structureOrUnion(structureOrUnion) {}
-    virtual void Print(std::ostream &os);
+
+    void Print(std::ostream &os) override;
 private:
     PostfixExprNode *structureOrUnion;
     IdNode *member;
 };
 
-class StructureOrUnionMemberAccessByPointer: public PostfixExprNode
+class StructureOrUnionMemberAccessByPointerNode: public PostfixExprNode
 {
 public:
-    StructureOrUnionMemberAccessByPointer(PostfixExprNode *structureOrUnion, IdNode *member): member(member),
+    StructureOrUnionMemberAccessByPointerNode(PostfixExprNode *structureOrUnion, IdNode *member): member(member),
                                                                                      structureOrUnion(structureOrUnion) {}
-    virtual void Print(std::ostream &os);
+
+    void Print(std::ostream &os) override;
 private:
     PostfixExprNode *structureOrUnion;
     IdNode *member;
+};
+
+//unary-expr ::= postfix-expr | ++ unary-expr | -- unary-expr | unary-op cast-expr
+//              | sizeof unary-expr | sizeof (type-name)
+class UnaryExprNode: public PostfixExprNode
+{
+public:
+    void Print(std::ostream &os) override = 0;
+};
+
+class PrefixIncrementNode: public UnaryExprNode
+{
+public:
+    explicit PrefixIncrementNode(PostfixExprNode *node): node(node){}
+    void Print(std::ostream &os) override;
+private:
+    PostfixExprNode *node;
+};
+
+class PrefixDecrementNode: public UnaryExprNode
+{
+public:
+    explicit PrefixDecrementNode(PostfixExprNode *node): node(node){}
+    void Print(std::ostream &os) override;
+private:
+    PostfixExprNode *node;
 };
 
 // primary-expr ::= id | constant | string-literal | (expr)

@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parsePostrixExpr();
+    tree.root = parseUnaryExpr();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -73,17 +73,37 @@ PostfixExprNode *Parser::parsePostrixExpr()
             case TokenType::DOT:
                 t = scanner->Next();
                 if (t->type != TokenType::ID) throw "";
-                pe = new StructureOrUnionMemberAccess(pe, new IdNode(t));
+                pe = new StructureOrUnionMemberAccessNode(pe, new IdNode(t));
                 t = scanner->Next();
                 break;
             case TokenType::ARROW:
                 t = scanner->Next();
                 if (t->type != TokenType::ID) throw "";
-                pe = new StructureOrUnionMemberAccessByPointer(pe, new IdNode(t));
+                pe = new StructureOrUnionMemberAccessByPointerNode(pe, new IdNode(t));
                 t = scanner->Next();
                 break;
             default:
                 canBeContinued = false;
         }
     return pe;
+}
+
+PostfixExprNode *Parser::parseUnaryExpr()
+{
+    PostfixExprNode *ue;
+    Token *t = scanner->Current();
+    switch (t->type)
+    {
+        case TokenType::DOUBLE_PLUS:
+            t = scanner->Next();
+            ue = new PrefixIncrementNode(parseUnaryExpr());
+            break;
+        case TokenType::DOUBLE_MINUS:
+            t = scanner->Next();
+            ue = new PrefixDecrementNode(parseUnaryExpr());
+            break;
+        default:
+            ue = parsePostrixExpr();
+    }
+    return ue;
 }

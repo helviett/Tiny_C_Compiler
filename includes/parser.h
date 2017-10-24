@@ -19,6 +19,7 @@ public:
 private:
     PrimaryExprNode *parsePrimaryExpr();
     PostfixExprNode *parsePostrixExpr();
+    PostfixExprNode *parseUnaryExpr();
 
     Tokenizer *scanner;
     SyntaxTree tree;

@@ -56,16 +56,28 @@ void PostfixDecrementNode::Print(std::ostream &os)
     os << "--";
 }
 
-void StructureOrUnionMemberAccess::Print(std::ostream &os)
+void StructureOrUnionMemberAccessNode::Print(std::ostream &os)
 {
     structureOrUnion->Print(os);
     os << ".";
     member->Print(os);
 }
 
-void StructureOrUnionMemberAccessByPointer::Print(std::ostream &os)
+void StructureOrUnionMemberAccessByPointerNode::Print(std::ostream &os)
 {
     structureOrUnion->Print(os);
     os << "->";
     member->Print(os);
+}
+
+void PrefixIncrementNode::Print(std::ostream &os)
+{
+    os << "++";
+    node->Print(os);
+}
+
+void PrefixDecrementNode::Print(std::ostream &os)
+{
+    os << "--";
+    node->Print(os);
 }
