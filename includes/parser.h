@@ -31,6 +31,7 @@ private:
     PostfixExprNode *parseExclusiveOrExpr();
     PostfixExprNode *parseInclusiveOrExpr();
     PostfixExprNode *parseLogicalAndExpr();
+    PostfixExprNode *parseLogicalOrExpr();
     PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
                                   std::unordered_set<TokenType> types);
 

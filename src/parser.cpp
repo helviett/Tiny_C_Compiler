@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseLogicalAndExpr();
+    tree.root = parseLogicalOrExpr();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -166,6 +166,12 @@ PostfixExprNode *Parser::parseLogicalAndExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::LOGIC_AND};
     return parseGeneral(this, &Parser::parseInclusiveOrExpr, types);
+}
+
+PostfixExprNode *Parser::parseLogicalOrExpr()
+{
+    static std::unordered_set<TokenType> types = {TokenType::LOGIC_OR};
+    return parseGeneral(this, &Parser::parseLogicalAndExpr, types);
 }
 
 PostfixExprNode *Parser::parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
