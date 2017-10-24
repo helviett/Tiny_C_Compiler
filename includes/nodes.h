@@ -135,6 +135,16 @@ public:
     void Print(std::ostream &os, int depth) override = 0;
 };
 
+//shift-expr ::= addictive-expr
+//               | shift-expr << addictive-expr
+//               | shift-expr >> addictive-expr
+
+class ShiftExpr: public AddictiveExprNode
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
 // primary-expr ::= id | constant | string-literal | (expr)
 
 class PrimaryExprNode: public PostfixExprNode

@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseAddictiveExpr();
+    tree.root = parseShiftExpr();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -139,4 +139,18 @@ PostfixExprNode *Parser::parseAddictiveExpr()
         t = scanner->Current();
     }
     return me;
+}
+
+PostfixExprNode *Parser::parseShiftExpr()
+{
+    PostfixExprNode *ae = parseAddictiveExpr();
+    Token *t = scanner->Current();
+    while (t->type == TokenType::BITWISE_LSHIFT || t->type == TokenType::BITWISE_RSHIFT)
+    {
+        scanner->Next();
+        auto right = parseAddictiveExpr();
+        ae = new BinOpNode(ae, right, t);
+        t = scanner->Current();
+    }
+    return ae;
 }
