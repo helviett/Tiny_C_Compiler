@@ -97,6 +97,14 @@ private:
     PostfixExprNode *node;
 };
 
+// cast-expr ::= unary-expr | (type-name) cast-expr
+class CastExprNode: public UnaryExprNode
+{
+public:
+    CastExprNode(){}
+    void Print(std::ostream &os) override = 0;
+};
+
 // primary-expr ::= id | constant | string-literal | (expr)
 
 class PrimaryExprNode: public PostfixExprNode

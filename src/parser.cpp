@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseUnaryExpr();
+    tree.root = parseCastExpr();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -106,4 +106,9 @@ PostfixExprNode *Parser::parseUnaryExpr()
             ue = parsePostrixExpr();
     }
     return ue;
+}
+
+PostfixExprNode *Parser::parseCastExpr()
+{
+    return parseUnaryExpr();
 }
