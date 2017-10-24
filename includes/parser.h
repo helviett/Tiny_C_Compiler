@@ -7,6 +7,7 @@
 
 #include "tokenizer.h"
 #include "syntax_tree.h"
+#include <functional>
 
 class Parser
 {
@@ -29,6 +30,9 @@ private:
     PostfixExprNode *parseAndExpr();
     PostfixExprNode *parseExclusiveOrExpr();
     PostfixExprNode *parseInclusiveOrExpr();
+    PostfixExprNode *parseLogicalAndExpr();
+    PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
+                                  std::unordered_set<TokenType> types);
 
     Tokenizer *scanner;
     SyntaxTree tree;

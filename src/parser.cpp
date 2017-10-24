@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseInclusiveOrExpr();
+    tree.root = parseLogicalAndExpr();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -115,113 +115,70 @@ PostfixExprNode *Parser::parseCastExpr()
 
 PostfixExprNode *Parser::parseMultiplicativeExpr()
 {
-    PostfixExprNode *ce = parseCastExpr();
-    Token *t = scanner->Current();
-    while (t->type == TokenType::ASTERIX || t->type == TokenType::FORWARD_SLASH || t->type == TokenType::REMINDER)
-    {
-        scanner->Next();
-        auto right = parseCastExpr();
-        ce = new BinOpNode(ce, right, t);
-        t = scanner->Current();
-    }
-    return ce;
+    static std::unordered_set<TokenType> types = {TokenType::ASTERIX, TokenType::FORWARD_SLASH, TokenType::REMINDER};
+    return parseGeneral(this, &Parser::parseCastExpr, types);
 }
 
 PostfixExprNode *Parser::parseAddictiveExpr()
 {
-    PostfixExprNode *me = parseMultiplicativeExpr();
-    Token *t = scanner->Current();
-    while (t->type == TokenType::MINUS || t->type == TokenType::PLUS)
-    {
-        scanner->Next();
-        auto right = parseMultiplicativeExpr();
-        me = new BinOpNode(me, right, t);
-        t = scanner->Current();
-    }
-    return me;
+    static std::unordered_set<TokenType> types = {TokenType::PLUS, TokenType::MINUS};
+    return parseGeneral(this, &Parser::parseMultiplicativeExpr, types);
 }
 
 PostfixExprNode *Parser::parseShiftExpr()
 {
-    PostfixExprNode *ae = parseAddictiveExpr();
-    Token *t = scanner->Current();
-    while (t->type == TokenType::BITWISE_LSHIFT || t->type == TokenType::BITWISE_RSHIFT)
-    {
-        scanner->Next();
-        auto right = parseAddictiveExpr();
-        ae = new BinOpNode(ae, right, t);
-        t = scanner->Current();
-    }
-    return ae;
+    static std::unordered_set<TokenType> types = {TokenType::BITWISE_LSHIFT, TokenType::BITWISE_RSHIFT};
+    return parseGeneral(this, &Parser::parseAddictiveExpr, types);
 }
 
 PostfixExprNode *Parser::parseRelationalExpr()
 {
-    PostfixExprNode *se = parseShiftExpr();
-    Token *t = scanner->Current();
-    while (t->type == TokenType::RELOP_LT || t->type == TokenType::RELOP_GT || t->type == TokenType::RELOP_LE
-            || t->type == TokenType::RELOP_GE)
-    {
-        scanner->Next();
-        auto right = parseShiftExpr();
-        se = new BinOpNode(se, right, t);
-        t = scanner->Current();
-    }
-    return se;
+    static std::unordered_set<TokenType> types = {TokenType::RELOP_GT, TokenType::RELOP_LT,
+                                                  TokenType::RELOP_GE, TokenType::RELOP_LE};
+    return parseGeneral(this, &Parser::parseShiftExpr, types);
 }
 
 PostfixExprNode *Parser::parseEqualityExpr()
 {
-    PostfixExprNode *re = parseRelationalExpr();
-    Token *t = scanner->Current();
-    while (t->type == TokenType::RELOP_EQ || t->type == TokenType::RELOP_NE)
-    {
-        scanner->Next();
-        auto right = parseRelationalExpr();
-        re = new BinOpNode(re, right, t);
-        t = scanner->Current();
-    }
-    return re;
+    static std::unordered_set<TokenType> types = {TokenType::RELOP_EQ, TokenType::RELOP_NE};
+    return parseGeneral(this, &Parser::parseRelationalExpr, types);
 }
 
 PostfixExprNode *Parser::parseAndExpr()
 {
-    PostfixExprNode *ee = parseEqualityExpr();
-    Token *t = scanner->Current();
-    while (t->type == TokenType::BITWISE_AND)
-    {
-        scanner->Next();
-        auto right = parseEqualityExpr();
-        ee = new BinOpNode(ee, right, t);
-        t = scanner->Current();
-    }
-    return ee;
+    static std::unordered_set<TokenType> types = {TokenType::BITWISE_AND};
+    return parseGeneral(this, &Parser::parseEqualityExpr, types);
 }
 
 PostfixExprNode *Parser::parseExclusiveOrExpr()
 {
-    PostfixExprNode *ae = parseAndExpr();
-    Token *t = scanner->Current();
-    while (t->type == TokenType::BITWISE_XOR)
-    {
-        scanner->Next();
-        auto right = parseAndExpr();
-        ae = new BinOpNode(ae, right, t);
-        t = scanner->Current();
-    }
-    return ae;
+    static std::unordered_set<TokenType> types = {TokenType::BITWISE_XOR};
+    return parseGeneral(this, &Parser::parseAndExpr, types);
 }
 
 PostfixExprNode *Parser::parseInclusiveOrExpr()
 {
-    PostfixExprNode *eoe = parseExclusiveOrExpr();
-    Token *t = scanner->Current();
-    while (t->type == TokenType::BITWISE_OR)
+    static std::unordered_set<TokenType> types = {TokenType::BITWISE_OR};
+    return parseGeneral(this, &Parser::parseExclusiveOrExpr, types);
+}
+
+PostfixExprNode *Parser::parseLogicalAndExpr()
+{
+    static std::unordered_set<TokenType> types = {TokenType::LOGIC_AND};
+    return parseGeneral(this, &Parser::parseInclusiveOrExpr, types);
+}
+
+PostfixExprNode *Parser::parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
+                                      std::unordered_set<TokenType> types)
+{
+    auto *e = (PostfixExprNode *)((*self).*f)();
+    Token *t = self->scanner->Current();
+    while (types.find(t->type) != types.end())
     {
-        scanner->Next();
-        auto right = parseExclusiveOrExpr();
-        eoe = new BinOpNode(eoe, right, t);
-        t = scanner->Current();
+        self->scanner->Next();
+        auto right = (PostfixExprNode *) ((*self).*f)();
+        e = new BinOpNode(e, right, t);
+        t = self->scanner->Current();
     }
-    return eoe;
+    return e;
 }

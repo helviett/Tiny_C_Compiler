@@ -186,6 +186,14 @@ public:
     void Print(std::ostream &os, int depth) override = 0;
 };
 
+//logical-AND-expr ::= inclusive-OR-expr | logical-AND-expr && inclusive-OR-expr
+
+class LogicalAndExpr: public InclusiveOrExpr
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
 // primary-expr ::= id | constant | string-literal | (expr)
 
 class PrimaryExprNode: public PostfixExprNode
