@@ -178,6 +178,14 @@ public:
     void Print(std::ostream &os, int depth) override = 0;
 };
 
+//inclusive-OR-expr ::= exclusive-OR-expr | inclusive-OR-expr '|' exclusive-OR-expr
+
+class InclusiveOrExpr: public ExclusiveOrExpr
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
 // primary-expr ::= id | constant | string-literal | (expr)
 
 class PrimaryExprNode: public PostfixExprNode

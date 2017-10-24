@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseExclusiveOrExpr();
+    tree.root = parseInclusiveOrExpr();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -210,4 +210,18 @@ PostfixExprNode *Parser::parseExclusiveOrExpr()
         t = scanner->Current();
     }
     return ae;
+}
+
+PostfixExprNode *Parser::parseInclusiveOrExpr()
+{
+    PostfixExprNode *eoe = parseExclusiveOrExpr();
+    Token *t = scanner->Current();
+    while (t->type == TokenType::BITWISE_OR)
+    {
+        scanner->Next();
+        auto right = parseExclusiveOrExpr();
+        eoe = new BinOpNode(eoe, right, t);
+        t = scanner->Current();
+    }
+    return eoe;
 }
