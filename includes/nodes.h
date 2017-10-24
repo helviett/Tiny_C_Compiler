@@ -154,6 +154,14 @@ public:
     void Print(std::ostream &os, int depth) override = 0;
 };
 
+//eq-expr ::= rel-expr | eq-expr == rel-expr | eq-expr != rel-expr
+
+class EqualityExpr: public RelationalExpr
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
 // primary-expr ::= id | constant | string-literal | (expr)
 
 class PrimaryExprNode: public PostfixExprNode

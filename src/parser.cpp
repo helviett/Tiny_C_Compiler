@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseRelationalExpr();
+    tree.root = parseEqualityExpr();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -168,4 +168,18 @@ PostfixExprNode *Parser::parseRelationalExpr()
         t = scanner->Current();
     }
     return se;
+}
+
+PostfixExprNode *Parser::parseEqualityExpr()
+{
+    PostfixExprNode *re = parseRelationalExpr();
+    Token *t = scanner->Current();
+    while (t->type == TokenType::RELOP_EQ || t->type == TokenType::RELOP_NE)
+    {
+        scanner->Next();
+        auto right = parseRelationalExpr();
+        re = new BinOpNode(re, right, t);
+        t = scanner->Current();
+    }
+    return re;
 }
