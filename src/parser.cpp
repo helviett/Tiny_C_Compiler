@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseCastExpr();
+    tree.root = parseMultiplicativeExpr();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -111,4 +111,17 @@ PostfixExprNode *Parser::parseUnaryExpr()
 PostfixExprNode *Parser::parseCastExpr()
 {
     return parseUnaryExpr();
+}
+
+PostfixExprNode *Parser::parseMultiplicativeExpr()
+{
+    PostfixExprNode *ce = parseCastExpr();
+    Token *t = scanner->Current();
+    if (t->type == TokenType::ASTERIX || t->type == TokenType::FORWARD_SLASH || t->type == TokenType::REMINDER)
+    {
+        scanner->Next();
+        auto right = parseMultiplicativeExpr();
+        ce = new BinOpNode(ce, right, t);
+    }
+    return ce;
 }

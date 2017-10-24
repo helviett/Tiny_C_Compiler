@@ -105,6 +105,26 @@ public:
     void Print(std::ostream &os) override = 0;
 };
 
+//multiplicative-expr ::= cast-expr | multiplicative-expr * cast-expr
+//                       | multiplicative-expr / cast-expr
+//                       | multiplicative-expr % cast-expr
+
+class BinOpNode: public CastExprNode
+{
+public:
+    BinOpNode(PostfixExprNode *left, PostfixExprNode *right, Token *op): left(left), right(right), op(op) {}
+    void Print(std::ostream &os) override;
+private:
+    PostfixExprNode *left, *right;
+    Token *op;
+};
+
+class MultiplicativeExprNode: public CastExprNode
+{
+public:
+    void Print(std::ostream &os) override = 0;
+};
+
 // primary-expr ::= id | constant | string-literal | (expr)
 
 class PrimaryExprNode: public PostfixExprNode

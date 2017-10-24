@@ -81,3 +81,10 @@ void PrefixDecrementNode::Print(std::ostream &os)
     os << "--";
     node->Print(os);
 }
+
+void BinOpNode::Print(std::ostream &os)
+{
+    left->Print(os);
+    os << op->stringValue;
+    right->Print(os);
+}
