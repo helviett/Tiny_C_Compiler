@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseLogicalOrExpr();
+    tree.root = parseExpr();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -187,4 +187,19 @@ PostfixExprNode *Parser::parseGeneral(Parser *self, PostfixExprNode *(Parser::*f
         t = self->scanner->Current();
     }
     return e;
+}
+
+PostfixExprNode *Parser::parseConditionalExpr()
+{
+    return parseLogicalOrExpr();
+}
+
+PostfixExprNode *Parser::parseAssignmentExpr()
+{
+    return parseConditionalExpr();
+}
+
+PostfixExprNode *Parser::parseExpr()
+{
+    return parseAssignmentExpr();
 }

@@ -202,6 +202,30 @@ public:
     void Print(std::ostream &os, int depth) override = 0;
 };
 
+//conditional-expr ::= logical-OR-expr | logical-OR-expr ? expr : conditional-expr
+
+class ConditionalExpr: public LogicalOrExpr
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
+//assignment-expr ::= conditional-expr | unary-expr assignment-op assignment-expr
+
+class AssignmentExpr: public ConditionalExpr
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
+//expr ::= assignment-expr | expr , assignment-expr
+
+class Expr: public AssignmentExpr
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
 // primary-expr ::= id | constant | string-literal | (expr)
 
 class PrimaryExprNode: public PostfixExprNode
