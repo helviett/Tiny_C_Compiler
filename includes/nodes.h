@@ -6,6 +6,7 @@
 #define TINY_C_COMPILER_NODE_H
 
 #include "token.h"
+#include "specifier_qualifier_list.h"
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -89,6 +90,36 @@ public:
     void Print(std::ostream &os, int depth) override = 0;
 };
 
+class SizeofExprNode: public  UnaryExprNode
+{
+public:
+    SizeofExprNode(PostfixExprNode *expr): expr(expr) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    PostfixExprNode *expr;
+};
+
+class TypeNameNode;
+
+class SizeofTypeNameNode: public UnaryExprNode
+{
+public:
+    SizeofTypeNameNode(TypeNameNode *typeName): typeName(typeName) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    TypeNameNode *typeName;
+};
+
+class UnaryOpNode: public UnaryExprNode
+{
+public:
+    UnaryOpNode (Token *unaryOp, PostfixExprNode *expr): unaryOp(unaryOp), expr(expr) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    Token *unaryOp;
+    PostfixExprNode *expr;
+};
+
 class PrefixIncrementNode: public UnaryExprNode
 {
 public:
@@ -149,7 +180,7 @@ public:
 //               | shift-expr << addictive-expr
 //               | shift-expr >> addictive-expr
 
-class ShiftExpr: public AddictiveExprNode
+class ShiftExprNode: public AddictiveExprNode
 {
 public:
     void Print(std::ostream &os, int depth) override = 0;
@@ -158,7 +189,7 @@ public:
 //rel-expr ::= shift-expr | rel-expr < shift-expr | rel-expr > shift-expr
 //             | rel-expr <= shift expr | rel-expr >= shift-expr
 
-class RelationalExpr: public ShiftExpr
+class RelationalExprNode: public ShiftExprNode
 {
 public:
     void Print(std::ostream &os, int depth) override = 0;
@@ -166,7 +197,7 @@ public:
 
 //eq-expr ::= rel-expr | eq-expr == rel-expr | eq-expr != rel-expr
 
-class EqualityExpr: public RelationalExpr
+class EqualityExprNode: public RelationalExprNode
 {
 public:
     void Print(std::ostream &os, int depth) override = 0;
@@ -174,7 +205,7 @@ public:
 
 //AND-expr ::= eq-expr | AND-expr & eq-expr
 
-class AndExpr: public EqualityExpr
+class AndExprNode: public EqualityExprNode
 {
 public:
     void Print(std::ostream &os, int depth) override = 0;
@@ -182,7 +213,7 @@ public:
 
 //exclusive-OR-expr ::= AND-expr | exclusive-OR-expr ^ AND-expr
 
-class ExclusiveOrExpr: public AndExpr
+class ExclusiveOrExprNode: public AndExprNode
 {
 public:
     void Print(std::ostream &os, int depth) override = 0;
@@ -190,7 +221,7 @@ public:
 
 //inclusive-OR-expr ::= exclusive-OR-expr | inclusive-OR-expr '|' exclusive-OR-expr
 
-class InclusiveOrExpr: public ExclusiveOrExpr
+class InclusiveOrExprNode: public ExclusiveOrExprNode
 {
 public:
     void Print(std::ostream &os, int depth) override = 0;
@@ -198,7 +229,7 @@ public:
 
 //logical-AND-expr ::= inclusive-OR-expr | logical-AND-expr && inclusive-OR-expr
 
-class LogicalAndExpr: public InclusiveOrExpr
+class LogicalAndExprNode: public InclusiveOrExprNode
 {
 public:
     void Print(std::ostream &os, int depth) override = 0;
@@ -206,7 +237,7 @@ public:
 
 //logical-OR-expr ::= logical-AND-expr | logical-OR-expr || logical-AND-expr
 
-class LogicalOrExpr: public LogicalAndExpr
+class LogicalOrExprNode: public LogicalAndExprNode
 {
 public:
     void Print(std::ostream &os, int depth) override = 0;
@@ -214,16 +245,16 @@ public:
 
 //conditional-expr ::= logical-OR-expr | logical-OR-expr ? expr : conditional-expr
 
-class ConditionalExpr: public LogicalOrExpr
+class ConditionalExprNode: public LogicalOrExprNode
 {
 public:
     void Print(std::ostream &os, int depth) override = 0;
 };
 
-class TernaryOperator: public ConditionalExpr
+class TernaryOperatorNode: public ConditionalExprNode
 {
 public:
-    TernaryOperator(PostfixExprNode *condition, PostfixExprNode *iftrue, PostfixExprNode *iffalse):
+    TernaryOperatorNode(PostfixExprNode *condition, PostfixExprNode *iftrue, PostfixExprNode *iffalse):
                     condition(condition), iftrue(iftrue), iffalse(iffalse) {}
     void Print(std::ostream &os, int depth) override;
 private:
@@ -231,20 +262,49 @@ private:
 };
 //assignment-expr ::= conditional-expr | unary-expr assignment-op assignment-expr
 
-class AssignmentExpr: public ConditionalExpr
+class AssignmentExprNode: public ConditionalExprNode
 {
 public:
     void Print(std::ostream &os, int depth) override = 0;
+};
+
+class AssignmentNode: public AssignmentExprNode
+{
+public:
+    AssignmentNode(PostfixExprNode *left, PostfixExprNode *right, Token *assignmentOp): left(left), right(right),
+                                                                                    assignmentOp(assignmentOp) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    PostfixExprNode *left, *right;
+    Token *assignmentOp;
 };
 
 //expr ::= assignment-expr | expr , assignment-expr
 
-class Expr: public AssignmentExpr
+class ExprNode: public AssignmentExprNode
 {
 public:
     void Print(std::ostream &os, int depth) override = 0;
 };
 
+class TypeNameNode: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override;
+    SpecifierQualifierList &List();
+private:
+    SpecifierQualifierList list;
+};
+
+class TypeCastNode: public CastExprNode
+{
+public:
+    TypeCastNode(TypeNameNode *typeName, PostfixExprNode *castExpr): typeName(typeName), castExpr(castExpr) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    TypeNameNode *typeName;
+    PostfixExprNode *castExpr;
+};
 // primary-expr ::= id | constant | string-literal | (expr)
 
 class PrimaryExprNode: public PostfixExprNode

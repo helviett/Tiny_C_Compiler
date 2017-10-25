@@ -96,11 +96,55 @@ void ArrayAccess::Print(std::ostream &os, int depth)
     inBrackets->Print(os, depth + 1);
 }
 
-void TernaryOperator::Print(std::ostream &os, int depth)
+void TernaryOperatorNode::Print(std::ostream &os, int depth)
 {
     condition->Print(os, depth + 1);
     os << std::string(depth * 4, ' ') << "?" << std::endl;
     iftrue->Print(os, depth + 1);
     os << std::string(depth * 4, ' ') << ":" << std::endl;
     iffalse->Print(os, depth + 1);
+}
+
+void TypeNameNode::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ');
+    for (auto it = list.begin(); it != list.end(); it++)
+        os << (*it)->SpecOrQual()->stringValue;
+    os << std::endl;
+}
+
+SpecifierQualifierList &TypeNameNode::List()
+{
+    return list;
+}
+
+void AssignmentNode::Print(std::ostream &os, int depth)
+{
+    left->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << assignmentOp->stringValue << std::endl;
+    right->Print(os, depth + 1);
+}
+
+void TypeCastNode::Print(std::ostream &os, int depth)
+{
+    typeName->Print(os, depth + 1);
+    castExpr->Print(os, depth + 1);
+}
+
+void UnaryOpNode::Print(std::ostream &os, int depth)
+{
+    expr->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << unaryOp->stringValue << std::endl;
+}
+
+void SizeofExprNode::Print(std::ostream &os, int depth)
+{
+    expr->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << "sizeof" << std::endl;
+}
+
+void SizeofTypeNameNode::Print(std::ostream &os, int depth)
+{
+    typeName->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << "sizeof" << std::endl;
 }

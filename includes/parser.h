@@ -9,6 +9,16 @@
 #include "syntax_tree.h"
 #include <functional>
 
+static std::unordered_set<std::string> TypeSpecifiers =
+{
+    "void", "char", "short", "int", "long", "float", "double", "singed", "unsigned"
+};
+
+static std::unordered_set<std::string> TypeQualifiers =
+{
+        "volatile", "const", "restrict"
+};
+
 class Parser
 {
 public:
@@ -19,7 +29,7 @@ public:
     friend std::ostream &operator<<(std::ostream &os, Parser &parser);
 private:
     PostfixExprNode *parsePrimaryExpr();
-    PostfixExprNode *parsePostrixExpr();
+    PostfixExprNode *parsePostfixExpr();
     PostfixExprNode *parseUnaryExpr();
     PostfixExprNode *parseCastExpr();
     PostfixExprNode *parseMultiplicativeExpr();
@@ -35,8 +45,14 @@ private:
     PostfixExprNode *parseConditionalExpr();
     PostfixExprNode *parseAssignmentExpr();
     PostfixExprNode *parseExpr();
+    TypeNameNode    *parseTypeName();
+
     PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
                                   std::unordered_set<TokenType> types);
+    bool isTypeSpecifier(Token *token);
+    bool isUnaryOp(Token *token);
+    bool isAssignmentOp(Token *token);
+    bool isTypeQualifier(Token *token);
 
     Tokenizer *scanner;
     SyntaxTree tree;

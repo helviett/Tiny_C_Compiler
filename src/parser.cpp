@@ -54,10 +54,18 @@ std::ostream &operator<<(std::ostream &os, Parser &parser)
     return os;
 }
 
-PostfixExprNode *Parser::parsePostrixExpr()
+PostfixExprNode *Parser::parsePostfixExpr()
 {
-    PostfixExprNode *pe = parsePrimaryExpr();
     Token *t = scanner->Current();
+    if (t->type == TokenType::LBRACKET)
+    {
+        t = scanner->Next();
+        auto typeToCast = 0;
+
+    }
+    // else
+    PostfixExprNode *pe = parsePrimaryExpr();
+    t = scanner->Current();
     bool canBeContinued = true;
     while (canBeContinued)
         switch (t->type)
@@ -87,6 +95,7 @@ PostfixExprNode *Parser::parsePostrixExpr()
                 pe = new ArrayAccess(pe, parseExpr());
                 if ((t = scanner->Current())->type != TokenType::RSQUARE_BRACKER) throw "";
                 scanner->Next();
+                break;
             default:
                 canBeContinued = false;
         }
@@ -107,8 +116,31 @@ PostfixExprNode *Parser::parseUnaryExpr()
             t = scanner->Next();
             ue = new PrefixDecrementNode(parseUnaryExpr());
             break;
+        case TokenType::KEYWORD:
+            if (t->text == "sizeof")
+            {
+                t = scanner->Next();
+                if (t->type == TokenType::LBRACKET)
+                {
+                    scanner->Next();
+                    ue = new SizeofTypeNameNode(parseTypeName());
+                    if (scanner->Current()->type != TokenType::RBRACKET) throw "";
+                    scanner->Next();
+                }
+                else
+                    ue = new SizeofExprNode(parseUnaryExpr());
+            }
+            else throw "";
+            break;
         default:
-            ue = parsePostrixExpr();
+            if (isUnaryOp(t))
+            {
+                scanner->Next();
+                ue = new UnaryOpNode(t, parseCastExpr());
+                t = scanner->Current();
+                break;
+            }
+            ue = parsePostfixExpr();
     }
     return ue;
 }
@@ -207,17 +239,75 @@ PostfixExprNode *Parser::parseConditionalExpr()
             throw "";
         t = scanner->Next();
         PostfixExprNode *lse = parseConditionalExpr();
-        return new TernaryOperator(loe, then, lse);
+        return new TernaryOperatorNode(loe, then, lse);
     }
     return loe;
 }
 
 PostfixExprNode *Parser::parseAssignmentExpr()
 {
-    return parseConditionalExpr();
+    PostfixExprNode *ce = parseConditionalExpr();
+    Token *t = scanner->Current();
+    if (isAssignmentOp(t))
+    {
+        scanner->Next();
+        return new AssignmentNode(ce, parseAssignmentExpr(), t);
+
+    }
+    return ce;
 }
 
 PostfixExprNode *Parser::parseExpr()
 {
     return parseAssignmentExpr();
+}
+
+TypeNameNode *Parser::parseTypeName()
+{
+    auto tnn = new TypeNameNode();
+    Token *t = scanner->Current();
+    bool spec;
+    while ((spec = isTypeSpecifier(t)) || isTypeQualifier(t))
+    {
+
+        tnn->List().push_back(spec ? (TypeSpecifierQualifier *)new TypeSpecifier(t) :
+                              (TypeSpecifierQualifier *)new TypeQualifier(t)) ;
+        t = scanner->Next();
+    }
+    if (tnn->List().size() == 0) throw "";
+    return tnn;
+}
+
+bool Parser::isTypeSpecifier(Token *token)
+{
+    if (token->type == TokenType::KEYWORD)
+        return TypeSpecifiers.find(token->stringValue) != TypeSpecifiers.end();
+    return false;
+}
+
+bool Parser::isUnaryOp(Token *token)
+{
+
+    return token->type == TokenType::MINUS || token->type == TokenType::PLUS || token->type == TokenType::LOGIC_NO
+           || token->type == TokenType::BITWISE_NOT || token->type == TokenType::ASTERIX
+           || token->type == TokenType::BITWISE_AND;
+}
+
+bool Parser::isAssignmentOp(Token *token)
+{
+    return  token->type == TokenType::ASSIGNMENT || token->type == TokenType::ASSIGNMENT_BY_PRODUCT
+            || token->type == TokenType::ASSIGNMENT_BY_QUOTIENT || token->type == TokenType::ASSIGNMENT_BY_REMINDER
+            || token->type == TokenType::ASSIGNMENT_BY_SUM || token->type == TokenType::ASSIGNMENT_BY_DIFFERENCE
+            || token->type == TokenType::ASSIGNMENT_BY_BITWISE_LSHIFT
+            || token->type == TokenType::ASSIGNMENT_BY_BITWISE_RSHIFT
+            || token->type == TokenType::ASSIGNMENT_BY_BITWISE_AND
+            || token->type == TokenType::ASSIGNMENT_BY_BITWISE_OR
+            || token->type == TokenType::ASSIGNMENT_BY_BITWISE_XOR;
+}
+
+bool Parser::isTypeQualifier(Token *token)
+{
+    if (token->type == TokenType::KEYWORD)
+        return TypeQualifiers.find(token->stringValue) != TypeQualifiers.end();
+    return false;
 }
