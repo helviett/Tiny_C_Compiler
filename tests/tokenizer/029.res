@@ -1,9 +1,9 @@
 Position		Type			Value			Text
 
-(1, 1)			KEYWORD			void				  void
+(1, 1)			KEYWORD			27				  void
 (1, 6)			ID			error				  error
 (1, 11)			LBRACKET			(				  (
-(1, 12)			KEYWORD			struct				  struct
+(1, 12)			KEYWORD			23				  struct
 (1, 19)			ID			Err				  Err
 (1, 23)			ASTERIX			*				  *
 (1, 24)			ID			e				  e

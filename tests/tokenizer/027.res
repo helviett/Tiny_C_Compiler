@@ -1,16 +1,16 @@
 Position		Type			Value			Text
 
-(1, 1)			KEYWORD			void				  void
+(1, 1)			KEYWORD			27				  void
 (1, 6)			ID			lc				  lc
 (1, 8)			LBRACKET			(				  (
-(1, 9)			KEYWORD			char				  char
+(1, 9)			KEYWORD			2				  char
 (1, 14)			ASTERIX			*				  *
 (1, 15)			ID			str				  str
 (1, 18)			RBRACKET			)				  )
 (3, 1)			LCURLY_BRACKET			{				  {
-(5, 5)			KEYWORD			for				  for
+(5, 5)			KEYWORD			12				  for
 (5, 8)			LBRACKET			(				  (
-(5, 9)			KEYWORD			int				  int
+(5, 9)			KEYWORD			15				  int
 (5, 13)			ID			i				  i
 (5, 15)			ASSIGNMENT			=				  =
 (5, 17)			NUM_INT			0				  0
@@ -26,7 +26,7 @@ Position		Type			Value			Text
 (5, 38)			ID			i				  i
 (5, 39)			RBRACKET			)				  )
 (7, 5)			LCURLY_BRACKET			{				  {
-(9, 9)			KEYWORD			if				  if
+(9, 9)			KEYWORD			14				  if
 (9, 12)			LBRACKET			(				  (
 (9, 13)			ID			str				  str
 (9, 16)			LSQUARE_BRACKET			[				  [

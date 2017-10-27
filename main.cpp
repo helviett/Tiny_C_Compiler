@@ -29,6 +29,7 @@ void TokenizeOnly()
             case TokenType::KEYWORD:
                 printf("(%d, %d)\t\t\t%s\t\t\t%d\t\t\t\t  %s\n", t->row, t->col,
                        TokenTypeToString[t->type].c_str(), (int)t->keyword,t->text.c_str());
+                break;
             default:
                 printf("(%d, %d)\t\t\t%s\t\t\t%s\t\t\t\t  %s\n", t->row, t->col,
                        TokenTypeToString[t->type].c_str(), t->stringValue,t->text.c_str());
