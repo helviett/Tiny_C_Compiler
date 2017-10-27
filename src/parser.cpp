@@ -117,7 +117,7 @@ PostfixExprNode *Parser::parseUnaryExpr()
             ue = new PrefixDecrementNode(parseUnaryExpr());
             break;
         case TokenType::KEYWORD:
-            if (t->text == "sizeof")
+            if (t->keyword == Keyword::SIZEOF)
             {
                 t = scanner->Next();
                 if (t->type == TokenType::LBRACKET)
@@ -281,7 +281,7 @@ TypeNameNode *Parser::parseTypeName()
 bool Parser::isTypeSpecifier(Token *token)
 {
     if (token->type == TokenType::KEYWORD)
-        return TypeSpecifiers.find(token->stringValue) != TypeSpecifiers.end();
+        return TypeSpecifiers.find(token->keyword) != TypeSpecifiers.end();
     return false;
 }
 
@@ -308,6 +308,6 @@ bool Parser::isAssignmentOp(Token *token)
 bool Parser::isTypeQualifier(Token *token)
 {
     if (token->type == TokenType::KEYWORD)
-        return TypeQualifiers.find(token->stringValue) != TypeQualifiers.end();
+        return TypeQualifiers.find(token->keyword) != TypeQualifiers.end();
     return false;
 }

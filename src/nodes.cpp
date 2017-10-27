@@ -109,7 +109,7 @@ void TypeNameNode::Print(std::ostream &os, int depth)
 {
     os << std::string(depth * 4, ' ');
     for (auto it = list.begin(); it != list.end(); it++)
-        os << (*it)->SpecOrQual()->stringValue;
+        os << (*it)->SpecOrQual()->text;
     os << std::endl;
 }
 

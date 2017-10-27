@@ -9,14 +9,15 @@
 #include "syntax_tree.h"
 #include <functional>
 
-static std::unordered_set<std::string> TypeSpecifiers =
+static std::unordered_set<Keyword> TypeSpecifiers =
 {
-    "void", "char", "short", "int", "long", "float", "double", "singed", "unsigned"
+    Keyword::VOID, Keyword::CHAR, Keyword::SHORT, Keyword::INT, Keyword::LONG,
+    Keyword::FLOAT, Keyword::DOUBLE, Keyword::SIGNED, Keyword::UNSIGNED
 };
 
-static std::unordered_set<std::string> TypeQualifiers =
+static std::unordered_set<Keyword> TypeQualifiers =
 {
-        "volatile", "const", "restrict"
+    Keyword::VOLATILE, Keyword::CONST
 };
 
 class Parser
