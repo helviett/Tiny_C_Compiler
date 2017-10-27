@@ -68,8 +68,11 @@ Token *Tokenizer::getToken()
         try
         {
             if (t->type == TokenType::ID && Keywords.find(t->text) != Keywords.end())
+            {
                 t->type = TokenType::KEYWORD;
-            if (t->type == TokenType::NUM_INT)
+                t->keyword = StringToKeyword[buffer];
+            }
+            else if (t->type == TokenType::NUM_INT)
             {
                 if (buffer.length() >= 2 && (buffer[1] == 'x' || buffer[1] == 'X'))
                     t->intValue = std::stoull(buffer, nullptr, 16);

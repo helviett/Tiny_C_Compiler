@@ -23,6 +23,13 @@ enum class TokenType
     BACK_SLASH, FORWARD_SLASH, ARROW, KEYWORD, CHARACTER, STRING, END_OF_FILE
 };
 
+enum class Keyword
+{
+    BREAK, CASE, CHAR, CONST, CONTINUE, DEFAULT, DO, DOUBLE, ELSE, ENUM,
+    EXTERN, FLOAT, FOR, GOTO, IF, INT, LONG, REGISTER, RETURN, SHORT,
+    SIGNED, SIZEOF, STATIC, STRUCT, TYPEDEF, UNION, UNSIGNED, VOID, VOLATILE, WHILE
+};
+
 static std::unordered_map<TokenType, std::string> TokenTypeToString(
 {
     {TokenType::ASSIGNMENT_BY_BITWISE_RSHIFT, "ASSIGNMENT_BY_BITWISE_RSHIFT"},
@@ -79,6 +86,40 @@ static std::unordered_map<TokenType, std::string> TokenTypeToString(
     {TokenType::ID, "ID"}
 });
 
+static std::unordered_map<std::string, Keyword> StringToKeyword
+{
+    {"register", Keyword::REGISTER},
+    {"volatile", Keyword::VOLATILE},
+    {"continue", Keyword::CONTINUE},
+    {"unsigned", Keyword::UNSIGNED},
+    {"default", Keyword::DEFAULT},
+    {"typedef", Keyword::TYPEDEF},
+    {"return", Keyword::RETURN},
+    {"signed", Keyword::SIGNED},
+    {"sizeof", Keyword::SIZEOF},
+    {"static", Keyword::STATIC},
+    {"struct", Keyword::STRUCT},
+    {"double", Keyword::DOUBLE},
+    {"extern", Keyword::EXTERN},
+    {"const", Keyword::CONST},
+    {"while", Keyword::WHILE},
+    {"break", Keyword::BREAK},
+    {"float", Keyword::FLOAT},
+    {"short", Keyword::SHORT},
+    {"union", Keyword::UNION},
+    {"case", Keyword::CASE},
+    {"char", Keyword::CHAR},
+    {"else", Keyword::ELSE},
+    {"enum", Keyword::ENUM},
+    {"goto", Keyword::GOTO},
+    {"long", Keyword::LONG},
+    {"void", Keyword::VOID},
+    {"for", Keyword::FOR},
+    {"int", Keyword::INT},
+    {"if", Keyword::IF},
+    {"do", Keyword::DO}
+};
+
 struct Token
 {
     TokenType type;
@@ -89,6 +130,7 @@ struct Token
         char *stringValue;
         uint64_t intValue;
         long double floatValue;
+        Keyword keyword;
     };
     Token(TokenType type, int row, int col, std::string text): type(type), row(row), col(col), text(std::move(text)) {}
 };
