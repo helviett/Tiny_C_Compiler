@@ -278,18 +278,18 @@ PostfixExprNode *Parser::parseExpr()
 
 TypeNameNode *Parser::parseTypeName()
 {
-    auto tnn = new TypeNameNode();
+    auto tnn = new SpecifierQualifierListNode();
     Token *t = scanner->Current();
     bool spec;
     while ((spec = isTypeSpecifier(t)) || isTypeQualifier(t))
     {
 
-        tnn->List().push_back(spec ? (TypeSpecifierQualifier *)new TypeSpecifier(t) :
+        tnn->Add(spec ? (TypeSpecifierQualifier *)new TypeSpecifier(t) :
                               (TypeSpecifierQualifier *)new TypeQualifier(t)) ;
         t = scanner->Next();
     }
-    if (tnn->List().size() == 0) throw "";
-    return tnn;
+    if (tnn->Size() == 0) throw "";
+    return (TypeNameNode *)tnn;
 }
 
 bool Parser::isTypeSpecifier(Token *token)

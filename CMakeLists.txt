@@ -8,7 +8,7 @@ set(SOURCE_FILES
         main.cpp
         includes/tokenizer.h includes/token.h src/tokenizer.cpp src/token.cpp includes/dfa.h
         includes/errors/tcc_exceptions.h includes/nodes.h includes/syntax_tree.h includes/parser.h src/parser.cpp
-        src/nodes.cpp src/syntax_tree.cpp includes/errors/compilation_error.h includes/errors/lexical_errors.h includes/errors/syntax_errors.h includes/specifier_qualifier_list.h)
+        src/nodes.cpp src/syntax_tree.cpp includes/errors/compilation_error.h includes/errors/lexical_errors.h includes/errors/syntax_errors.h includes/specifier_qualifier.h)
 
 include_directories(includes src)
 

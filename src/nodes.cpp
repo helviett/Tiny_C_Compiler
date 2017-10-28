@@ -105,18 +105,6 @@ void TernaryOperatorNode::Print(std::ostream &os, int depth)
     iffalse->Print(os, depth + 1);
 }
 
-void TypeNameNode::Print(std::ostream &os, int depth)
-{
-    os << std::string(depth * 4, ' ');
-    for (auto it = list.begin(); it != list.end(); it++)
-        os << (*it)->SpecOrQual()->text;
-    os << std::endl;
-}
-
-SpecifierQualifierList &TypeNameNode::List()
-{
-    return list;
-}
 
 void AssignmentNode::Print(std::ostream &os, int depth)
 {
@@ -153,5 +141,23 @@ void CommaSeparatedExprs::Print(std::ostream &os, int depth)
 {
     left->Print(os, depth + 1);
     os << std::string(depth * 4, ' ') << "," << std::endl;
-    right->Print(os, depth + 1);
+    right->Print(os, depth + 1)git
+}
+
+void SpecifierQualifierListNode::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ');
+    for (auto it = specifierQualifierList.begin(); it != specifierQualifierList.end(); it++)
+        os << (*it)->SpecOrQual()->text << " ";
+    os << std::endl;
+}
+
+void SpecifierQualifierListNode::Add(TypeSpecifierQualifier *typeSpecifierQualifier)
+{
+    specifierQualifierList.push_back(typeSpecifierQualifier);
+}
+
+uint64_t SpecifierQualifierListNode::Size()
+{
+    return specifierQualifierList.size();
 }

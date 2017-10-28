@@ -6,7 +6,7 @@
 #define TINY_C_COMPILER_NODE_H
 
 #include "token.h"
-#include "specifier_qualifier_list.h"
+#include "specifier_qualifier.h"
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -308,10 +308,18 @@ private:
 class TypeNameNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override;
-    SpecifierQualifierList &List();
+    void Print(std::ostream &os, int depth) override = 0;
 private:
-    SpecifierQualifierList list;
+};
+
+class SpecifierQualifierListNode: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override;
+    void Add(TypeSpecifierQualifier *typeSpecifierQualifier);
+    uint64_t Size();
+private:
+    std::list<TypeSpecifierQualifier *> specifierQualifierList;
 };
 
 class TypeCastNode: public CastExprNode

@@ -38,7 +38,6 @@ public:
     }
 };
 
-using SpecifierQualifierList = std::list<TypeSpecifierQualifier *> ;
 
 
 
