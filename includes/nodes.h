@@ -260,6 +260,15 @@ public:
 private:
     PostfixExprNode *condition, *iftrue, *iffalse;
 };
+
+//constant-expr ::= conditional-expr
+
+class ConstantExprNode: public ConditionalExprNode
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
 //assignment-expr ::= conditional-expr | unary-expr assignment-op assignment-expr
 
 class AssignmentExprNode: public ConditionalExprNode

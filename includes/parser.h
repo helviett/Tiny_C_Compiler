@@ -46,6 +46,7 @@ private:
     PostfixExprNode *parseConditionalExpr();
     PostfixExprNode *parseAssignmentExpr();
     PostfixExprNode *parseExpr();
+    PostfixExprNode *parseConstantExpr();
     TypeNameNode    *parseTypeName();
 
     PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),

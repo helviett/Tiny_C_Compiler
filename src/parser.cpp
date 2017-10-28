@@ -325,3 +325,8 @@ bool Parser::isTypeQualifier(Token *token)
         return TypeQualifiers.find(token->keyword) != TypeQualifiers.end();
     return false;
 }
+
+PostfixExprNode *Parser::parseConstantExpr()
+{
+    return parseConditionalExpr();
+}
