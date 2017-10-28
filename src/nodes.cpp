@@ -148,3 +148,10 @@ void SizeofTypeNameNode::Print(std::ostream &os, int depth)
     typeName->Print(os, depth + 1);
     os << std::string(depth * 4, ' ') << "sizeof" << std::endl;
 }
+
+void CommaSeparatedExprs::Print(std::ostream &os, int depth)
+{
+    left->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << "," << std::endl;
+    right->Print(os, depth + 1);
+}

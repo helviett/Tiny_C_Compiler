@@ -287,6 +287,15 @@ public:
     void Print(std::ostream &os, int depth) override = 0;
 };
 
+class CommaSeparatedExprs: public ExprNode
+{
+public:
+    CommaSeparatedExprs(PostfixExprNode *left, PostfixExprNode *right): left(left), right(right) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    PostfixExprNode *left, *right;
+};
+
 class TypeNameNode: public Node
 {
 public:

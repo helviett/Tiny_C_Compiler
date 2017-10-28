@@ -267,7 +267,13 @@ PostfixExprNode *Parser::parseAssignmentExpr()
 
 PostfixExprNode *Parser::parseExpr()
 {
-    return parseAssignmentExpr();
+    PostfixExprNode *ae = parseAssignmentExpr();
+    while (scanner->Current()->type == TokenType::COMMA)
+    {
+        scanner->Next();
+        ae = new CommaSeparatedExprs(ae, parseExpr());
+    }
+    return ae;
 }
 
 TypeNameNode *Parser::parseTypeName()
