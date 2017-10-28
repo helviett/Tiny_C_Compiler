@@ -29,26 +29,27 @@ public:
     void Parse();
     friend std::ostream &operator<<(std::ostream &os, Parser &parser);
 private:
-    PostfixExprNode *parsePrimaryExpr();
-    PostfixExprNode *parsePostfixExpr();
-    PostfixExprNode *parseUnaryExpr();
-    PostfixExprNode *parseCastExpr();
-    PostfixExprNode *parseMultiplicativeExpr();
-    PostfixExprNode *parseAddictiveExpr();
-    PostfixExprNode *parseShiftExpr();
-    PostfixExprNode *parseRelationalExpr();
-    PostfixExprNode *parseEqualityExpr();
-    PostfixExprNode *parseAndExpr();
-    PostfixExprNode *parseExclusiveOrExpr();
-    PostfixExprNode *parseInclusiveOrExpr();
-    PostfixExprNode *parseLogicalAndExpr();
-    PostfixExprNode *parseLogicalOrExpr();
-    PostfixExprNode *parseConditionalExpr();
-    PostfixExprNode *parseAssignmentExpr();
-    PostfixExprNode *parseExpr();
-    PostfixExprNode *parseConstantExpr();
-    TypeNameNode    *parseTypeName();
-    TypeQualifierListNode *parseQualifierLis();
+    PostfixExprNode       *parsePrimaryExpr();
+    PostfixExprNode       *parsePostfixExpr();
+    PostfixExprNode       *parseUnaryExpr();
+    PostfixExprNode       *parseCastExpr();
+    PostfixExprNode       *parseMultiplicativeExpr();
+    PostfixExprNode       *parseAddictiveExpr();
+    PostfixExprNode       *parseShiftExpr();
+    PostfixExprNode       *parseRelationalExpr();
+    PostfixExprNode       *parseEqualityExpr();
+    PostfixExprNode       *parseAndExpr();
+    PostfixExprNode       *parseExclusiveOrExpr();
+    PostfixExprNode       *parseInclusiveOrExpr();
+    PostfixExprNode       *parseLogicalAndExpr();
+    PostfixExprNode       *parseLogicalOrExpr();
+    PostfixExprNode       *parseConditionalExpr();
+    PostfixExprNode       *parseAssignmentExpr();
+    PostfixExprNode       *parseExpr();
+    PostfixExprNode       *parseConstantExpr();
+    TypeNameNode          *parseTypeName();
+    TypeQualifierListNode *parseTypeQualifierList();
+    PointerNode           *parsePointer();
 
     PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
                                   std::unordered_set<TokenType> types);

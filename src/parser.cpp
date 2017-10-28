@@ -331,7 +331,7 @@ PostfixExprNode *Parser::parseConstantExpr()
     return parseConditionalExpr();
 }
 
-TypeQualifierListNode *Parser::parseQualifierLis()
+TypeQualifierListNode *Parser::parseTypeQualifierList()
 {
     auto tql = new TypeQualifierListNode();
     Token *t = scanner->Current();
@@ -342,4 +342,11 @@ TypeQualifierListNode *Parser::parseQualifierLis()
         t = scanner->Next();
     }
     return tql;
+}
+
+PointerNode *Parser::parsePointer()
+{
+    if (scanner->Current()->type != TokenType::ASTERIX) return nullptr;
+    scanner->Next();
+    return new PointerNode(parseTypeQualifierList(), parsePointer());
 }

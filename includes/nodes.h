@@ -337,6 +337,19 @@ private:
     std::list<TypeQualifier *> qualifierList;
 };
 
+//pointer ::= * `type-qualifier-list | * `type-qualifier-list pointer
+
+class PointerNode: public Node
+{
+public:
+    PointerNode(TypeQualifierListNode *typeQualifierList, PointerNode *pointer):
+            typeQualifierList(typeQualifierList), pointer(pointer) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    TypeQualifierListNode *typeQualifierList;
+    PointerNode *pointer;
+};
+
 class TypeCastNode: public CastExprNode
 {
 public:

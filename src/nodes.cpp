@@ -141,7 +141,7 @@ void CommaSeparatedExprs::Print(std::ostream &os, int depth)
 {
     left->Print(os, depth + 1);
     os << std::string(depth * 4, ' ') << "," << std::endl;
-    right->Print(os, depth + 1)git
+    right->Print(os, depth + 1);
 }
 
 void SpecifierQualifierListNode::Print(std::ostream &os, int depth)
@@ -178,4 +178,11 @@ void TypeQualifierListNode::Add(TypeQualifier *typeSpecifierQualifier)
 uint64_t TypeQualifierListNode::Size()
 {
     return qualifierList.size();
+}
+
+void PointerNode::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ') << "*" << std::endl;
+    typeQualifierList->Print(os, depth + 1);
+    if (pointer) pointer->Print(os, depth + 2);
 }
