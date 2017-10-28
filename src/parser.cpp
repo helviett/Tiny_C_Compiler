@@ -147,6 +147,14 @@ PostfixExprNode *Parser::parseUnaryExpr()
 
 PostfixExprNode *Parser::parseCastExpr()
 {
+    if (scanner->Current()->type == TokenType::LBRACKET)
+    {
+        scanner->Next();
+        TypeNameNode *typName = parseTypeName();
+        if (scanner->Current()->type != TokenType::RBRACKET) throw "";
+        scanner->Next();
+        return new TypeCastNode(typName, parseCastExpr());
+    }
     return parseUnaryExpr();
 }
 

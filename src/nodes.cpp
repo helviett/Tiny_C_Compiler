@@ -127,8 +127,8 @@ void AssignmentNode::Print(std::ostream &os, int depth)
 
 void TypeCastNode::Print(std::ostream &os, int depth)
 {
-    typeName->Print(os, depth + 1);
     castExpr->Print(os, depth + 1);
+    typeName->Print(os, depth);
 }
 
 void UnaryOpNode::Print(std::ostream &os, int depth)
