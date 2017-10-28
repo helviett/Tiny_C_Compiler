@@ -359,6 +359,24 @@ private:
     TypeNameNode *typeName;
     PostfixExprNode *castExpr;
 };
+
+class StatementNode: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
+//expression-statement ::= `expr ;
+
+class ExprStatmentNode: StatementNode
+{
+public:
+    explicit ExprStatmentNode(PostfixExprNode *expr): expr(expr) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    PostfixExprNode *expr;
+};
+
 // primary-expr ::= id | constant | string-literal | (expr)
 
 class PrimaryExprNode: public PostfixExprNode

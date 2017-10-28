@@ -186,3 +186,8 @@ void PointerNode::Print(std::ostream &os, int depth)
     typeQualifierList->Print(os, depth + 1);
     if (pointer) pointer->Print(os, depth + 2);
 }
+
+void ExprStatmentNode::Print(std::ostream &os, int depth)
+{
+    if (expr) expr->Print(os, depth + 1);
+}

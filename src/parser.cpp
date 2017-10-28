@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseExpr();
+    tree.root = parseStatement();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -349,4 +349,18 @@ PointerNode *Parser::parsePointer()
     if (scanner->Current()->type != TokenType::ASTERIX) return nullptr;
     scanner->Next();
     return new PointerNode(parseTypeQualifierList(), parsePointer());
+}
+
+StatementNode *Parser::parseStatement()
+{
+    return reinterpret_cast<StatementNode *>(parseExprStatement());
+}
+
+ExprStatmentNode *Parser::parseExprStatement()
+{
+    if (scanner->Current()->type == TokenType::SEMICOLON)
+        return nullptr;
+    auto et = new ExprStatmentNode(parseExpr());
+    if (scanner->Current()->type != TokenType::SEMICOLON) throw "";
+    return et;
 }

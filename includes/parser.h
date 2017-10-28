@@ -50,6 +50,8 @@ private:
     TypeNameNode          *parseTypeName();
     TypeQualifierListNode *parseTypeQualifierList();
     PointerNode           *parsePointer();
+    StatementNode         *parseStatement();
+    ExprStatmentNode      *parseExprStatement();
 
     PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
                                   std::unordered_set<TokenType> types);
