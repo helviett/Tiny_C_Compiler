@@ -330,3 +330,16 @@ PostfixExprNode *Parser::parseConstantExpr()
 {
     return parseConditionalExpr();
 }
+
+TypeQualifierListNode *Parser::parseQualifierLis()
+{
+    auto tql = new TypeQualifierListNode();
+    Token *t = scanner->Current();
+    while (isTypeQualifier(t))
+    {
+
+        tql->Add(new TypeQualifier(t));
+        t = scanner->Next();
+    }
+    return tql;
+}

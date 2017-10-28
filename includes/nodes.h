@@ -312,6 +312,9 @@ public:
 private:
 };
 
+//specifier-qualifier-list ::= type-specifier `specifier-qualifier-list
+//| type-qualifier `specifier-qualifier-list
+
 class SpecifierQualifierListNode: public Node
 {
 public:
@@ -320,6 +323,18 @@ public:
     uint64_t Size();
 private:
     std::list<TypeSpecifierQualifier *> specifierQualifierList;
+};
+
+//type-qualifier-list ::= type-qualifier | type-qualifier-list type-qualifier
+
+class TypeQualifierListNode: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override;
+    void Add(TypeQualifier *typeSpecifierQualifier);
+    uint64_t Size();
+private:
+    std::list<TypeQualifier *> qualifierList;
 };
 
 class TypeCastNode: public CastExprNode

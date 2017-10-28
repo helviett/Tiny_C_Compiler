@@ -161,3 +161,21 @@ uint64_t SpecifierQualifierListNode::Size()
 {
     return specifierQualifierList.size();
 }
+
+void TypeQualifierListNode::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ');
+    for (auto it = qualifierList.begin(); it != qualifierList.end(); it++)
+        os << (*it)->SpecOrQual()->text << " ";
+    os << std::endl;
+}
+
+void TypeQualifierListNode::Add(TypeQualifier *typeSpecifierQualifier)
+{
+    qualifierList.push_back(typeSpecifierQualifier);
+}
+
+uint64_t TypeQualifierListNode::Size()
+{
+    return qualifierList.size();
+}
