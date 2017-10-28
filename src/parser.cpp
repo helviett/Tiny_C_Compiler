@@ -353,6 +353,8 @@ PointerNode *Parser::parsePointer()
 
 StatementNode *Parser::parseStatement()
 {
+    if (scanner->Current()->type == TokenType::KEYWORD && scanner->Current()->keyword == Keyword::IF)
+        return parseSelectionStatement();
     return reinterpret_cast<StatementNode *>(parseExprStatement());
 }
 
@@ -362,5 +364,24 @@ ExprStatmentNode *Parser::parseExprStatement()
         return nullptr;
     auto et = new ExprStatmentNode(parseExpr());
     if (scanner->Current()->type != TokenType::SEMICOLON) throw "";
+    scanner->Next();
     return et;
+}
+
+SelectionStatementNode *Parser::parseSelectionStatement()
+{
+    if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::IF) throw "";
+    scanner->Next();
+    if (scanner->Current()->type != TokenType::LBRACKET) throw "";
+    scanner->Next();
+    auto expr = parseExpr();
+    if (scanner->Current()->type != TokenType::RBRACKET) throw "";
+    scanner->Next();
+    auto then = parseStatement();
+    if (scanner->Current()->type == TokenType::KEYWORD && scanner->Current()->keyword == Keyword::ELSE)
+    {
+        scanner->Next();
+        return new IfElseStatementNode(expr, then, parseStatement());
+    }
+    return new IfStatementNode(expr, then);
 }

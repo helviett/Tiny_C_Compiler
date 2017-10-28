@@ -377,6 +377,37 @@ private:
     PostfixExprNode *expr;
 };
 
+//selection-statement ::= if (expr) statement
+//| if (expr) statement else statement
+//| switch (expr) statement
+
+class SelectionStatementNode: public StatementNode
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
+class IfStatementNode: public SelectionStatementNode
+{
+public:
+    IfStatementNode() {}
+    IfStatementNode(PostfixExprNode *expr, StatementNode *then): expr(expr), then(then) {}
+    void Print(std::ostream &os, int depth) override;
+protected:
+    PostfixExprNode *expr;
+    StatementNode *then;
+};
+
+class IfElseStatementNode: public IfStatementNode
+{
+public:
+    IfElseStatementNode(PostfixExprNode *expr, StatementNode *then, StatementNode *_else):
+            IfStatementNode(expr, then), _else(_else) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    StatementNode *_else;
+};
+
 // primary-expr ::= id | constant | string-literal | (expr)
 
 class PrimaryExprNode: public PostfixExprNode

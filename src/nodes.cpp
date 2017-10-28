@@ -191,3 +191,19 @@ void ExprStatmentNode::Print(std::ostream &os, int depth)
 {
     if (expr) expr->Print(os, depth + 1);
 }
+
+void IfStatementNode::Print(std::ostream &os, int depth)
+{
+    expr->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << "if" << std::endl;
+    then->Print(os, depth + 1);
+}
+
+void IfElseStatementNode::Print(std::ostream &os, int depth)
+{
+    expr->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << "if" << std::endl;
+    then->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << "else" <<  std::endl;
+    _else->Print(os, depth + 1);
+}
