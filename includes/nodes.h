@@ -360,6 +360,10 @@ private:
     PostfixExprNode *castExpr;
 };
 
+//statement ::= labeled-statement | compound-statement
+//              | expression-statement | selection-statement
+//              | iteration-statement | jump-statement
+
 class StatementNode: public Node
 {
 public:
@@ -406,6 +410,49 @@ public:
     void Print(std::ostream &os, int depth) override;
 private:
     StatementNode *_else;
+};
+
+//jump-statement ::= goto id ;
+//                  | continue ;
+//                  | break ;
+//                  | return `expr ;
+
+class JumpStatementNode: public StatementNode
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
+class GotoStatementNode: public JumpStatementNode
+{
+public:
+    explicit GotoStatementNode(IdNode *id): id(id) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    IdNode *id;
+};
+
+class ContinueStatementNode: public JumpStatementNode
+{
+public:
+    ContinueStatementNode() = default;
+    void Print(std::ostream &os, int depth) override;
+};
+
+class BreakStatementNode: public JumpStatementNode
+{
+public:
+    BreakStatementNode() = default;
+    void Print(std::ostream &os, int depth) override;
+};
+
+class ReturnStatementNode: public JumpStatementNode
+{
+public:
+    explicit ReturnStatementNode(PostfixExprNode *expr): expr(expr) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    PostfixExprNode *expr;
 };
 
 // primary-expr ::= id | constant | string-literal | (expr)

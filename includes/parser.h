@@ -53,6 +53,7 @@ private:
     StatementNode          *parseStatement();
     ExprStatmentNode       *parseExprStatement();
     SelectionStatementNode *parseSelectionStatement();
+    JumpStatementNode      *parseJumpStatement();
 
     PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
                                   std::unordered_set<TokenType> types);

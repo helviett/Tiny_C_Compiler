@@ -207,3 +207,25 @@ void IfElseStatementNode::Print(std::ostream &os, int depth)
     os << std::string(depth * 4, ' ') << "else" <<  std::endl;
     _else->Print(os, depth + 1);
 }
+
+void GotoStatementNode::Print(std::ostream &os, int depth)
+{
+    id->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << "goto" << std::endl;
+}
+
+void ContinueStatementNode::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ') << "continue" << std::endl;
+}
+
+void BreakStatementNode::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ') << "break" << std::endl;
+}
+
+void ReturnStatementNode::Print(std::ostream &os, int depth)
+{
+    if (expr) expr->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << "return" << std::endl;
+}

@@ -353,8 +353,15 @@ PointerNode *Parser::parsePointer()
 
 StatementNode *Parser::parseStatement()
 {
-    if (scanner->Current()->type == TokenType::KEYWORD && scanner->Current()->keyword == Keyword::IF)
-        return parseSelectionStatement();
+    if (scanner->Current()->type == TokenType::KEYWORD)
+        switch (scanner->Current()->keyword)
+        {
+            case Keyword::IF:
+                return parseSelectionStatement();
+            case Keyword::GOTO: case Keyword::CONTINUE: case Keyword::BREAK:
+            case Keyword::RETURN:
+                return parseJumpStatement();
+        }
     return reinterpret_cast<StatementNode *>(parseExprStatement());
 }
 
@@ -384,4 +391,35 @@ SelectionStatementNode *Parser::parseSelectionStatement()
         return new IfElseStatementNode(expr, then, parseStatement());
     }
     return new IfStatementNode(expr, then);
+}
+
+JumpStatementNode *Parser::parseJumpStatement()
+{
+    JumpStatementNode *js = nullptr;
+    if (scanner->Current()->type == TokenType::KEYWORD)
+        switch (scanner->Current()->keyword)
+        {
+            case Keyword::GOTO:
+                if (scanner->Next()->type != TokenType::ID) throw "";
+                js = new GotoStatementNode(new IdNode(scanner->Current()));
+                scanner->Next();
+                break;
+            case Keyword::CONTINUE:
+                scanner->Next()->type;
+                js = new ContinueStatementNode();
+                break;
+            case Keyword::BREAK:
+                scanner->Next()->type;
+                js = new BreakStatementNode();
+                break;
+            case Keyword::RETURN:
+                js = scanner->Next()->type == TokenType::SEMICOLON ? new ReturnStatementNode(nullptr) :
+                     new ReturnStatementNode(parseExpr());
+                break;
+            default:
+                throw "";
+        }
+    if (scanner->Current()->type != TokenType::SEMICOLON) throw "";
+    scanner->Next();
+    return js;
 }
