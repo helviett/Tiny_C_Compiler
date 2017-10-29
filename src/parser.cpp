@@ -361,6 +361,8 @@ StatementNode *Parser::parseStatement()
             case Keyword::GOTO: case Keyword::CONTINUE: case Keyword::BREAK:
             case Keyword::RETURN:
                 return parseJumpStatement();
+            case Keyword::FOR: case Keyword::DO: case Keyword::WHILE:
+                return parseIterationStatement();
         }
     return reinterpret_cast<StatementNode *>(parseExprStatement());
 }
@@ -368,7 +370,10 @@ StatementNode *Parser::parseStatement()
 ExprStatmentNode *Parser::parseExprStatement()
 {
     if (scanner->Current()->type == TokenType::SEMICOLON)
-        return nullptr;
+    {
+        scanner->Next();
+        return new ExprStatmentNode(nullptr);
+    }
     auto et = new ExprStatmentNode(parseExpr());
     if (scanner->Current()->type != TokenType::SEMICOLON) throw "";
     scanner->Next();
@@ -422,4 +427,62 @@ JumpStatementNode *Parser::parseJumpStatement()
     if (scanner->Current()->type != TokenType::SEMICOLON) throw "";
     scanner->Next();
     return js;
+}
+
+IterationStatementNode *Parser::parseIterationStatement()
+{
+    if (scanner->Current()->type != TokenType::KEYWORD) throw "";
+    switch (scanner->Current()->keyword)
+    {
+        case Keyword::FOR:
+            return parseForStatement();
+        case Keyword::DO:
+            return parseDoWhileStatement();
+        case Keyword::WHILE:
+            return parseWhileStatement();
+
+    }
+}
+
+ForStatementNode *Parser::parseForStatement()
+{
+    if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::FOR) throw "";
+    if (scanner->Next()->type != TokenType::LBRACKET) throw "";
+    scanner->Next();
+    auto init = parseExprStatement(), condition = parseExprStatement();
+    if (scanner->Current()->type == TokenType::RBRACKET)
+    {
+        scanner->Next();
+        return new ForStatementNode(init, condition, nullptr, parseStatement());
+    }
+    auto iteration = parseExpr();
+    if (scanner->Current()->type != TokenType::RBRACKET) throw "";
+    scanner->Next();
+    return new ForStatementNode(init, condition, iteration, parseStatement());
+}
+
+WhileStatementNode *Parser::parseWhileStatement()
+{
+    if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::WHILE) throw "";
+    if (scanner->Next()->type != TokenType::LBRACKET) throw "";
+    scanner->Next();
+    auto condition = parseExpr();
+    if (scanner->Current()->type != TokenType::RBRACKET) throw "";
+    scanner->Next();
+    return new WhileStatementNode(condition, parseStatement());
+}
+
+DoWhileStatementNode *Parser::parseDoWhileStatement()
+{
+    if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::DO) throw "";
+    scanner->Next();
+    auto body = parseStatement();
+    if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::WHILE) throw "";
+    if (scanner->Next()->type != TokenType::LBRACKET) throw "";
+    scanner->Next();
+    auto condition = parseExpr();
+    if (scanner->Current()->type != TokenType::RBRACKET) throw "";
+    if (scanner->Next()->type != TokenType::SEMICOLON) throw "";
+    scanner->Next();
+    return new DoWhileStatementNode(condition, body);
 }

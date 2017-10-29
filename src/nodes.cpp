@@ -229,3 +229,27 @@ void ReturnStatementNode::Print(std::ostream &os, int depth)
     if (expr) expr->Print(os, depth + 1);
     os << std::string(depth * 4, ' ') << "return" << std::endl;
 }
+
+void WhileStatementNode::Print(std::ostream &os, int depth)
+{
+    condition->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << "while" << std::endl;
+    body->Print(os, depth + 1);
+}
+
+void DoWhileStatementNode::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ') << "do" << std::endl;
+    body->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << "while" <<  std::endl;
+    condition->Print(os, depth + 1);
+}
+
+void ForStatementNode::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ') << "for" << std::endl;
+    init->Print(os, depth + 1);
+    condition->Print(os, depth + 1);
+    if (iteration) iteration->Print(os, depth + 1);
+    body->Print(os, depth + 1);
+}

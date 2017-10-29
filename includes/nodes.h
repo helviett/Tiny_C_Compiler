@@ -455,6 +455,50 @@ private:
     PostfixExprNode *expr;
 };
 
+//iteration-statement ::= while (expr) statement
+//                      | do statement while (expr) ;
+//                      | for (`expr ; `expr ; `expr) statement
+//                      | for (declaration `expr; `expr) statement
+
+class IterationStatementNode: public StatementNode
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
+class WhileStatementNode: public IterationStatementNode
+{
+public:
+    WhileStatementNode(PostfixExprNode *condition, StatementNode *body): condition(condition), body(body) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    PostfixExprNode *condition;
+    StatementNode *body;
+};
+
+class DoWhileStatementNode: public IterationStatementNode
+{
+public:
+    DoWhileStatementNode(PostfixExprNode *condition, StatementNode *body): condition(condition), body(body) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    PostfixExprNode *condition;
+    StatementNode *body;
+};
+
+class ForStatementNode: public IterationStatementNode
+{
+public:
+    ForStatementNode(ExprStatmentNode *init, ExprStatmentNode *condition,
+                     PostfixExprNode *iteration, StatementNode *body):
+            init(init), condition(condition), iteration(iteration), body(body) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    ExprStatmentNode *init, *condition;
+    PostfixExprNode *iteration;
+    StatementNode *body;
+};
+
 // primary-expr ::= id | constant | string-literal | (expr)
 
 class PrimaryExprNode: public PostfixExprNode
