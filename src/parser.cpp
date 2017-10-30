@@ -300,36 +300,22 @@ TypeNameNode *Parser::parseTypeName()
 
 bool Parser::isTypeSpecifier(Token *token)
 {
-    if (token->type == TokenType::KEYWORD)
-        return TypeSpecifiers.find(token->keyword) != TypeSpecifiers.end();
-    return false;
+    return token->type == TokenType::KEYWORD ? TypeSpecifiers.find(token->keyword) != TypeSpecifiers.end() : false;
 }
 
 bool Parser::isUnaryOp(Token *token)
 {
-
-    return token->type == TokenType::MINUS || token->type == TokenType::PLUS || token->type == TokenType::LOGIC_NO
-           || token->type == TokenType::BITWISE_NOT || token->type == TokenType::ASTERIX
-           || token->type == TokenType::BITWISE_AND;
+    return UnaryOps.find(token->type) != UnaryOps.end();
 }
 
 bool Parser::isAssignmentOp(Token *token)
 {
-    return  token->type == TokenType::ASSIGNMENT || token->type == TokenType::ASSIGNMENT_BY_PRODUCT
-            || token->type == TokenType::ASSIGNMENT_BY_QUOTIENT || token->type == TokenType::ASSIGNMENT_BY_REMINDER
-            || token->type == TokenType::ASSIGNMENT_BY_SUM || token->type == TokenType::ASSIGNMENT_BY_DIFFERENCE
-            || token->type == TokenType::ASSIGNMENT_BY_BITWISE_LSHIFT
-            || token->type == TokenType::ASSIGNMENT_BY_BITWISE_RSHIFT
-            || token->type == TokenType::ASSIGNMENT_BY_BITWISE_AND
-            || token->type == TokenType::ASSIGNMENT_BY_BITWISE_OR
-            || token->type == TokenType::ASSIGNMENT_BY_BITWISE_XOR;
+    return  AssignmentOps.find(token->type) != AssignmentOps.end();
 }
 
 bool Parser::isTypeQualifier(Token *token)
 {
-    if (token->type == TokenType::KEYWORD)
-        return TypeQualifiers.find(token->keyword) != TypeQualifiers.end();
-    return false;
+    return token->type == TokenType::KEYWORD ? TypeQualifiers.find(token->keyword) != TypeQualifiers.end() : false;
 }
 
 PostfixExprNode *Parser::parseConstantExpr()
@@ -544,4 +530,15 @@ ArgumentExprListNode *Parser::parseArgumentExprList()
         }
     }
     return ael;
+}
+
+bool Parser::isStorageClassSpecifier(Token *token)
+{
+    return token->type == TokenType::KEYWORD ?
+           StorageClassSpecifiers.find(token->keyword) != StorageClassSpecifiers.end() : false;
+}
+
+bool Parser::isFunctionSpecifier(Token *token)
+{
+    return token->type == TokenType::KEYWORD && token->keyword == Keyword::INLINE;
 }

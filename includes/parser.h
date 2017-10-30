@@ -20,6 +20,28 @@ static std::unordered_set<Keyword> TypeQualifiers =
     Keyword::VOLATILE, Keyword::CONST
 };
 
+static std::unordered_set<Keyword> StorageClassSpecifiers =
+{
+    Keyword::TYPEDEF, Keyword::EXTERN, Keyword::STATIC, Keyword::REGISTER
+};
+
+static std::unordered_set<TokenType> AssignmentOps =
+{
+    TokenType::ASSIGNMENT, TokenType::ASSIGNMENT_BY_PRODUCT,
+    TokenType::ASSIGNMENT_BY_QUOTIENT, TokenType::ASSIGNMENT_BY_REMINDER,
+    TokenType::ASSIGNMENT_BY_SUM, TokenType::ASSIGNMENT_BY_DIFFERENCE,
+    TokenType::ASSIGNMENT_BY_BITWISE_RSHIFT, TokenType::ASSIGNMENT_BY_BITWISE_AND,
+    TokenType::ASSIGNMENT_BY_BITWISE_OR, TokenType::ASSIGNMENT_BY_BITWISE_XOR,
+    TokenType::ASSIGNMENT_BY_BITWISE_LSHIFT
+};
+
+static std::unordered_set<TokenType> UnaryOps =
+{
+        TokenType::MINUS, TokenType::PLUS, TokenType::LOGIC_NO,
+        TokenType::BITWISE_NOT, TokenType::ASTERIX,
+        TokenType::BITWISE_AND
+};
+
 class Parser
 {
 public:
@@ -68,6 +90,8 @@ private:
     bool isUnaryOp(Token *token);
     bool isAssignmentOp(Token *token);
     bool isTypeQualifier(Token *token);
+    bool isStorageClassSpecifier(Token *token);
+    bool isFunctionSpecifier(Token *token);
 
     Tokenizer *scanner;
     SyntaxTree tree;

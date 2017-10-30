@@ -7,38 +7,49 @@
 
 #include "token.h"
 #include <list>
-
 class TypeSpecifiers;
 class TypeQualifier;
 
-class TypeSpecifierQualifier
+class DeclarationSpecifier
 {
 public:
-    TypeSpecifierQualifier() {}
-    Token *SpecOrQual() { return specOrQual; }
+    DeclarationSpecifier() = default;
+    explicit DeclarationSpecifier(Token *value): value(value) {}
+    Token *Value() { return value; }
 protected:
-    Token *specOrQual;
+    Token *value;
+};
+
+class TypeSpecifierQualifier: public DeclarationSpecifier
+{
+public:
+    TypeSpecifierQualifier() = default;
+    TypeSpecifierQualifier(Token *value): DeclarationSpecifier(value) {}
 };
 
 class TypeSpecifier: public TypeSpecifierQualifier
 {
 public:
-    TypeSpecifier(Token *specifier)
-    {
-        this->specOrQual = specifier;
-    }
+    TypeSpecifier(Token *specifier): TypeSpecifierQualifier(specifier) {}
 };
 
 class TypeQualifier: public TypeSpecifierQualifier
 {
 public:
-    TypeQualifier(Token *qualifier)
-    {
-        this->specOrQual = qualifier;
-    }
+    TypeQualifier(Token *qualifier): TypeSpecifierQualifier(qualifier) {}
 };
 
+class StorageClassSpecifier: public DeclarationSpecifier
+{
+public:
+    StorageClassSpecifier(Token *specifier): DeclarationSpecifier(specifier) {}
+};
 
+class FunctionSpecifier: public DeclarationSpecifier
+{
+public:
+    FunctionSpecifier(Token *specifier): DeclarationSpecifier(specifier) {}
+};
 
 
 

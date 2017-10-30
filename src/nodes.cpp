@@ -148,7 +148,7 @@ void SpecifierQualifierListNode::Print(std::ostream &os, int depth)
 {
     os << std::string(depth * 4, ' ');
     for (auto it = specifierQualifierList.begin(); it != specifierQualifierList.end(); it++)
-        os << (*it)->SpecOrQual()->text << " ";
+        os << (*it)->Value()->text << " ";
     os << std::endl;
 }
 
@@ -166,7 +166,7 @@ void TypeQualifierListNode::Print(std::ostream &os, int depth)
 {
     os << std::string(depth * 4, ' ');
     for (auto it = qualifierList.begin(); it != qualifierList.end(); it++)
-        os << (*it)->SpecOrQual()->text << " ";
+        os << (*it)->Value()->text << " ";
     os << std::endl;
 }
 
