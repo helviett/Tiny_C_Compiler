@@ -37,9 +37,14 @@ static std::unordered_set<TokenType> AssignmentOps =
 
 static std::unordered_set<TokenType> UnaryOps =
 {
-        TokenType::MINUS, TokenType::PLUS, TokenType::LOGIC_NO,
-        TokenType::BITWISE_NOT, TokenType::ASTERIX,
-        TokenType::BITWISE_AND
+    TokenType::MINUS, TokenType::PLUS, TokenType::LOGIC_NO,
+    TokenType::BITWISE_NOT, TokenType::ASTERIX,
+    TokenType::BITWISE_AND
+};
+
+enum class DeclaratorType
+{
+    ABSTRACT, NORMAL, ABSTRACT_OR_NORMAL
 };
 
 class Parser
@@ -80,8 +85,8 @@ private:
     ForStatementNode          *parseForStatement();
     WhileStatementNode        *parseWhileStatement();
     DoWhileStatementNode      *parseDoWhileStatement();
-    DeclaratorNode            *parseDeclarator();
-    DirectDeclaratorNode      *parseDirectDeclarator();
+    DeclaratorNode            *parseDeclarator(DeclaratorType type);
+    DirectDeclaratorNode      *parseDirectDeclarator(DeclaratorType type);
     ArrayDeclaratorNode       *parseArrayDeclarator(DirectDeclaratorNode *directDeclarator);
     ArgumentExprListNode      *parseArgumentExprList();
     ParameterDeclarationNode  *parseParameterDeclaration();

@@ -269,12 +269,12 @@ void TypeNameNode::Print(std::ostream &os, int depth)
 void DeclaratorNode::Print(std::ostream &os, int depth)
 {
     if (pointer) pointer->Print(os, depth + 1);
-    directDeclarator->Print(os, depth + 2);
+    if (directDeclarator) directDeclarator->Print(os, depth + 2);
 }
 
 void ArrayDeclaratorNode::Print(std::ostream &os, int depth)
 {
-    directDeclarator->Print(os, depth + 1);
+    if (directDeclarator) directDeclarator->Print(os, depth + 1);
     os << std::string(depth * 4, ' ') << "[" << std::endl;
     if (size) size->Print(os, depth + 1);
     os << std::string(depth * 4, ' ') << "]" << std::endl;
@@ -347,6 +347,8 @@ void ParameterDeclarationNode::Print(std::ostream &os, int depth)
 
 void FunctionDeclaratorNode::Print(std::ostream &os, int depth)
 {
-    directDeclarator->Print(os, depth + 1);
+    if (directDeclarator) directDeclarator->Print(os, depth + 1);
+    os << std::string((depth + 1) * 4, ' ') << "(" << std::endl;
     params->Print(os, depth + 2);
+    os << std::string((depth + 1) * 4, ' ') << ")" << std::endl;
 }

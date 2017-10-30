@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseDeclarator();
+    tree.root = parseDeclarator(DeclaratorType::ABSTRACT_OR_NORMAL);
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -479,26 +479,30 @@ DoWhileStatementNode *Parser::parseDoWhileStatement()
     return new DoWhileStatementNode(condition, body);
 }
 
-DeclaratorNode *Parser::parseDeclarator()
+DeclaratorNode *Parser::parseDeclarator(DeclaratorType type)
 {
     PointerNode *pointer = nullptr;
     if (scanner->Current()->type == TokenType::ASTERIX) pointer = parsePointer();
-    return new DeclaratorNode(pointer, parseDirectDeclarator());
+    return new DeclaratorNode(pointer, parseDirectDeclarator(type));
 }
 
-DirectDeclaratorNode *Parser::parseDirectDeclarator()
+DirectDeclaratorNode *Parser::parseDirectDeclarator(DeclaratorType type)
 {
     if (scanner->Current()->type == TokenType::LBRACKET)
     {
         scanner->Next();
-        auto declarator = parseDeclarator();
+        auto declarator = parseDeclarator(type);
         if (scanner->Current()->type != TokenType::RBRACKET) throw "";
         scanner->Next();
         return (DirectDeclaratorNode *)declarator;
     }
-    else if (scanner->Current()->type != TokenType::ID) throw "";
-    auto *directDeclarator = (DirectDeclaratorNode *)new IdNode(scanner->Current());
-    scanner->Next();
+    DirectDeclaratorNode *directDeclarator = nullptr;
+    if (type == DeclaratorType::NORMAL && scanner->Current()->type != TokenType::ID) throw "";
+    if (type != DeclaratorType::ABSTRACT && scanner->Current()->type == TokenType::ID)
+    {
+        directDeclarator = (DirectDeclaratorNode *)new IdNode(scanner->Current());
+        scanner->Next();
+    }
     while (scanner->Current()->type == TokenType::LSQUARE_BRACKET || scanner->Current()->type == TokenType::LBRACKET)
     {
         if (scanner->Current()->type == TokenType::LSQUARE_BRACKET)
@@ -548,7 +552,7 @@ bool Parser::isFunctionSpecifier(Token *token)
 
 ParameterDeclarationNode *Parser::parseParameterDeclaration()
 {
-    return new ParameterDeclarationNode(parseDeclarationSpecifiers(), parseDeclarator());
+    return new ParameterDeclarationNode(parseDeclarationSpecifiers(), parseDeclarator(DeclaratorType::ABSTRACT_OR_NORMAL));
 }
 
 DeclarationSpecifiersNode *Parser::parseDeclarationSpecifiers()
