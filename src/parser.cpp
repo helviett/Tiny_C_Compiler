@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseDeclarator();
+    tree.root = parseStatement();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -95,6 +95,12 @@ PostfixExprNode *Parser::parsePostfixExpr()
                 pe = new ArrayAccess(pe, parseExpr());
                 if ((t = scanner->Current())->type != TokenType::RSQUARE_BRACKER) throw "";
                 scanner->Next();
+                break;
+            case TokenType::LBRACKET:
+                t = scanner->Next();
+                pe = new FunctionCallNode(pe, parseArgumentExprList());
+                if (scanner->Current()->type != TokenType::RBRACKET) throw "";
+                t = scanner->Next();
                 break;
             default:
                 canBeContinued = false;
@@ -523,4 +529,19 @@ ArrayDeclaratorNode *Parser::parseArrayDeclarator(DirectDeclaratorNode *directDe
     if (scanner->Current()->type != TokenType::RSQUARE_BRACKER) throw "";
     scanner->Next();
     return new ArrayDeclaratorNode(directDeclarator, (ConditionalExprNode *)(ce));
+}
+
+ArgumentExprListNode *Parser::parseArgumentExprList()
+{
+    auto ael = new ArgumentExprListNode();
+    while (scanner->Current()->type != TokenType::RBRACKET)
+    {
+        ael->Add((AssignmentExprNode *)parseAssignmentExpr());
+        if (scanner->Current()->type != TokenType::RBRACKET)
+        {
+            if (scanner->Current()->type != TokenType::COMMA) throw "";
+            scanner->Next();
+        }
+    }
+    return ael;
 }

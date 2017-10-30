@@ -61,6 +61,7 @@ private:
     DeclaratorNode         *parseDeclarator();
     DirectDeclaratorNode   *parseDirectDeclarator();
     ArrayDeclaratorNode    *parseArrayDeclarator(DirectDeclaratorNode *directDeclarator);
+    ArgumentExprListNode   *parseArgumentExprList();
     PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
                                   std::unordered_set<TokenType> types);
     bool isTypeSpecifier(Token *token);

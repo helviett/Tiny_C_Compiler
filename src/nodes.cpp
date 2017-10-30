@@ -279,3 +279,27 @@ void ArrayDeclaratorNode::Print(std::ostream &os, int depth)
     if (size) size->Print(os, depth + 1);
     os << std::string(depth * 4, ' ') << "]" << std::endl;
 }
+
+void ArgumentExprListNode::Print(std::ostream &os, int depth)
+{
+    for (auto it = list.begin(); it != list.end(); it++)
+        (*it)->Print(os, depth + 1);
+}
+
+void ArgumentExprListNode::Add(AssignmentExprNode *assignmentExpr)
+{
+    list.push_back(assignmentExpr);
+}
+
+uint64_t ArgumentExprListNode::Size()
+{
+    return list.size();
+}
+
+void FunctionCallNode::Print(std::ostream &os, int depth)
+{
+    functionName->Print(os, depth + 1);
+    os << std::string((depth + 1) * 4, ' ') << "(" << std::endl;
+    arguments->Print(os, depth + 2);
+    os << std::string((depth + 1) * 4, ' ') << ")" << std::endl;
+}

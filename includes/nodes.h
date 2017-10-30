@@ -82,6 +82,29 @@ private:
     PostfixExprNode *left, *inBrackets;
 };
 
+class AssignmentExprNode;
+
+class ArgumentExprListNode: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override;
+    void Add(AssignmentExprNode *assignmentExpr);
+    uint64_t Size();
+private:
+    std::list<AssignmentExprNode *> list;
+};
+
+class FunctionCallNode: public PostfixExprNode
+{
+public:
+    FunctionCallNode(PostfixExprNode *functionName, ArgumentExprListNode *arguments):
+            functionName(functionName), arguments(arguments) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    PostfixExprNode *functionName;
+    ArgumentExprListNode *arguments;
+};
+
 //unary-expr ::= postfix-expr | ++ unary-expr | -- unary-expr | unary-op cast-expr
 //              | sizeof unary-expr | sizeof (type-name)
 class UnaryExprNode: public PostfixExprNode
