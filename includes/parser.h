@@ -58,6 +58,9 @@ private:
     ForStatementNode       *parseForStatement();
     WhileStatementNode     *parseWhileStatement();
     DoWhileStatementNode   *parseDoWhileStatement();
+    DeclaratorNode         *parseDeclarator();
+    DirectDeclaratorNode   *parseDirectDeclarator();
+    ArrayDeclaratorNode    *parseArrayDeclarator(DirectDeclaratorNode *directDeclarator);
     PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
                                   std::unordered_set<TokenType> types);
     bool isTypeSpecifier(Token *token);

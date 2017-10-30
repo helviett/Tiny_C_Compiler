@@ -253,3 +253,29 @@ void ForStatementNode::Print(std::ostream &os, int depth)
     if (iteration) iteration->Print(os, depth + 1);
     body->Print(os, depth + 1);
 }
+
+void LabelStatement::Print(std::ostream &os, int depth)
+{
+    labelName->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << ":" << std::endl;
+    statement->Print(os, depth + 1);
+}
+
+void TypeNameNode::Print(std::ostream &os, int depth)
+{
+    specifierQualifierList->Print(os, depth + 1);
+}
+
+void DeclaratorNode::Print(std::ostream &os, int depth)
+{
+    if (pointer) pointer->Print(os, depth + 1);
+    directDeclarator->Print(os, depth + 2);
+}
+
+void ArrayDeclaratorNode::Print(std::ostream &os, int depth)
+{
+    directDeclarator->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << "[" << std::endl;
+    if (size) size->Print(os, depth + 1);
+    os << std::string(depth * 4, ' ') << "]" << std::endl;
+}

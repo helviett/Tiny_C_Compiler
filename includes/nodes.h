@@ -305,11 +305,15 @@ private:
     PostfixExprNode *left, *right;
 };
 
+class SpecifierQualifierListNode;
+
 class TypeNameNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, int depth) override;
 private:
+    SpecifierQualifierListNode *specifierQualifierList;
+
 };
 
 //specifier-qualifier-list ::= type-specifier `specifier-qualifier-list
@@ -497,6 +501,64 @@ private:
     ExprStatmentNode *init, *condition;
     PostfixExprNode *iteration;
     StatementNode *body;
+};
+
+//labeled-statement ::= id : statement
+//| case constant-expr : statement
+//| default : statement
+
+class LabeledStatement: public StatementNode
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
+class LabelStatement: public LabeledStatement
+{
+public:
+    LabelStatement(IdNode *labelName, StatementNode *statement): labelName(labelName), statement(statement) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    IdNode *labelName;
+    StatementNode *statement;
+};
+
+//direct-declarator ::= id | direct-declarator [`type-qualifier-list `assignment-expr]
+//                      | direct-declarator [static `type-qualifier-list assignment-expr]
+//                      | direct-declarator [type-qualifier-list static assignment-expr]
+//                      | direct-declarator [`type-qualifier-list * ]
+//                      | direct-declarator (parameter-type-list)
+//                      | direct-declarator (`id-list)
+
+class DirectDeclaratorNode;
+
+class DeclaratorNode: public Node
+{
+public:
+    DeclaratorNode () = default;
+    DeclaratorNode(PointerNode *pointer, DirectDeclaratorNode *directDeclarator):
+            pointer(pointer), directDeclarator(directDeclarator) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    DirectDeclaratorNode *directDeclarator;
+    PointerNode *pointer;
+};
+
+class DirectDeclaratorNode: public DeclaratorNode
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
+class ArrayDeclaratorNode: public DirectDeclaratorNode
+{
+public:
+    ArrayDeclaratorNode(DirectDeclaratorNode *directDeclarator, ConditionalExprNode *size):
+            directDeclarator(directDeclarator), size(size) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    DirectDeclaratorNode *directDeclarator;
+    ConditionalExprNode  *size;
 };
 
 // primary-expr ::= id | constant | string-literal | (expr)

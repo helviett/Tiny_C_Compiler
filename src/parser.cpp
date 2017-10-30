@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseStatement();
+    tree.root = parseDeclarator();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -485,4 +485,42 @@ DoWhileStatementNode *Parser::parseDoWhileStatement()
     if (scanner->Next()->type != TokenType::SEMICOLON) throw "";
     scanner->Next();
     return new DoWhileStatementNode(condition, body);
+}
+
+DeclaratorNode *Parser::parseDeclarator()
+{
+    PointerNode *pointer = nullptr;
+    if (scanner->Current()->type == TokenType::ASTERIX) pointer = parsePointer();
+    return new DeclaratorNode(pointer, parseDirectDeclarator());
+}
+
+DirectDeclaratorNode *Parser::parseDirectDeclarator()
+{
+    if (scanner->Current()->type == TokenType::LBRACKET)
+    {
+        scanner->Next();
+        auto declarator = parseDeclarator();
+        if (scanner->Current()->type != TokenType::RBRACKET) throw "";
+        scanner->Next();
+        return (DirectDeclaratorNode *)declarator;
+    }
+    else if (scanner->Current()->type != TokenType::ID) throw "";
+    DirectDeclaratorNode *directDeclarator = (DirectDeclaratorNode *)new IdNode(scanner->Current());
+    scanner->Next();
+    while (scanner->Current()->type == TokenType::LSQUARE_BRACKET)
+    {
+        directDeclarator = parseArrayDeclarator(directDeclarator);
+    }
+    return directDeclarator;
+}
+
+ArrayDeclaratorNode *Parser::parseArrayDeclarator(DirectDeclaratorNode *directDeclarator)
+{
+    if (scanner->Current()->type == TokenType::RSQUARE_BRACKER)
+        return new ArrayDeclaratorNode(directDeclarator, nullptr);
+    scanner->Next();
+    auto ce = parseConstantExpr();
+    if (scanner->Current()->type != TokenType::RSQUARE_BRACKER) throw "";
+    scanner->Next();
+    return new ArrayDeclaratorNode(directDeclarator, (ConditionalExprNode *)(ce));
 }
