@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseStatement();
+    tree.root = parseDeclarator();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -497,11 +497,14 @@ DirectDeclaratorNode *Parser::parseDirectDeclarator()
         return (DirectDeclaratorNode *)declarator;
     }
     else if (scanner->Current()->type != TokenType::ID) throw "";
-    DirectDeclaratorNode *directDeclarator = (DirectDeclaratorNode *)new IdNode(scanner->Current());
+    auto *directDeclarator = (DirectDeclaratorNode *)new IdNode(scanner->Current());
     scanner->Next();
-    while (scanner->Current()->type == TokenType::LSQUARE_BRACKET)
+    while (scanner->Current()->type == TokenType::LSQUARE_BRACKET || scanner->Current()->type == TokenType::LBRACKET)
     {
-        directDeclarator = parseArrayDeclarator(directDeclarator);
+        if (scanner->Current()->type == TokenType::LSQUARE_BRACKET)
+            directDeclarator = parseArrayDeclarator(directDeclarator);
+        else
+            directDeclarator = parseFunctionDeclarator(directDeclarator);
     }
     return directDeclarator;
 }
@@ -541,4 +544,52 @@ bool Parser::isStorageClassSpecifier(Token *token)
 bool Parser::isFunctionSpecifier(Token *token)
 {
     return token->type == TokenType::KEYWORD && token->keyword == Keyword::INLINE;
+}
+
+ParameterDeclarationNode *Parser::parseParameterDeclaration()
+{
+    return new ParameterDeclarationNode(parseDeclarationSpecifiers(), parseDeclarator());
+}
+
+DeclarationSpecifiersNode *Parser::parseDeclarationSpecifiers()
+{
+    auto ds = new DeclarationSpecifiersNode();
+    while(isDeclarationSpecifier(scanner->Current()))
+    {
+        ds->Add(new DeclarationSpecifier(scanner->Current()));
+        scanner->Next();
+    }
+    if (!ds->Size()) throw "";
+    return ds;
+}
+
+ParameterList *Parser::parseParameterList()
+{
+    auto pl = new ParameterList();
+    do
+    {
+        pl->Add(parseParameterDeclaration());
+    } while(scanner->Current()->type == TokenType::COMMA && scanner->Next());
+    if (!pl->Size()) throw "";
+    return pl;
+}
+
+ParameterTypeList *Parser::parseParameterTypeList()
+{
+    return parseParameterList();
+}
+
+bool Parser::isDeclarationSpecifier(Token *token)
+{
+    return isTypeSpecifier(token) || isStorageClassSpecifier(token) || isTypeQualifier(token)
+           || isFunctionSpecifier(token);
+}
+
+FunctionDeclaratorNode *Parser::parseFunctionDeclarator(DirectDeclaratorNode *directDeclarator)
+{
+    scanner->Next();
+    auto ptl = parseParameterTypeList();
+    if (scanner->Current()->type != TokenType::RBRACKET) throw "";
+    scanner->Next();
+    return new FunctionDeclaratorNode(directDeclarator, ptl);
 }

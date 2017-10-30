@@ -303,3 +303,50 @@ void FunctionCallNode::Print(std::ostream &os, int depth)
     arguments->Print(os, depth + 2);
     os << std::string((depth + 1) * 4, ' ') << ")" << std::endl;
 }
+
+void DeclarationSpecifiersNode::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ');
+    for (auto it = list.begin(); it != list.end(); it++)
+        os << (*it)->Value()->text << " ";
+    os << std::endl;
+}
+
+void DeclarationSpecifiersNode::Add(DeclarationSpecifier *specifier)
+{
+    list.push_back(specifier);
+}
+
+uint64_t DeclarationSpecifiersNode::Size()
+{
+    return list.size();
+}
+
+void ParameterList::Print(std::ostream &os, int depth)
+{
+    for (auto it = list.begin(); it != list.end(); it++)
+        (*it)->Print(os, depth + 1);
+    os << std::endl;
+}
+
+void ParameterList::Add(ParameterDeclarationNode *parameterDeclaration)
+{
+    list.push_back(parameterDeclaration);
+}
+
+uint64_t ParameterList::Size()
+{
+    return list.size();
+}
+
+void ParameterDeclarationNode::Print(std::ostream &os, int depth)
+{
+    specifiers->Print(os, depth + 1);
+    declarator->Print(os, depth + 2);
+}
+
+void FunctionDeclaratorNode::Print(std::ostream &os, int depth)
+{
+    directDeclarator->Print(os, depth + 1);
+    params->Print(os, depth + 2);
+}

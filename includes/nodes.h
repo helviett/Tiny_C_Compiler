@@ -546,12 +546,8 @@ private:
     StatementNode *statement;
 };
 
-//direct-declarator ::= id | direct-declarator [`type-qualifier-list `assignment-expr]
-//                      | direct-declarator [static `type-qualifier-list assignment-expr]
-//                      | direct-declarator [type-qualifier-list static assignment-expr]
-//                      | direct-declarator [`type-qualifier-list * ]
+//direct-declarator ::= id | direct-declarator [constant-expr]
 //                      | direct-declarator (parameter-type-list)
-//                      | direct-declarator (`id-list)
 
 class DirectDeclaratorNode;
 
@@ -582,6 +578,62 @@ public:
 private:
     DirectDeclaratorNode *directDeclarator;
     ConditionalExprNode  *size;
+};
+
+class ParameterTypeList;
+
+class FunctionDeclaratorNode: public DirectDeclaratorNode
+{
+public:
+    FunctionDeclaratorNode(DirectDeclaratorNode *directDeclarator, ParameterTypeList *params):
+            params(params), directDeclarator(directDeclarator) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    DirectDeclaratorNode *directDeclarator;
+    ParameterTypeList    *params;
+};
+
+//parameter-declaration ::= declaration-specifiers declarator | declaration-specifiers `abstract-declarator
+
+class DeclarationSpecifiersNode: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override;
+    void Add(DeclarationSpecifier *specifier);
+    uint64_t Size();
+private:
+    std::list<DeclarationSpecifier *> list;
+};
+
+class ParameterDeclarationNode: public Node
+{
+public:
+    ParameterDeclarationNode(DeclarationSpecifiersNode *specifiers, DeclaratorNode *declarator):
+            specifiers(specifiers), declarator(declarator) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    DeclarationSpecifiersNode *specifiers;
+    DeclaratorNode *declarator;
+};
+
+//parameter-type-list ::= parameter-list | parameter-list , ...
+
+class ParameterTypeList: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
+//parameter-list ::= parameter-declaration | parameter-list , parameter-declaration
+
+class ParameterList: public ParameterTypeList
+{
+public:
+    void Print(std::ostream &os, int depth) override;
+    void Add(ParameterDeclarationNode *specifier);
+    uint64_t Size();
+protected:
+    std::list<ParameterDeclarationNode *> list;
 };
 
 // primary-expr ::= id | constant | string-literal | (expr)
