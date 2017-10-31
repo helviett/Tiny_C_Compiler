@@ -15,7 +15,7 @@ void Parser::Parse()
 {
     scanner->Consume();
     scanner->Consume();
-    tree.root = parseDeclaration();
+    tree.root = parseStatement();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -357,6 +357,8 @@ StatementNode *Parser::parseStatement()
             case Keyword::FOR: case Keyword::DO: case Keyword::WHILE:
                 return parseIterationStatement();
         }
+    if (scanner->Current()->type == TokenType::ID && scanner->Next()->type == TokenType::COLON)
+        return parseLabelStatement();
     return reinterpret_cast<StatementNode *>(parseExprStatement());
 }
 
@@ -638,4 +640,14 @@ InitDeclaratorNode *Parser::parseInitDeclarator()
 InitializerNode *Parser::parseInitializer()
 {
     return (InitializerNode *)parseAssignmentExpr();
+}
+
+LabelStatement *Parser::parseLabelStatement()
+{
+    if (scanner->Current()->type != TokenType::ID) throw "";
+    auto id = new IdNode(scanner->Current());
+    scanner->Consume();
+    if (scanner->Current()->type != TokenType::COLON) throw "";
+    scanner->Consume();
+    return new LabelStatement(id, parseStatement());
 }

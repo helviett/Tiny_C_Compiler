@@ -42,11 +42,18 @@ Token *Tokenizer::Consume()
         currentPos.col++;
         buffer.push_back(currentCharacter);
         if (processNewState(FiniteAutomata[currentState][currentCharacter]))
-            return nextToken = getToken();
+        {
+            nextToken = getToken();
+            return currentToken;
+        }
     }
     if (currentState != 0)
-        return nextToken = getToken();
-    return (nextToken = new Token(TokenType::END_OF_FILE, currentPos.row, currentPos.col, ""));
+    {
+        nextToken = getToken();
+        return currentToken;
+    }
+    (nextToken = new Token(TokenType::END_OF_FILE, currentPos.row, currentPos.col, ""));
+    return currentToken;
 }
 
 Token *Tokenizer::Current()
