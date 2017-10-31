@@ -636,6 +636,40 @@ protected:
     std::list<ParameterDeclarationNode *> list;
 };
 
+//declaration ::= declaration-specifiers `init-declarator-list ;
+class InitDeclaratorListNode;
+
+class DeclarationNode: public Node
+{
+public:
+    DeclarationNode(DeclarationSpecifiersNode *declarationSpecifiers, InitDeclaratorListNode *list):
+            declarationSpecifiers(declarationSpecifiers), list(list) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    DeclarationSpecifiersNode *declarationSpecifiers;
+    InitDeclaratorListNode    *list;
+};
+
+class InitDeclaratorNode: public Node
+{
+public:
+    InitDeclaratorNode(DeclaratorNode *declarator): declarator(declarator) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    DeclaratorNode *declarator;
+    //InitializerNode *initializer;
+};
+
+class InitDeclaratorListNode: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override;
+    void Add(InitDeclaratorNode *initDeclarator);
+    uint64_t Size();
+protected:
+    std::list<InitDeclaratorNode *> list;
+};
+
 // primary-expr ::= id | constant | string-literal | (expr)
 
 class PrimaryExprNode: public PostfixExprNode

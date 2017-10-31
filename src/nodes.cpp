@@ -352,3 +352,31 @@ void FunctionDeclaratorNode::Print(std::ostream &os, int depth)
     params->Print(os, depth + 2);
     os << std::string((depth + 1) * 4, ' ') << ")" << std::endl;
 }
+
+void DeclarationNode::Print(std::ostream &os, int depth)
+{
+    declarationSpecifiers->Print(os, depth + 1);
+    list->Print(os, depth + 2);
+}
+
+uint64_t InitDeclaratorListNode::Size()
+{
+    return list.size();
+}
+
+void InitDeclaratorListNode::Add(InitDeclaratorNode *initDeclarator)
+{
+    list.push_back(initDeclarator);
+}
+
+void InitDeclaratorListNode::Print(std::ostream &os, int depth)
+{
+    for (auto it = list.begin(); it != list.end(); it++)
+        (*it)->Print(os, depth + 1);
+    os << std::endl;
+}
+
+void InitDeclaratorNode::Print(std::ostream &os, int depth)
+{
+    declarator->Print(os, depth + 1);
+}

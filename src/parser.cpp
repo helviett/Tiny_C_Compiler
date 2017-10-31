@@ -14,7 +14,7 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    tree.root = parseDeclarator(DeclaratorType::ABSTRACT_OR_NORMAL);
+    tree.root = parseDeclaration();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -596,4 +596,34 @@ FunctionDeclaratorNode *Parser::parseFunctionDeclarator(DirectDeclaratorNode *di
     if (scanner->Current()->type != TokenType::RBRACKET) throw "";
     scanner->Next();
     return new FunctionDeclaratorNode(directDeclarator, ptl);
+}
+
+DeclarationNode * Parser::parseDeclaration()
+{
+    auto ds = parseDeclarationSpecifiers();
+    if (scanner->Current()->type == TokenType::SEMICOLON)
+    {
+        scanner->Next();
+        return new DeclarationNode(ds, nullptr);
+    }
+    auto idl = parseInitDeclaratorList();
+    if (scanner->Current()->type != TokenType::SEMICOLON) throw "";
+    scanner->Next();
+    return new DeclarationNode(ds, idl);
+}
+
+InitDeclaratorListNode *Parser::parseInitDeclaratorList()
+{
+    auto idl = new InitDeclaratorListNode();
+    do
+    {
+        idl->Add(parseInitDeclarator());
+    } while (scanner->Current()->type == TokenType::COMMA && scanner->Next());
+    if (!idl->Size()) throw "";
+    return idl;
+}
+
+InitDeclaratorNode *Parser::parseInitDeclarator()
+{
+    return new InitDeclaratorNode(parseDeclarator(DeclaratorType::NORMAL));
 }

@@ -93,6 +93,9 @@ private:
     DeclarationSpecifiersNode *parseDeclarationSpecifiers();
     ParameterList             *parseParameterList();
     ParameterTypeList         *parseParameterTypeList();
+    DeclarationNode           *parseDeclaration();
+    InitDeclaratorListNode    *parseInitDeclaratorList();
+    InitDeclaratorNode        *parseInitDeclarator();
     FunctionDeclaratorNode    *parseFunctionDeclarator(DirectDeclaratorNode *directDeclarator);
     PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
                                   std::unordered_set<TokenType> types);
