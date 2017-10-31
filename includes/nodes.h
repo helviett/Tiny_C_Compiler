@@ -650,14 +650,17 @@ private:
     InitDeclaratorListNode    *list;
 };
 
+class InitializerNode;
+
 class InitDeclaratorNode: public Node
 {
 public:
-    InitDeclaratorNode(DeclaratorNode *declarator): declarator(declarator) {}
+    InitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer):
+            declarator(declarator), initializer(initializer) {}
     void Print(std::ostream &os, int depth) override;
 private:
     DeclaratorNode *declarator;
-    //InitializerNode *initializer;
+    InitializerNode *initializer;
 };
 
 class InitDeclaratorListNode: public Node
@@ -668,6 +671,14 @@ public:
     uint64_t Size();
 protected:
     std::list<InitDeclaratorNode *> list;
+};
+
+//initializer ::= assignment-expr | {initializer-list} | {initializer-list , }
+
+class InitializerNode: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
 };
 
 // primary-expr ::= id | constant | string-literal | (expr)

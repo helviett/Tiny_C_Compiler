@@ -619,11 +619,22 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList()
     {
         idl->Add(parseInitDeclarator());
     } while (scanner->Current()->type == TokenType::COMMA && scanner->Next());
-    if (!idl->Size()) throw "";
     return idl;
 }
 
 InitDeclaratorNode *Parser::parseInitDeclarator()
 {
-    return new InitDeclaratorNode(parseDeclarator(DeclaratorType::NORMAL));
+    auto dcltr = parseDeclarator(DeclaratorType::NORMAL);
+    InitializerNode *initializer = nullptr;
+    if (scanner->Current()->type == TokenType::ASSIGNMENT)
+    {
+        scanner->Next();
+        initializer = parseInitializer();
+    }
+    return new InitDeclaratorNode(dcltr, initializer);
+}
+
+InitializerNode *Parser::parseInitializer()
+{
+    return (InitializerNode *)parseAssignmentExpr();
 }

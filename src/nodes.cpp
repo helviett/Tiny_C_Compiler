@@ -379,4 +379,5 @@ void InitDeclaratorListNode::Print(std::ostream &os, int depth)
 void InitDeclaratorNode::Print(std::ostream &os, int depth)
 {
     declarator->Print(os, depth + 1);
+    if (initializer) initializer->Print(os, depth + 1);
 }
