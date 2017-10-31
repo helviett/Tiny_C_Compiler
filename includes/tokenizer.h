@@ -38,8 +38,9 @@ public:
     Tokenizer(std::string fileName);
 
     std::vector<Token *> Tokenize(std::string fileName);
-    Token *Next();
+    Token *Consume();
     Token *Current();
+    Token *Next();
     void OpenFile(std::string fileName);
 private:
     int currentState = 0;
@@ -47,6 +48,7 @@ private:
     Position currentPos;
     Position currentlyProcessingTokenPos;
     Token *currentToken;
+    Token *nextToken;
     std::ifstream currentFile;
     std::string buffer;
     Token *getToken();

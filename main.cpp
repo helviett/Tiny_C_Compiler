@@ -15,7 +15,7 @@ void TokenizeOnly()
     printf("Position\t\tType\t\t\tValue\t\t\tText\n\n");
     tok.OpenFile(sourceFile.Get());
     Token *t;
-    while ((t = tok.Next())->type != TokenType::END_OF_FILE)
+    while ((t = tok.Consume())->type != TokenType::END_OF_FILE)
         switch (t->type)
         {
             case TokenType::NUM_INT:case TokenType::CHARACTER:

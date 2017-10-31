@@ -22,15 +22,16 @@ std::vector<Token *> Tokenizer::Tokenize(std::string fileName)
     currentState = 0;
     std::vector<Token *> result;
     OpenFile(std::move(fileName));
-    while(Next()->type != TokenType::END_OF_FILE)
+    while(Consume()->type != TokenType::END_OF_FILE)
         result.push_back(currentToken);
     return result;
 
 }
 
-Token *Tokenizer::Next()
+Token *Tokenizer::Consume()
 {
     currentlyProcessingTokenPos = currentPos;
+    currentToken = nextToken;
     while (currentFile.get(currentCharacter))
     {
         if (currentCharacter == '\n')
@@ -41,11 +42,11 @@ Token *Tokenizer::Next()
         currentPos.col++;
         buffer.push_back(currentCharacter);
         if (processNewState(FiniteAutomata[currentState][currentCharacter]))
-            return currentToken = getToken();
+            return nextToken = getToken();
     }
     if (currentState != 0)
-        return currentToken = getToken();
-    return (currentToken = new Token(TokenType::END_OF_FILE, currentPos.row, currentPos.col, ""));
+        return nextToken = getToken();
+    return (nextToken = new Token(TokenType::END_OF_FILE, currentPos.row, currentPos.col, ""));
 }
 
 Token *Tokenizer::Current()
@@ -226,6 +227,11 @@ char Tokenizer::toEscape(char c)
         case '\"':
             return '\"';
     }
+}
+
+Token *Tokenizer::Next()
+{
+    return nextToken;
 }
 
 
