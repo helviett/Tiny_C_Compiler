@@ -329,14 +329,17 @@ private:
 };
 
 class SpecifierQualifierListNode;
+class DeclaratorNode;
 
 class TypeNameNode: public Node
 {
 public:
+    TypeNameNode(SpecifierQualifierListNode *specifierQualifierList, DeclaratorNode *abstractDeclarator):
+            specifierQualifierList(specifierQualifierList), abstractDeclarator(abstractDeclarator) {}
     void Print(std::ostream &os, int depth) override;
 private:
     SpecifierQualifierListNode *specifierQualifierList;
-
+    DeclaratorNode *abstractDeclarator;
 };
 
 //specifier-qualifier-list ::= type-specifier `specifier-qualifier-list
@@ -527,8 +530,6 @@ private:
 };
 
 //labeled-statement ::= id : statement
-//| case constant-expr : statement
-//| default : statement
 
 class LabeledStatement: public StatementNode
 {

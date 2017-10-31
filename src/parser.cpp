@@ -15,7 +15,7 @@ void Parser::Parse()
 {
     scanner->Consume();
     scanner->Consume();
-    tree.root = parseStatement();
+    tree.root = parseExpr();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -58,13 +58,6 @@ std::ostream &operator<<(std::ostream &os, Parser &parser)
 PostfixExprNode *Parser::parsePostfixExpr()
 {
     Token *t = scanner->Current();
-    if (t->type == TokenType::LBRACKET)
-    {
-        t = scanner->Consume();
-        auto typeToCast = 0;
-
-    }
-    // else
     PostfixExprNode *pe = parsePrimaryExpr();
     t = scanner->Current();
     bool canBeContinued = true;
@@ -154,7 +147,8 @@ PostfixExprNode *Parser::parseUnaryExpr()
 
 PostfixExprNode *Parser::parseCastExpr()
 {
-    if (scanner->Current()->type == TokenType::LBRACKET)
+    if (scanner->Current()->type == TokenType::LBRACKET &&
+            (isTypeQualifier(scanner->Next()) || isTypeSpecifier(scanner->Next())))
     {
         scanner->Consume();
         TypeNameNode *typName = parseTypeName();
@@ -295,8 +289,9 @@ TypeNameNode *Parser::parseTypeName()
                               (TypeSpecifierQualifier *)new TypeQualifier(t)) ;
         t = scanner->Consume();
     }
+    auto abstractDeclarator = parseDeclarator(DeclaratorType::ABSTRACT);
     if (tnn->Size() == 0) throw "";
-    return (TypeNameNode *)tnn;
+    return new TypeNameNode(tnn, abstractDeclarator);
 }
 
 bool Parser::isTypeSpecifier(Token *token)

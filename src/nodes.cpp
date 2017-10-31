@@ -264,6 +264,7 @@ void LabelStatement::Print(std::ostream &os, int depth)
 void TypeNameNode::Print(std::ostream &os, int depth)
 {
     specifierQualifierList->Print(os, depth + 1);
+    if (abstractDeclarator) abstractDeclarator->Print(os, depth + 1);
 }
 
 void DeclaratorNode::Print(std::ostream &os, int depth)
