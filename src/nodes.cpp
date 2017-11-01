@@ -254,7 +254,7 @@ void ForStatementNode::Print(std::ostream &os, int depth)
     body->Print(os, depth + 1);
 }
 
-void LabelStatement::Print(std::ostream &os, int depth)
+void LabelStatementNode::Print(std::ostream &os, int depth)
 {
     labelName->Print(os, depth + 1);
     os << std::string(depth * 4, ' ') << ":" << std::endl;
@@ -381,4 +381,31 @@ void InitDeclaratorNode::Print(std::ostream &os, int depth)
 {
     declarator->Print(os, depth + 1);
     if (initializer) initializer->Print(os, depth + 1);
+}
+
+void CompoundStatement::Print(std::ostream &os, int depth)
+{
+    if (blockItemList) blockItemList->Print(os, depth + 1);
+}
+
+void BlockItemNode::Print(std::ostream &os, int depth)
+{
+    declOrStatement->Print(os, depth + 1);
+}
+
+uint64_t BlockItemListNode::Size()
+{
+    return list.size();
+}
+
+void BlockItemListNode::Add(BlockItemNode *blockItem)
+{
+    list.push_back(blockItem);
+}
+
+void BlockItemListNode::Print(std::ostream &os, int depth)
+{
+    for (auto it = list.begin(); it != list.end(); it++)
+        (*it)->Print(os, depth + 1);
+    os << std::endl;
 }

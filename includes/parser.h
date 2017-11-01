@@ -98,7 +98,10 @@ private:
     InitDeclaratorNode        *parseInitDeclarator();
     InitializerNode           *parseInitializer();
     FunctionDeclaratorNode    *parseFunctionDeclarator(DirectDeclaratorNode *directDeclarator);
-    LabelStatement            *parseLabelStatement();
+    LabelStatementNode        *parseLabelStatement();
+    CompoundStatement         *parseCompoundStatement();
+    BlockItemListNode         *parseBlockItemList();
+    BlockItemNode             *parseBlockItem();
     PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
                                   std::unordered_set<TokenType> types);
     bool isTypeSpecifier(Token *token);

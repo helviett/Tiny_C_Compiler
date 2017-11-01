@@ -15,7 +15,7 @@ void Parser::Parse()
 {
     scanner->Consume();
     scanner->Consume();
-    tree.root = parseExpr();
+    tree.root = parseStatement();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -88,7 +88,7 @@ PostfixExprNode *Parser::parsePostfixExpr()
                 t = scanner->Consume();
                 pe = new ArrayAccess(pe, parseExpr());
                 if ((t = scanner->Current())->type != TokenType::RSQUARE_BRACKER) throw "";
-                scanner->Consume();
+                t = scanner->Consume();
                 break;
             case TokenType::LBRACKET:
                 t = scanner->Consume();
@@ -354,6 +354,8 @@ StatementNode *Parser::parseStatement()
         }
     if (scanner->Current()->type == TokenType::ID && scanner->Next()->type == TokenType::COLON)
         return parseLabelStatement();
+    if (scanner->Current()->type == TokenType::LCURLY_BRACKET)
+        return parseCompoundStatement();
     return reinterpret_cast<StatementNode *>(parseExprStatement());
 }
 
@@ -637,12 +639,36 @@ InitializerNode *Parser::parseInitializer()
     return (InitializerNode *)parseAssignmentExpr();
 }
 
-LabelStatement *Parser::parseLabelStatement()
+LabelStatementNode *Parser::parseLabelStatement()
 {
     if (scanner->Current()->type != TokenType::ID) throw "";
     auto id = new IdNode(scanner->Current());
     scanner->Consume();
     if (scanner->Current()->type != TokenType::COLON) throw "";
     scanner->Consume();
-    return new LabelStatement(id, parseStatement());
+    return new LabelStatementNode(id, parseStatement());
+}
+
+CompoundStatement *Parser::parseCompoundStatement()
+{
+    if (scanner->Current()->type != TokenType::LCURLY_BRACKET) throw "";
+    if (scanner->Consume()->type == TokenType::RCURLY_BRACKET) return new CompoundStatement(nullptr);
+    auto blockItemList = parseBlockItemList();
+    if (scanner->Current()->type != TokenType::RCURLY_BRACKET) throw "";
+    return new CompoundStatement(blockItemList);
+}
+
+BlockItemListNode *Parser::parseBlockItemList()
+{
+    auto blockItemList = new BlockItemListNode();
+    while (scanner->Current()->type != TokenType::RCURLY_BRACKET)
+    {
+        blockItemList->Add(parseBlockItem());
+    }
+    return blockItemList;
+}
+
+BlockItemNode *Parser::parseBlockItem()
+{
+    return (isDeclarationSpecifier(scanner->Current()) ? (BlockItemNode *)parseDeclaration() : (BlockItemNode *)parseStatement());
 }

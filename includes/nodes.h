@@ -424,7 +424,7 @@ public:
 class IfStatementNode: public SelectionStatementNode
 {
 public:
-    IfStatementNode() {}
+    IfStatementNode() = default;
     IfStatementNode(PostfixExprNode *expr, StatementNode *then): expr(expr), then(then) {}
     void Print(std::ostream &os, int depth) override;
 protected:
@@ -531,20 +531,52 @@ private:
 
 //labeled-statement ::= id : statement
 
-class LabeledStatement: public StatementNode
+class LabeledStatementNode: public StatementNode
 {
 public:
     void Print(std::ostream &os, int depth) override = 0;
 };
 
-class LabelStatement: public LabeledStatement
+class LabelStatementNode: public LabeledStatementNode
 {
 public:
-    LabelStatement(IdNode *labelName, StatementNode *statement): labelName(labelName), statement(statement) {}
+    LabelStatementNode(IdNode *labelName, StatementNode *statement): labelName(labelName), statement(statement) {}
     void Print(std::ostream &os, int depth) override;
 private:
     IdNode *labelName;
     StatementNode *statement;
+};
+
+//compound-statement ::= {`block-item-list}
+
+class BlockItemListNode;
+
+class CompoundStatement: public StatementNode
+{
+public:
+    explicit CompoundStatement(BlockItemListNode *blockItemList): blockItemList(blockItemList) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    BlockItemListNode *blockItemList;
+};
+
+class BlockItemNode: public Node
+{
+public:
+    explicit BlockItemNode(Node *declOrStatement): declOrStatement(declOrStatement) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    Node *declOrStatement;
+};
+
+class BlockItemListNode: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override;
+    void Add(BlockItemNode *blockItem);
+    uint64_t Size();
+private:
+    std::list<BlockItemNode *> list;
 };
 
 //direct-declarator ::= id | direct-declarator [constant-expr]
