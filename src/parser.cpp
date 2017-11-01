@@ -15,7 +15,7 @@ void Parser::Parse()
 {
     scanner->Next();
     scanner->Next();
-    tree.root = parseStatement();
+    tree.root = parseDeclaration();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -279,16 +279,7 @@ PostfixExprNode *Parser::parseExpr()
 
 TypeNameNode *Parser::parseTypeName()
 {
-    auto tnn = new SpecifierQualifierListNode();
-    Token *t = scanner->Current();
-    bool spec;
-    while ((spec = isTypeSpecifier(t)) || isTypeQualifier(t))
-    {
-
-        tnn->Add(spec ? (TypeSpecifierQualifierNode *)new TypeSpecifierNode(t) :
-                              (TypeSpecifierQualifierNode *)new TypeQualifierNode(t)) ;
-        t = scanner->Next();
-    }
+    auto tnn = parseSpecifierQualifierList();
     auto abstractDeclarator = parseDeclarator(DeclaratorType::ABSTRACT);
     if (tnn->Size() == 0) throw "";
     return new TypeNameNode(tnn, abstractDeclarator);
@@ -561,7 +552,7 @@ DeclarationSpecifiersNode *Parser::parseDeclarationSpecifiers()
     while(isDeclarationSpecifier(scanner->Current()))
     {
         if (scanner->Current()->keyword == Keyword::STRUCT)
-            ;// parseStructSpecifiers
+            ds->Add((DeclarationSpecifierNode *)parseStructSpecifier());
         else if (scanner->Current()->keyword == Keyword::ENUM)
             ds->Add((DeclarationSpecifierNode *)parseEnumSpecifier());
         else
@@ -726,4 +717,76 @@ bool Parser::isSimpleSpecifier(Token *token)
 {
     return isTypeQualifier(token) || isTypeSpecifier(token) ||
             isStorageClassSpecifier(token) || isFunctionSpecifier(token);
+}
+
+StructSpecifierNode *Parser::parseStructSpecifier()
+{
+    if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::STRUCT) throw "";
+    scanner->Next();
+    IdNode *id = scanner->Current()->type == TokenType::ID ? new IdNode(scanner->Current()) : nullptr;
+    if (!id)
+    {
+        if (scanner->Current()->type != TokenType::LCURLY_BRACKET) throw "";
+        scanner->Next();
+        return new StructSpecifierNode(id, parseStructDeclarationList());
+    }
+    scanner->Next();
+    if (scanner->Current()->type == TokenType::LCURLY_BRACKET && scanner->Next())
+        return new StructSpecifierNode(id, parseStructDeclarationList());
+    return new StructSpecifierNode(id, nullptr);
+}
+
+StructDeclarationListNode *Parser::parseStructDeclarationList()
+{
+    auto sdl = new StructDeclarationListNode();
+    do
+    {
+        sdl->Add(parseStructDeclaration());
+    } while (scanner->Current()->type != TokenType::RCURLY_BRACKET);
+    scanner->Next();
+    return sdl;
+}
+//struct-declaration ::= specifier-qualifier-list struct-declarator-list ;
+StructDeclarationNode *Parser::parseStructDeclaration()
+{
+    auto structDecl = new StructDeclarationNode(parseSpecifierQualifierList(), parseStructDeclaratorList());
+    if (scanner->Current()->type != TokenType::SEMICOLON) throw "";
+    scanner->Next();
+    return structDecl;
+}
+
+StructDeclaratorNode *Parser::parseStructDeclarator()
+{
+    if (scanner->Current()->type == TokenType::COLON && scanner->Next())
+        return new StructDeclaratorNode(nullptr, (ConstantExprNode *)parseConstantExpr());
+    auto declarator = parseDeclarator(DeclaratorType::NORMAL);
+    if (scanner->Current()->type == TokenType::COLON && scanner->Next())
+        return new StructDeclaratorNode(declarator, (ConstantExprNode *)parseConstantExpr());
+    return new StructDeclaratorNode(declarator, nullptr);
+}
+
+
+StructDeclaratorListNode *Parser::parseStructDeclaratorList()
+{
+    auto sdl = new StructDeclaratorListNode();
+    do
+    {
+        sdl->Add(parseStructDeclarator());
+    } while (scanner->Current()->type == TokenType::COMMA && scanner->Next());
+    return sdl;
+}
+
+SpecifierQualifierListNode *Parser::parseSpecifierQualifierList()
+{
+    auto tnn = new SpecifierQualifierListNode();
+    Token *t = scanner->Current();
+    bool spec;
+    while ((spec = isTypeSpecifier(t)) || isTypeQualifier(t))
+    {
+
+        tnn->Add(spec ? (TypeSpecifierQualifierNode *)new TypeSpecifierNode(t) :
+                 (TypeSpecifierQualifierNode *)new TypeQualifierNode(t)) ;
+        t = scanner->Next();
+    }
+    return tnn;
 }

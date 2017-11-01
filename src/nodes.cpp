@@ -464,3 +464,59 @@ void SimpleSpecifier::Print(std::ostream &os, int depth)
 {
     os << std::string(depth * 4, ' ') << value->text << std::endl;
 }
+
+void StructDeclaratorListNode::Print(std::ostream &os, int depth)
+{
+    for (auto it = list.begin(); it != list.end(); it++)
+        (*it)->Print(os, depth + 1);
+    os << std::endl;
+}
+
+void StructDeclaratorListNode::Add(StructDeclaratorNode *initDeclarator)
+{
+    list.push_back(initDeclarator);
+}
+
+uint64_t StructDeclaratorListNode::Size()
+{
+    return list.size();
+}
+
+void StructDeclarationNode::Print(std::ostream &os, int depth)
+{
+    specifierQualifierList->Print(os, depth);
+    structDeclaratorList->Print(os, depth);
+}
+
+uint64_t StructDeclarationListNode::Size()
+{
+    return list.size();
+}
+
+void StructDeclarationListNode::Add(StructDeclarationNode *initDeclarator)
+{
+    list.push_back(initDeclarator);
+}
+
+void StructDeclarationListNode::Print(std::ostream &os, int depth)
+{
+    for (auto it = list.begin(); it != list.end(); it++)
+        (*it)->Print(os, depth + 1);
+    os << std::endl;
+}
+
+void StructSpecifierNode::Print(std::ostream &os, int depth)
+{
+    if (id) id->Print(os, depth);
+    if (structDeclaratorList) structDeclaratorList->Print(os, depth + 1);
+}
+
+void StructDeclaratorNode::Print(std::ostream &os, int depth)
+{
+    if (declarator) declarator->Print(os, depth);
+    if (constantExpr)
+    {
+        os << std::string(depth * 4, ' ') << ":" << std::endl;
+        constantExpr->Print(os, depth + 1);
+    }
+}
