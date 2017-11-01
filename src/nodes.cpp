@@ -146,13 +146,11 @@ void CommaSeparatedExprs::Print(std::ostream &os, int depth)
 
 void SpecifierQualifierListNode::Print(std::ostream &os, int depth)
 {
-    os << std::string(depth * 4, ' ');
     for (auto it = specifierQualifierList.begin(); it != specifierQualifierList.end(); it++)
-        os << (*it)->Value()->text << " ";
-    os << std::endl;
+        (*it)->Print(os, depth);
 }
 
-void SpecifierQualifierListNode::Add(TypeSpecifierQualifier *typeSpecifierQualifier)
+void SpecifierQualifierListNode::Add(TypeSpecifierQualifierNode *typeSpecifierQualifier)
 {
     specifierQualifierList.push_back(typeSpecifierQualifier);
 }
@@ -164,13 +162,11 @@ uint64_t SpecifierQualifierListNode::Size()
 
 void TypeQualifierListNode::Print(std::ostream &os, int depth)
 {
-    os << std::string(depth * 4, ' ');
     for (auto it = qualifierList.begin(); it != qualifierList.end(); it++)
-        os << (*it)->Value()->text << " ";
-    os << std::endl;
+        (*it)->Print(os, depth);
 }
 
-void TypeQualifierListNode::Add(TypeQualifier *typeSpecifierQualifier)
+void TypeQualifierListNode::Add(TypeQualifierNode *typeSpecifierQualifier)
 {
     qualifierList.push_back(typeSpecifierQualifier);
 }
@@ -307,13 +303,12 @@ void FunctionCallNode::Print(std::ostream &os, int depth)
 
 void DeclarationSpecifiersNode::Print(std::ostream &os, int depth)
 {
-    os << std::string(depth * 4, ' ');
     for (auto it = list.begin(); it != list.end(); it++)
-        os << (*it)->Value()->text << " ";
+        (*it)->Print(os, depth);
     os << std::endl;
 }
 
-void DeclarationSpecifiersNode::Add(DeclarationSpecifier *specifier)
+void DeclarationSpecifiersNode::Add(DeclarationSpecifierNode *specifier)
 {
     list.push_back(specifier);
 }
@@ -357,7 +352,7 @@ void FunctionDeclaratorNode::Print(std::ostream &os, int depth)
 void DeclarationNode::Print(std::ostream &os, int depth)
 {
     declarationSpecifiers->Print(os, depth + 1);
-    list->Print(os, depth + 2);
+    if (list) list->Print(os, depth + 2);
 }
 
 uint64_t InitDeclaratorListNode::Size()
@@ -408,4 +403,64 @@ void BlockItemListNode::Print(std::ostream &os, int depth)
     for (auto it = list.begin(); it != list.end(); it++)
         (*it)->Print(os, depth + 1);
     os << std::endl;
+}
+
+uint64_t EnumeratorList::Size()
+{
+    return list.size();
+}
+
+void EnumeratorList::Add(EnumeratorNode *initDeclarator)
+{
+    list.push_back(initDeclarator);
+}
+
+void EnumeratorList::Print(std::ostream &os, int depth)
+{
+    for (auto it = list.begin(); it != list.end(); it++)
+        (*it)->Print(os, depth + 1);
+    os << std::endl;
+}
+
+void EnumSpecifierNode::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ') << "enum" << std::endl;
+    if (id) id->Print(os, depth + 1);
+    if (enumeratorList) enumeratorList->Print(os, depth + 2);
+}
+
+void EnumeratorNode::Print(std::ostream &os, int depth)
+{
+    enumerationConstant->Print(os, depth);
+    if (value) value->Print(os, depth + 1);
+}
+
+void TypeSpecifierQualifierNode::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ') << value->text << std::endl;
+}
+
+void TypeSpecifierNode::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ') << value->text << std::endl;
+}
+
+void TypeQualifierNode::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ') << value->text << std::endl;
+}
+
+void StorageClassSpecifierNode::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ') << value->text << std::endl;
+}
+
+void FunctionSpecifierNode::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ') << value->text << std::endl;
+}
+
+void SimpleSpecifier::Print(std::ostream &os, int depth)
+{
+    os << std::string(depth * 4, ' ') << value->text << std::endl;
 }

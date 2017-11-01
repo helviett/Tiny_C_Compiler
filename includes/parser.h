@@ -12,7 +12,7 @@
 static std::unordered_set<Keyword> TypeSpecifiers =
 {
     Keyword::VOID, Keyword::CHAR, Keyword::SHORT, Keyword::INT, Keyword::LONG,
-    Keyword::FLOAT, Keyword::DOUBLE, Keyword::SIGNED, Keyword::UNSIGNED
+    Keyword::FLOAT, Keyword::DOUBLE, Keyword::SIGNED, Keyword::UNSIGNED, Keyword::STRUCT, Keyword::ENUM
 };
 
 static std::unordered_set<Keyword> TypeQualifiers =
@@ -102,6 +102,9 @@ private:
     CompoundStatement         *parseCompoundStatement();
     BlockItemListNode         *parseBlockItemList();
     BlockItemNode             *parseBlockItem();
+    EnumSpecifierNode         *parseEnumSpecifier();
+    EnumeratorList            *parseEnumeratorList();
+    EnumeratorNode            *parseEnumerator();
     PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
                                   std::unordered_set<TokenType> types);
     bool isTypeSpecifier(Token *token);
@@ -111,7 +114,7 @@ private:
     bool isStorageClassSpecifier(Token *token);
     bool isFunctionSpecifier(Token *token);
     bool isDeclarationSpecifier(Token *token);
-
+    bool isSimpleSpecifier(Token *token);
     Tokenizer *scanner;
     SyntaxTree tree;
 };

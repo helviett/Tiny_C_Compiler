@@ -13,8 +13,8 @@ Parser::Parser(Tokenizer *tokenizer)
 
 void Parser::Parse()
 {
-    scanner->Consume();
-    scanner->Consume();
+    scanner->Next();
+    scanner->Next();
     tree.root = parseStatement();
 }
 
@@ -26,23 +26,23 @@ PostfixExprNode *Parser::parsePrimaryExpr()
     switch (t->type)
     {
         case TokenType::NUM_INT:
-            scanner->Consume();
+            scanner->Next();
             return new IntConstNode(t);
         case TokenType::NUM_FLOAT:
-            scanner->Consume();
+            scanner->Next();
             return new FloatConstNode(t);
         case TokenType::ID:
-            scanner->Consume();
+            scanner->Next();
             return new IdNode(t);
         case TokenType::STRING:
-            scanner->Consume();
+            scanner->Next();
             return new StringLiteralNode(t);
         case TokenType::LBRACKET:
-            scanner->Consume();
+            scanner->Next();
             PostfixExprNode *e = parseExpr(); // that's temporary function call;
             if (scanner->Current()->type != TokenType::RBRACKET)
                 throw SyntaxError(t, "Missing closing bracket. ");
-            scanner->Consume();
+            scanner->Next();
             return e;
     }
     throw SyntaxError(t, "Missing operand. ");
@@ -60,44 +60,44 @@ PostfixExprNode *Parser::parsePostfixExpr()
     Token *t = scanner->Current();
     PostfixExprNode *pe = parsePrimaryExpr();
     t = scanner->Current();
-    bool canBeContinued = true;
-    while (canBeContinued)
+    bool stillPostfixOperator = true;
+    while (stillPostfixOperator)
         switch (t->type)
         {
             case TokenType::DOUBLE_PLUS:
-                t = scanner->Consume();
+                t = scanner->Next();
                 pe = new PostfixIncrementNode(pe);
                 break;
             case TokenType::DOUBLE_MINUS:
-                t = scanner->Consume();
+                t = scanner->Next();
                 pe = new PostfixDecrementNode(pe);
                 break;
             case TokenType::DOT:
-                t = scanner->Consume();
+                t = scanner->Next();
                 if (t->type != TokenType::ID) throw "";
                 pe = new StructureOrUnionMemberAccessNode(pe, new IdNode(t));
-                t = scanner->Consume();
+                t = scanner->Next();
                 break;
             case TokenType::ARROW:
-                t = scanner->Consume();
+                t = scanner->Next();
                 if (t->type != TokenType::ID) throw "";
                 pe = new StructureOrUnionMemberAccessByPointerNode(pe, new IdNode(t));
-                t = scanner->Consume();
+                t = scanner->Next();
                 break;
             case TokenType::LSQUARE_BRACKET:
-                t = scanner->Consume();
+                t = scanner->Next();
                 pe = new ArrayAccess(pe, parseExpr());
                 if ((t = scanner->Current())->type != TokenType::RSQUARE_BRACKER) throw "";
-                t = scanner->Consume();
+                t = scanner->Next();
                 break;
             case TokenType::LBRACKET:
-                t = scanner->Consume();
+                t = scanner->Next();
                 pe = new FunctionCallNode(pe, parseArgumentExprList());
                 if (scanner->Current()->type != TokenType::RBRACKET) throw "";
-                t = scanner->Consume();
+                t = scanner->Next();
                 break;
             default:
-                canBeContinued = false;
+                stillPostfixOperator = false;
         }
     return pe;
 }
@@ -109,23 +109,23 @@ PostfixExprNode *Parser::parseUnaryExpr()
     switch (t->type)
     {
         case TokenType::DOUBLE_PLUS:
-            t = scanner->Consume();
+            t = scanner->Next();
             ue = new PrefixIncrementNode(parseUnaryExpr());
             break;
         case TokenType::DOUBLE_MINUS:
-            t = scanner->Consume();
+            t = scanner->Next();
             ue = new PrefixDecrementNode(parseUnaryExpr());
             break;
         case TokenType::KEYWORD:
             if (t->keyword == Keyword::SIZEOF)
             {
-                t = scanner->Consume();
+                t = scanner->Next();
                 if (t->type == TokenType::LBRACKET)
                 {
-                    scanner->Consume();
+                    scanner->Next();
                     ue = new SizeofTypeNameNode(parseTypeName());
                     if (scanner->Current()->type != TokenType::RBRACKET) throw "";
-                    scanner->Consume();
+                    scanner->Next();
                 }
                 else
                     ue = new SizeofExprNode(parseUnaryExpr());
@@ -135,7 +135,7 @@ PostfixExprNode *Parser::parseUnaryExpr()
         default:
             if (isUnaryOp(t))
             {
-                scanner->Consume();
+                scanner->Next();
                 ue = new UnaryOpNode(t, parseCastExpr());
                 t = scanner->Current();
                 break;
@@ -148,12 +148,12 @@ PostfixExprNode *Parser::parseUnaryExpr()
 PostfixExprNode *Parser::parseCastExpr()
 {
     if (scanner->Current()->type == TokenType::LBRACKET &&
-            (isTypeQualifier(scanner->Next()) || isTypeSpecifier(scanner->Next())))
+            (isTypeQualifier(scanner->Peek()) || isTypeSpecifier(scanner->Peek())))
     {
-        scanner->Consume();
+        scanner->Next();
         TypeNameNode *typName = parseTypeName();
         if (scanner->Current()->type != TokenType::RBRACKET) throw "";
-        scanner->Consume();
+        scanner->Next();
         return new TypeCastNode(typName, parseCastExpr());
     }
     return parseUnaryExpr();
@@ -223,11 +223,11 @@ PostfixExprNode *Parser::parseLogicalOrExpr()
 PostfixExprNode *Parser::parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
                                       std::unordered_set<TokenType> types)
 {
-    auto *e = (PostfixExprNode *)((*self).*f)();
+    auto *e = (PostfixExprNode *)(self->*f)();
     Token *t = self->scanner->Current();
     while (types.find(t->type) != types.end())
     {
-        self->scanner->Consume();
+        self->scanner->Next();
         auto right = (PostfixExprNode *) ((*self).*f)();
         e = new BinOpNode(e, right, t);
         t = self->scanner->Current();
@@ -241,12 +241,12 @@ PostfixExprNode *Parser::parseConditionalExpr()
     Token *t = scanner->Current();
     if (t->type == TokenType::QUESTION_MARK)
     {
-        t = scanner->Consume();
+        t = scanner->Next();
         PostfixExprNode *then = parseExpr();
         t = scanner->Current();
         if (t->type != TokenType::COLON)
             throw "";
-        t = scanner->Consume();
+        t = scanner->Next();
         PostfixExprNode *lse = parseConditionalExpr();
         return new TernaryOperatorNode(loe, then, lse);
     }
@@ -259,7 +259,7 @@ PostfixExprNode *Parser::parseAssignmentExpr()
     Token *t = scanner->Current();
     if (isAssignmentOp(t))
     {
-        scanner->Consume();
+        scanner->Next();
         return new AssignmentNode(ce, parseAssignmentExpr(), t);
 
     }
@@ -271,7 +271,7 @@ PostfixExprNode *Parser::parseExpr()
     PostfixExprNode *ae = parseAssignmentExpr();
     while (scanner->Current()->type == TokenType::COMMA)
     {
-        scanner->Consume();
+        scanner->Next();
         ae = new CommaSeparatedExprs(ae, parseExpr());
     }
     return ae;
@@ -285,9 +285,9 @@ TypeNameNode *Parser::parseTypeName()
     while ((spec = isTypeSpecifier(t)) || isTypeQualifier(t))
     {
 
-        tnn->Add(spec ? (TypeSpecifierQualifier *)new TypeSpecifier(t) :
-                              (TypeSpecifierQualifier *)new TypeQualifier(t)) ;
-        t = scanner->Consume();
+        tnn->Add(spec ? (TypeSpecifierQualifierNode *)new TypeSpecifierNode(t) :
+                              (TypeSpecifierQualifierNode *)new TypeQualifierNode(t)) ;
+        t = scanner->Next();
     }
     auto abstractDeclarator = parseDeclarator(DeclaratorType::ABSTRACT);
     if (tnn->Size() == 0) throw "";
@@ -326,8 +326,8 @@ TypeQualifierListNode *Parser::parseTypeQualifierList()
     while (isTypeQualifier(t))
     {
 
-        tql->Add(new TypeQualifier(t));
-        t = scanner->Consume();
+        tql->Add(new TypeQualifierNode(t));
+        t = scanner->Next();
     }
     return tql;
 }
@@ -335,7 +335,7 @@ TypeQualifierListNode *Parser::parseTypeQualifierList()
 PointerNode *Parser::parsePointer()
 {
     if (scanner->Current()->type != TokenType::ASTERIX) return nullptr;
-    scanner->Consume();
+    scanner->Next();
     return new PointerNode(parseTypeQualifierList(), parsePointer());
 }
 
@@ -352,7 +352,7 @@ StatementNode *Parser::parseStatement()
             case Keyword::FOR: case Keyword::DO: case Keyword::WHILE:
                 return parseIterationStatement();
         }
-    if (scanner->Current()->type == TokenType::ID && scanner->Next()->type == TokenType::COLON)
+    if (scanner->Current()->type == TokenType::ID && scanner->Peek()->type == TokenType::COLON)
         return parseLabelStatement();
     if (scanner->Current()->type == TokenType::LCURLY_BRACKET)
         return parseCompoundStatement();
@@ -363,28 +363,28 @@ ExprStatmentNode *Parser::parseExprStatement()
 {
     if (scanner->Current()->type == TokenType::SEMICOLON)
     {
-        scanner->Consume();
+        scanner->Next();
         return new ExprStatmentNode(nullptr);
     }
     auto et = new ExprStatmentNode(parseExpr());
     if (scanner->Current()->type != TokenType::SEMICOLON) throw "";
-    scanner->Consume();
+    scanner->Next();
     return et;
 }
 
 SelectionStatementNode *Parser::parseSelectionStatement()
 {
     if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::IF) throw "";
-    scanner->Consume();
+    scanner->Next();
     if (scanner->Current()->type != TokenType::LBRACKET) throw "";
-    scanner->Consume();
+    scanner->Next();
     auto expr = parseExpr();
     if (scanner->Current()->type != TokenType::RBRACKET) throw "";
-    scanner->Consume();
+    scanner->Next();
     auto then = parseStatement();
     if (scanner->Current()->type == TokenType::KEYWORD && scanner->Current()->keyword == Keyword::ELSE)
     {
-        scanner->Consume();
+        scanner->Next();
         return new IfElseStatementNode(expr, then, parseStatement());
     }
     return new IfStatementNode(expr, then);
@@ -397,27 +397,27 @@ JumpStatementNode *Parser::parseJumpStatement()
         switch (scanner->Current()->keyword)
         {
             case Keyword::GOTO:
-                if (scanner->Consume()->type != TokenType::ID) throw "";
+                if (scanner->Next()->type != TokenType::ID) throw "";
                 js = new GotoStatementNode(new IdNode(scanner->Current()));
-                scanner->Consume();
+                scanner->Next();
                 break;
             case Keyword::CONTINUE:
-                scanner->Consume()->type;
+                scanner->Next()->type;
                 js = new ContinueStatementNode();
                 break;
             case Keyword::BREAK:
-                scanner->Consume()->type;
+                scanner->Next()->type;
                 js = new BreakStatementNode();
                 break;
             case Keyword::RETURN:
-                js = scanner->Consume()->type == TokenType::SEMICOLON ? new ReturnStatementNode(nullptr) :
+                js = scanner->Next()->type == TokenType::SEMICOLON ? new ReturnStatementNode(nullptr) :
                      new ReturnStatementNode(parseExpr());
                 break;
             default:
                 throw "";
         }
     if (scanner->Current()->type != TokenType::SEMICOLON) throw "";
-    scanner->Consume();
+    scanner->Next();
     return js;
 }
 
@@ -439,43 +439,43 @@ IterationStatementNode *Parser::parseIterationStatement()
 ForStatementNode *Parser::parseForStatement()
 {
     if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::FOR) throw "";
-    if (scanner->Consume()->type != TokenType::LBRACKET) throw "";
-    scanner->Consume();
+    if (scanner->Next()->type != TokenType::LBRACKET) throw "";
+    scanner->Next();
     auto init = parseExprStatement(), condition = parseExprStatement();
     if (scanner->Current()->type == TokenType::RBRACKET)
     {
-        scanner->Consume();
+        scanner->Next();
         return new ForStatementNode(init, condition, nullptr, parseStatement());
     }
     auto iteration = parseExpr();
     if (scanner->Current()->type != TokenType::RBRACKET) throw "";
-    scanner->Consume();
+    scanner->Next();
     return new ForStatementNode(init, condition, iteration, parseStatement());
 }
 
 WhileStatementNode *Parser::parseWhileStatement()
 {
     if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::WHILE) throw "";
-    if (scanner->Consume()->type != TokenType::LBRACKET) throw "";
-    scanner->Consume();
+    if (scanner->Next()->type != TokenType::LBRACKET) throw "";
+    scanner->Next();
     auto condition = parseExpr();
     if (scanner->Current()->type != TokenType::RBRACKET) throw "";
-    scanner->Consume();
+    scanner->Next();
     return new WhileStatementNode(condition, parseStatement());
 }
 
 DoWhileStatementNode *Parser::parseDoWhileStatement()
 {
     if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::DO) throw "";
-    scanner->Consume();
+    scanner->Next();
     auto body = parseStatement();
     if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::WHILE) throw "";
-    if (scanner->Consume()->type != TokenType::LBRACKET) throw "";
-    scanner->Consume();
+    if (scanner->Next()->type != TokenType::LBRACKET) throw "";
+    scanner->Next();
     auto condition = parseExpr();
     if (scanner->Current()->type != TokenType::RBRACKET) throw "";
-    if (scanner->Consume()->type != TokenType::SEMICOLON) throw "";
-    scanner->Consume();
+    if (scanner->Next()->type != TokenType::SEMICOLON) throw "";
+    scanner->Next();
     return new DoWhileStatementNode(condition, body);
 }
 
@@ -490,10 +490,10 @@ DirectDeclaratorNode *Parser::parseDirectDeclarator(DeclaratorType type)
 {
     if (scanner->Current()->type == TokenType::LBRACKET)
     {
-        scanner->Consume();
+        scanner->Next();
         auto declarator = parseDeclarator(type);
         if (scanner->Current()->type != TokenType::RBRACKET) throw "";
-        scanner->Consume();
+        scanner->Next();
         return (DirectDeclaratorNode *)declarator;
     }
     DirectDeclaratorNode *directDeclarator = nullptr;
@@ -501,7 +501,7 @@ DirectDeclaratorNode *Parser::parseDirectDeclarator(DeclaratorType type)
     if (type != DeclaratorType::ABSTRACT && scanner->Current()->type == TokenType::ID)
     {
         directDeclarator = (DirectDeclaratorNode *)new IdNode(scanner->Current());
-        scanner->Consume();
+        scanner->Next();
     }
     while (scanner->Current()->type == TokenType::LSQUARE_BRACKET || scanner->Current()->type == TokenType::LBRACKET)
     {
@@ -517,10 +517,10 @@ ArrayDeclaratorNode *Parser::parseArrayDeclarator(DirectDeclaratorNode *directDe
 {
     if (scanner->Current()->type == TokenType::RSQUARE_BRACKER)
         return new ArrayDeclaratorNode(directDeclarator, nullptr);
-    scanner->Consume();
+    scanner->Next();
     auto ce = parseConstantExpr();
     if (scanner->Current()->type != TokenType::RSQUARE_BRACKER) throw "";
-    scanner->Consume();
+    scanner->Next();
     return new ArrayDeclaratorNode(directDeclarator, (ConditionalExprNode *)(ce));
 }
 
@@ -533,7 +533,7 @@ ArgumentExprListNode *Parser::parseArgumentExprList()
         if (scanner->Current()->type != TokenType::RBRACKET)
         {
             if (scanner->Current()->type != TokenType::COMMA) throw "";
-            scanner->Consume();
+            scanner->Next();
         }
     }
     return ael;
@@ -560,8 +560,15 @@ DeclarationSpecifiersNode *Parser::parseDeclarationSpecifiers()
     auto ds = new DeclarationSpecifiersNode();
     while(isDeclarationSpecifier(scanner->Current()))
     {
-        ds->Add(new DeclarationSpecifier(scanner->Current()));
-        scanner->Consume();
+        if (scanner->Current()->keyword == Keyword::STRUCT)
+            ;// parseStructSpecifiers
+        else if (scanner->Current()->keyword == Keyword::ENUM)
+            ds->Add((DeclarationSpecifierNode *)parseEnumSpecifier());
+        else
+        {
+            ds->Add(new SimpleSpecifier(scanner->Current()));
+            scanner->Next();
+        }
     }
     if (!ds->Size()) throw "";
     return ds;
@@ -573,7 +580,7 @@ ParameterList *Parser::parseParameterList()
     do
     {
         pl->Add(parseParameterDeclaration());
-    } while(scanner->Current()->type == TokenType::COMMA && scanner->Consume());
+    } while(scanner->Current()->type == TokenType::COMMA && scanner->Next());
     if (!pl->Size()) throw "";
     return pl;
 }
@@ -591,10 +598,10 @@ bool Parser::isDeclarationSpecifier(Token *token)
 
 FunctionDeclaratorNode *Parser::parseFunctionDeclarator(DirectDeclaratorNode *directDeclarator)
 {
-    scanner->Consume();
+    scanner->Next();
     auto ptl = parseParameterTypeList();
     if (scanner->Current()->type != TokenType::RBRACKET) throw "";
-    scanner->Consume();
+    scanner->Next();
     return new FunctionDeclaratorNode(directDeclarator, ptl);
 }
 
@@ -603,12 +610,12 @@ DeclarationNode * Parser::parseDeclaration()
     auto ds = parseDeclarationSpecifiers();
     if (scanner->Current()->type == TokenType::SEMICOLON)
     {
-        scanner->Consume();
+        scanner->Next();
         return new DeclarationNode(ds, nullptr);
     }
     auto idl = parseInitDeclaratorList();
     if (scanner->Current()->type != TokenType::SEMICOLON) throw "";
-    scanner->Consume();
+    scanner->Next();
     return new DeclarationNode(ds, idl);
 }
 
@@ -618,7 +625,7 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList()
     do
     {
         idl->Add(parseInitDeclarator());
-    } while (scanner->Current()->type == TokenType::COMMA && scanner->Consume());
+    } while (scanner->Current()->type == TokenType::COMMA && scanner->Next());
     return idl;
 }
 
@@ -628,7 +635,7 @@ InitDeclaratorNode *Parser::parseInitDeclarator()
     InitializerNode *initializer = nullptr;
     if (scanner->Current()->type == TokenType::ASSIGNMENT)
     {
-        scanner->Consume();
+        scanner->Next();
         initializer = parseInitializer();
     }
     return new InitDeclaratorNode(dcltr, initializer);
@@ -643,16 +650,16 @@ LabelStatementNode *Parser::parseLabelStatement()
 {
     if (scanner->Current()->type != TokenType::ID) throw "";
     auto id = new IdNode(scanner->Current());
-    scanner->Consume();
+    scanner->Next();
     if (scanner->Current()->type != TokenType::COLON) throw "";
-    scanner->Consume();
+    scanner->Next();
     return new LabelStatementNode(id, parseStatement());
 }
 
 CompoundStatement *Parser::parseCompoundStatement()
 {
     if (scanner->Current()->type != TokenType::LCURLY_BRACKET) throw "";
-    if (scanner->Consume()->type == TokenType::RCURLY_BRACKET) return new CompoundStatement(nullptr);
+    if (scanner->Next()->type == TokenType::RCURLY_BRACKET) return new CompoundStatement(nullptr);
     auto blockItemList = parseBlockItemList();
     if (scanner->Current()->type != TokenType::RCURLY_BRACKET) throw "";
     return new CompoundStatement(blockItemList);
@@ -671,4 +678,52 @@ BlockItemListNode *Parser::parseBlockItemList()
 BlockItemNode *Parser::parseBlockItem()
 {
     return (isDeclarationSpecifier(scanner->Current()) ? (BlockItemNode *)parseDeclaration() : (BlockItemNode *)parseStatement());
+}
+
+EnumSpecifierNode *Parser::parseEnumSpecifier()
+{
+    IdNode *id = nullptr;
+    EnumeratorList *list = nullptr;
+    if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::ENUM) throw "";
+    if (scanner->Next()->type == TokenType::ID)
+    {
+        id = new IdNode(scanner->Current());
+        scanner->Next();
+    }
+    if (!id && scanner->Current()->type != TokenType::LCURLY_BRACKET) throw "";
+    if (scanner->Current()->type == TokenType::LCURLY_BRACKET && scanner->Next())
+    {
+        list = parseEnumeratorList();
+        if (!list->Size()) throw "";
+        if (scanner->Current()->type != TokenType::RCURLY_BRACKET) throw "";
+        scanner->Next();
+    }
+    return new EnumSpecifierNode(id, list);
+}
+
+EnumeratorList *Parser::parseEnumeratorList()
+{
+    auto list = new EnumeratorList();
+    do
+    {
+        if (scanner->Current()->type == TokenType::RCURLY_BRACKET) break;
+        list->Add(parseEnumerator());
+    } while(scanner->Current()->type == TokenType::COMMA && scanner->Next());
+    return list;
+}
+
+EnumeratorNode *Parser::parseEnumerator()
+{
+    if (scanner->Current()->type != TokenType::ID) throw "";
+    auto id = new IdNode(scanner->Current());
+    scanner->Next();
+    if (scanner->Current()->type == TokenType::ASSIGNMENT && scanner->Next())
+        return new EnumeratorNode(id, (ConstantExprNode *)parseConstantExpr());
+    return new EnumeratorNode(id, nullptr);
+}
+
+bool Parser::isSimpleSpecifier(Token *token)
+{
+    return isTypeQualifier(token) || isTypeSpecifier(token) ||
+            isStorageClassSpecifier(token) || isFunctionSpecifier(token);
 }

@@ -38,9 +38,9 @@ public:
     Tokenizer(std::string fileName);
 
     std::vector<Token *> Tokenize(std::string fileName);
-    Token *Consume();
-    Token *Current();
     Token *Next();
+    Token *Current();
+    Token *Peek();
     void OpenFile(std::string fileName);
 private:
     int currentState = 0;

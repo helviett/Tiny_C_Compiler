@@ -18,6 +18,60 @@ public:
     virtual void Print(std::ostream &os, int depth) = 0;
 };
 
+class TypeSpecifiers;
+class TypeQualifierNode;
+
+class DeclarationSpecifierNode: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
+class SimpleSpecifier: public DeclarationSpecifierNode
+{
+public:
+    explicit SimpleSpecifier(Token *specifier): value(specifier) {}
+    void Print(std::ostream &os, int depth) override;
+protected:
+    Token *value;
+};
+
+class TypeSpecifierQualifierNode: public SimpleSpecifier
+{
+public:
+    TypeSpecifierQualifierNode() = default;
+    explicit TypeSpecifierQualifierNode(Token *value): SimpleSpecifier(value) {}
+    void Print(std::ostream &os, int depth) override;
+};
+
+class TypeSpecifierNode: public TypeSpecifierQualifierNode
+{
+public:
+    explicit TypeSpecifierNode(Token *specifier): TypeSpecifierQualifierNode(specifier) {}
+    void Print(std::ostream &os, int depth) override;
+};
+
+class TypeQualifierNode: public TypeSpecifierQualifierNode
+{
+public:
+    explicit TypeQualifierNode(Token *qualifier): TypeSpecifierQualifierNode(qualifier) {}
+    void Print(std::ostream &os, int depth) override;
+};
+
+class StorageClassSpecifierNode: public SimpleSpecifier
+{
+public:
+    explicit StorageClassSpecifierNode(Token *specifier): SimpleSpecifier(specifier) {}
+    void Print(std::ostream &os, int depth) override;
+};
+
+class FunctionSpecifierNode: public SimpleSpecifier
+{
+public:
+    explicit FunctionSpecifierNode(Token *specifier): SimpleSpecifier(specifier) {}
+    void Print(std::ostream &os, int depth) override;
+};
+
 //
 //postfix-expr ::= primary-expr | postfix-expr [expr] | postfix-expr (`argument-expr-list)
 //                | postfix-expr . id | postfix-expr -> id | postfix-expr ++ | postfix-expr --
@@ -349,10 +403,10 @@ class SpecifierQualifierListNode: public Node
 {
 public:
     void Print(std::ostream &os, int depth) override;
-    void Add(TypeSpecifierQualifier *typeSpecifierQualifier);
+    void Add(TypeSpecifierQualifierNode *typeSpecifierQualifier);
     uint64_t Size();
 private:
-    std::list<TypeSpecifierQualifier *> specifierQualifierList;
+    std::list<TypeSpecifierQualifierNode *> specifierQualifierList;
 };
 
 //type-qualifier-list ::= type-qualifier | type-qualifier-list type-qualifier
@@ -361,10 +415,10 @@ class TypeQualifierListNode: public Node
 {
 public:
     void Print(std::ostream &os, int depth) override;
-    void Add(TypeQualifier *typeSpecifierQualifier);
+    void Add(TypeQualifierNode *typeSpecifierQualifier);
     uint64_t Size();
 private:
-    std::list<TypeQualifier *> qualifierList;
+    std::list<TypeQualifierNode *> qualifierList;
 };
 
 //pointer ::= * `type-qualifier-list | * `type-qualifier-list pointer
@@ -632,10 +686,10 @@ class DeclarationSpecifiersNode: public Node
 {
 public:
     void Print(std::ostream &os, int depth) override;
-    void Add(DeclarationSpecifier *specifier);
+    void Add(DeclarationSpecifierNode *specifier);
     uint64_t Size();
 private:
-    std::list<DeclarationSpecifier *> list;
+    std::list<DeclarationSpecifierNode *> list;
 };
 
 class ParameterDeclarationNode: public Node
@@ -712,6 +766,46 @@ class InitializerNode: public Node
 {
 public:
     void Print(std::ostream &os, int depth) override = 0;
+};
+
+//enumerator ::= enumeration-constant, enumeration-constant = constant-expr
+
+class EnumeratorNode: public Node
+{
+public:
+    EnumeratorNode(IdNode *enumerationConstant, ConstantExprNode *value):
+            enumerationConstant(enumerationConstant), value(value) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    IdNode *enumerationConstant;
+    ConstantExprNode *value;
+};
+
+//enumerator-list ::= enumerator | enumerator-list , enumerator
+
+
+class EnumeratorList: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override;
+    void Add(EnumeratorNode *initDeclarator);
+    uint64_t Size();
+protected:
+    std::list<EnumeratorNode *> list;
+};
+
+//enum-specifier ::= enum `id {enumerator-list}
+//                  | enum `id {enumerator-list , }
+//                  | enum id
+
+class EnumSpecifierNode: public Node
+{
+public:
+    EnumSpecifierNode(IdNode *id, EnumeratorList *enumeratorList): id(id), enumeratorList(enumeratorList) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    IdNode *id;
+    EnumeratorList *enumeratorList;
 };
 
 // primary-expr ::= id | constant | string-literal | (expr)

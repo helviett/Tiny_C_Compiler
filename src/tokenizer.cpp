@@ -22,13 +22,13 @@ std::vector<Token *> Tokenizer::Tokenize(std::string fileName)
     currentState = 0;
     std::vector<Token *> result;
     OpenFile(std::move(fileName));
-    while(Consume()->type != TokenType::END_OF_FILE)
+    while(Next()->type != TokenType::END_OF_FILE)
         result.push_back(currentToken);
     return result;
 
 }
 
-Token *Tokenizer::Consume()
+Token *Tokenizer::Next()
 {
     currentlyProcessingTokenPos = currentPos;
     currentToken = nextToken;
@@ -236,7 +236,7 @@ char Tokenizer::toEscape(char c)
     }
 }
 
-Token *Tokenizer::Next()
+Token *Tokenizer::Peek()
 {
     return nextToken;
 }
