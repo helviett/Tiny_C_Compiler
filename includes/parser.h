@@ -111,6 +111,11 @@ private:
     StructDeclaratorNode       *parseStructDeclarator();
     StructDeclaratorListNode   *parseStructDeclaratorList();
     SpecifierQualifierListNode *parseSpecifierQualifierList();
+    InitializerListNode        *parseInitializerList();
+    DesignationNode            *parseDesignation();
+    DesignatorListNode         *parseDesignatorList();
+    DesignatorNode             *parseDesignator();
+    DesignatedInitializerNode  *parseDesignatedInitializer();
     PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
                                   std::unordered_set<TokenType> types);
     bool isTypeSpecifier(Token *token);

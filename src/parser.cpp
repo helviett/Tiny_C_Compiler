@@ -15,7 +15,7 @@ void Parser::Parse()
 {
     scanner->Next();
     scanner->Next();
-    tree.root = parseDeclaration();
+    tree.root = parseInitializerList();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -634,6 +634,8 @@ InitDeclaratorNode *Parser::parseInitDeclarator()
 
 InitializerNode *Parser::parseInitializer()
 {
+    if (scanner->Current()->type == TokenType::LCURLY_BRACKET)
+        return (InitializerNode *)parseInitializerList();
     return (InitializerNode *)parseAssignmentExpr();
 }
 
@@ -789,4 +791,60 @@ SpecifierQualifierListNode *Parser::parseSpecifierQualifierList()
         t = scanner->Next();
     }
     return tnn;
+}
+//initializer-list ::= `designation initializer | initializer-list , `designation initializer
+InitializerListNode *Parser::parseInitializerList()
+{
+    if (scanner->Current()->type != TokenType::LCURLY_BRACKET) throw "";
+    scanner->Next();
+    auto il = new InitializerListNode();
+    do
+    {
+        if (scanner->Current()->type == TokenType::RCURLY_BRACKET) break;
+        il->Add(parseDesignatedInitializer());
+    } while (scanner->Current()->type == TokenType::COMMA && scanner->Next());
+    return il;
+}
+
+DesignationNode *Parser::parseDesignation()
+{
+    auto designatorList = parseDesignatorList();
+    if (scanner->Current()->type != TokenType::ASSIGNMENT) throw "";
+    scanner->Next();
+    return new DesignationNode(designatorList);
+}
+
+DesignatorListNode *Parser::parseDesignatorList()
+{
+    auto dl = new DesignatorListNode();
+    do
+    {
+        dl->Add(parseDesignator());
+    } while(scanner->Current()->type == TokenType::LSQUARE_BRACKET || scanner->Current()->type == TokenType::DOT);
+    return dl;
+}
+
+DesignatorNode *Parser::parseDesignator()
+{
+    if (scanner->Current()->type == TokenType::LSQUARE_BRACKET)
+    {
+        scanner->Next();
+        auto constExpr = parseConstantExpr();
+        if (scanner->Current()->type != TokenType::RSQUARE_BRACKER) throw "";
+        scanner->Next();
+        return new ArrayDesignator((ConstantExprNode *)constExpr);
+    }
+    if (scanner->Current()->type != TokenType::DOT) throw "";
+    scanner->Next();
+    if (scanner->Current()->type != TokenType::ID) throw "";
+    auto smd = new StructMemberDesignator(new IdNode(scanner->Current()));
+    scanner->Next();
+    return smd;
+}
+
+DesignatedInitializerNode *Parser::parseDesignatedInitializer()
+{
+    if (scanner->Current()->type == TokenType::DOT || scanner->Current()->type == TokenType::LSQUARE_BRACKET)
+        return new DesignatedInitializerNode(parseDesignation(), parseInitializer());
+    return new DesignatedInitializerNode(nullptr, parseInitializer());
 }

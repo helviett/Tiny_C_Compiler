@@ -765,7 +765,79 @@ protected:
 class InitializerNode: public Node
 {
 public:
+void Print(std::ostream &os, int depth) override = 0;
+};
+
+//designator ::= [constant-expr] | . id
+
+class DesignatorNode: public Node
+{
+public:
     void Print(std::ostream &os, int depth) override = 0;
+};
+
+class ArrayDesignator: public DesignatorNode
+{
+public:
+    explicit ArrayDesignator(ConstantExprNode *constantExpr): constantExpr(constantExpr) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    ConstantExprNode *constantExpr;
+};
+
+class StructMemberDesignator: public DesignatorNode
+{
+public:
+    explicit StructMemberDesignator(IdNode *id): id(id) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    IdNode *id;
+};
+
+//designator-list ::= designator | designator-list designator
+
+class DesignatorListNode: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override;
+    void Add(DesignatorNode *designator);
+    uint64_t Size();
+protected:
+    std::list<DesignatorNode *> list;
+};
+
+// designation ::= designator-list =
+
+class DesignationNode: public Node
+{
+public:
+    DesignationNode(DesignatorListNode *designatorList): designatorList(designatorList) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    DesignatorListNode *designatorList;
+};
+
+class DesignatedInitializerNode: public Node
+{
+public:
+    DesignatedInitializerNode(DesignationNode *designation, InitializerNode *initializer):
+            designation(designation), initializer(initializer) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    DesignationNode *designation;
+    InitializerNode *initializer;
+};
+
+//initializer-list ::= `designation initializer | initializer-list , `designation initializer
+
+class InitializerListNode: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override;
+    void Add(DesignatedInitializerNode *initializer);
+    uint64_t Size();
+protected:
+    std::list<DesignatedInitializerNode *> list;
 };
 
 //enumerator ::= enumeration-constant, enumeration-constant = constant-expr
@@ -872,6 +944,8 @@ private:
     IdNode *id;
     StructDeclarationListNode *structDeclaratorList;
 };
+
+
 
 // primary-expr ::= id | constant | string-literal | (expr)
 

@@ -520,3 +520,58 @@ void StructDeclaratorNode::Print(std::ostream &os, int depth)
         constantExpr->Print(os, depth + 1);
     }
 }
+
+uint64_t InitializerListNode::Size()
+{
+    return list.size();
+}
+
+void InitializerListNode::Print(std::ostream &os, int depth)
+{
+    for (auto it = list.begin(); it != list.end(); it++)
+        (*it)->Print(os, depth + 1);
+    os << std::endl;
+}
+
+void InitializerListNode::Add(DesignatedInitializerNode *initializer)
+{
+    list.push_back(initializer);
+}
+
+void DesignatorListNode::Print(std::ostream &os, int depth)
+{
+    for (auto it = list.begin(); it != list.end(); it++)
+        (*it)->Print(os, depth + 1);
+    os << std::endl;
+}
+
+void DesignatorListNode::Add(DesignatorNode *designator)
+{
+    list.push_back(designator);
+}
+
+uint64_t DesignatorListNode::Size()
+{
+    return list.size();
+}
+
+void ArrayDesignator::Print(std::ostream &os, int depth)
+{
+    constantExpr->Print(os, depth);
+}
+
+void DesignationNode::Print(std::ostream &os, int depth)
+{
+    designatorList->Print(os, depth + 1);
+}
+
+void StructMemberDesignator::Print(std::ostream &os, int depth)
+{
+    id->Print(os, depth);
+}
+
+void DesignatedInitializerNode::Print(std::ostream &os, int depth)
+{
+    if (designation) designation->Print(os, depth);
+    initializer->Print(os, depth + 1);
+}
