@@ -93,8 +93,9 @@ private:
     DeclarationSpecifiersNode  *parseDeclarationSpecifiers();
     ParameterList              *parseParameterList();
     ParameterTypeList          *parseParameterTypeList();
-    DeclarationNode            *parseDeclaration();
-    InitDeclaratorListNode     *parseInitDeclaratorList();
+    DeclarationNode            *parseDeclaration(DeclarationSpecifiersNode *declarationSpecifiers = nullptr,
+                                                 InitDeclaratorNode *declarator = nullptr);
+    InitDeclaratorListNode     *parseInitDeclaratorList(InitDeclaratorNode *declarator = nullptr);
     InitDeclaratorNode         *parseInitDeclarator();
     InitializerNode            *parseInitializer();
     FunctionDeclaratorNode     *parseFunctionDeclarator(DirectDeclaratorNode *directDeclarator);
@@ -116,6 +117,8 @@ private:
     DesignatorListNode         *parseDesignatorList();
     DesignatorNode             *parseDesignator();
     DesignatedInitializerNode  *parseDesignatedInitializer();
+    TranslationUnitNode        *parseTranslationUnit();
+    ExternalDeclarationNode    *parseExternalDeclaration();
     PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
                                   std::unordered_set<TokenType> types);
     bool isTypeSpecifier(Token *token);

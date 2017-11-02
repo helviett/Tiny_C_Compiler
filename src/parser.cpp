@@ -15,7 +15,7 @@ void Parser::Parse()
 {
     scanner->Next();
     scanner->Next();
-    tree.root = parseInitializerList();
+    tree.root = parseTranslationUnit();
 }
 
 // primary-expr ::= id | constant | string-literal | (expr)
@@ -596,23 +596,31 @@ FunctionDeclaratorNode *Parser::parseFunctionDeclarator(DirectDeclaratorNode *di
     return new FunctionDeclaratorNode(directDeclarator, ptl);
 }
 
-DeclarationNode * Parser::parseDeclaration()
+DeclarationNode * Parser::parseDeclaration(DeclarationSpecifiersNode *declarationSpecifiers,
+                                           InitDeclaratorNode *declarator)
 {
-    auto ds = parseDeclarationSpecifiers();
-    if (scanner->Current()->type == TokenType::SEMICOLON)
+
+    auto ds = declarationSpecifiers ? declarationSpecifiers : parseDeclarationSpecifiers();
+    if (scanner->Current()->type == TokenType::SEMICOLON && !declarator)
     {
         scanner->Next();
         return new DeclarationNode(ds, nullptr);
     }
-    auto idl = parseInitDeclaratorList();
+    auto idl = parseInitDeclaratorList(declarator);
     if (scanner->Current()->type != TokenType::SEMICOLON) throw "";
     scanner->Next();
     return new DeclarationNode(ds, idl);
 }
 
-InitDeclaratorListNode *Parser::parseInitDeclaratorList()
+InitDeclaratorListNode *Parser::parseInitDeclaratorList(InitDeclaratorNode *declarator)
 {
     auto idl = new InitDeclaratorListNode();
+    if (declarator)
+    {
+        idl->Add(declarator);
+        if (scanner->Current()->type != TokenType::COMMA) return idl;
+        scanner->Next();
+    }
     do
     {
         idl->Add(parseInitDeclarator());
@@ -655,6 +663,7 @@ CompoundStatement *Parser::parseCompoundStatement()
     if (scanner->Next()->type == TokenType::RCURLY_BRACKET) return new CompoundStatement(nullptr);
     auto blockItemList = parseBlockItemList();
     if (scanner->Current()->type != TokenType::RCURLY_BRACKET) throw "";
+    scanner->Next();
     return new CompoundStatement(blockItemList);
 }
 
@@ -748,7 +757,7 @@ StructDeclarationListNode *Parser::parseStructDeclarationList()
     scanner->Next();
     return sdl;
 }
-//struct-declaration ::= specifier-qualifier-list struct-declarator-list ;
+
 StructDeclarationNode *Parser::parseStructDeclaration()
 {
     auto structDecl = new StructDeclarationNode(parseSpecifierQualifierList(), parseStructDeclaratorList());
@@ -792,7 +801,7 @@ SpecifierQualifierListNode *Parser::parseSpecifierQualifierList()
     }
     return tnn;
 }
-//initializer-list ::= `designation initializer | initializer-list , `designation initializer
+
 InitializerListNode *Parser::parseInitializerList()
 {
     if (scanner->Current()->type != TokenType::LCURLY_BRACKET) throw "";
@@ -847,4 +856,31 @@ DesignatedInitializerNode *Parser::parseDesignatedInitializer()
     if (scanner->Current()->type == TokenType::DOT || scanner->Current()->type == TokenType::LSQUARE_BRACKET)
         return new DesignatedInitializerNode(parseDesignation(), parseInitializer());
     return new DesignatedInitializerNode(nullptr, parseInitializer());
+}
+
+TranslationUnitNode *Parser::parseTranslationUnit()
+{
+    auto tu = new TranslationUnitNode();
+    while (scanner->Current()->type != TokenType::END_OF_FILE)
+        tu->Add(parseExternalDeclaration());
+    return tu;
+}
+//function-definition ::= declaration-specifier declarator compound-statement
+ExternalDeclarationNode *Parser::parseExternalDeclaration()
+{
+    auto ds = parseDeclarationSpecifiers();
+    if (scanner->Current()->type == TokenType::SEMICOLON)
+    {
+        scanner->Next();
+        return (ExternalDeclarationNode *)new DeclarationNode(ds, nullptr);
+    }
+    auto declarator = parseDeclarator(DeclaratorType::NORMAL);
+    if (scanner->Current()->type == TokenType::LCURLY_BRACKET)
+        return (ExternalDeclarationNode *)new FunctionDefinitionNode(ds, declarator, parseCompoundStatement());
+    if (scanner->Current()->type == TokenType::ASSIGNMENT)
+    {
+        scanner->Next();
+        return (ExternalDeclarationNode *)parseDeclaration(ds, new InitDeclaratorNode(declarator, parseInitializer()));
+    }
+    return (ExternalDeclarationNode *)parseDeclaration(ds, new InitDeclaratorNode(declarator, nullptr));
 }

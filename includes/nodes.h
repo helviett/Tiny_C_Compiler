@@ -945,7 +945,40 @@ private:
     StructDeclarationListNode *structDeclaratorList;
 };
 
+//function-definition ::= declaration-specifier declarator compound-statement
 
+class FunctionDefinitionNode: public Node
+{
+public:
+    FunctionDefinitionNode(DeclarationSpecifiersNode *declarationSpecifiers,
+                           DeclaratorNode *declarator, CompoundStatement *compoundStatement):
+            declarationSpecifiers{declarationSpecifiers}, declarator(declarator), compoundStatement(compoundStatement) {}
+    void Print(std::ostream &os, int depth) override;
+private:
+    DeclarationSpecifiersNode *declarationSpecifiers;
+    DeclaratorNode *declarator;
+    CompoundStatement *compoundStatement;
+};
+
+//external-declaration ::= function-definition | declaration
+
+class ExternalDeclarationNode: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override = 0;
+};
+
+//translation-unit ::= external-declaration | translation-unit external-declaration
+
+class TranslationUnitNode: public Node
+{
+public:
+    void Print(std::ostream &os, int depth) override;
+    void Add(ExternalDeclarationNode *initDeclarator);
+    uint64_t Size();
+protected:
+    std::list<ExternalDeclarationNode *> list;
+};
 
 // primary-expr ::= id | constant | string-literal | (expr)
 

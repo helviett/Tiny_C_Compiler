@@ -575,3 +575,27 @@ void DesignatedInitializerNode::Print(std::ostream &os, int depth)
     if (designation) designation->Print(os, depth);
     initializer->Print(os, depth + 1);
 }
+
+void FunctionDefinitionNode::Print(std::ostream &os, int depth)
+{
+    declarationSpecifiers->Print(os, depth);
+    declarator->Print(os, depth);
+    compoundStatement->Print(os, depth);
+}
+
+void TranslationUnitNode::Print(std::ostream &os, int depth)
+{
+    for (auto it = list.begin(); it != list.end(); it++)
+        (*it)->Print(os, depth + 1);
+    os << std::endl;
+}
+
+void TranslationUnitNode::Add(ExternalDeclarationNode *initDeclarator)
+{
+    list.push_back(initDeclarator);
+}
+
+uint64_t TranslationUnitNode::Size()
+{
+    return list.size();
+}
