@@ -4,25 +4,10 @@
 
 #include "../includes/nodes.h"
 
-//void print(Node* node, string indent, bool is_tail) {
-//    cout << indent << (is_tail ? "└── " : "├── ");
-//    if (node == nullptr) {
-//        cout << "*" << endl;
-//        return;
-//    }
-//    cout << node->val << endl;
-//    if (node->left != nullptr || node->right != nullptr) {
-//        indent.append(is_tail ? "    " : "│   ");
-//        print(node->right, indent, false);
-//        print(node->left, indent, true);
-//    }
-//}
-
 void IntConstNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << token->intValue << std::endl;
-//    os << std::string(depth * 4, ' ') << token->intValue << std::endl;
 }
 
 IntConstNode::IntConstNode(Token *token): ConstNode(token)
@@ -258,7 +243,7 @@ void ExprStatmentNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << indent << (isTail ? "└── " : "├── ");
     os << ";" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    expr->Print(os, indent, true);
+    if (expr) expr->Print(os, indent, true);
 }
 
 void IfStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -432,10 +417,15 @@ uint64_t ArgumentExprListNode::Size()
 void FunctionCallNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
-    os << "ArgumentExprList" << std::endl;
+    os << "FuncCall" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    functionName->Print(os, indent, false);
-    arguments->Print(os, indent, true);
+    if (arguments->Size())
+    {
+        functionName->Print(os, indent, false);
+        arguments->Print(os, indent, true);
+        return;
+    }
+    functionName->Print(os, indent, true);
 }
 
 void DeclarationSpecifiersNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -741,18 +731,40 @@ void StructDeclarationListNode::Print(std::ostream &os, std::string indent, bool
 
 void StructSpecifierNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
-//    if (id) id->Print(os, depth);
-//    if (structDeclaratorList) structDeclaratorList->Print(os, depth + 1);
+    os << indent << (isTail ? "└── " : "├── ");
+    os << "struct" << std::endl;
+    indent.append(isTail ? "    " : "│   ");
+    if (id)
+    {
+        if (structDeclaratorList)
+        {
+            id->Print(os, indent, false);
+            structDeclaratorList->Print(os, indent, true);
+            return;
+        }
+        id->Print(os, indent, true);
+        return;
+    }
+    structDeclaratorList->Print(os, indent, true);
 }
 
 void StructDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
-//    if (declarator) declarator->Print(os, depth);
-//    if (constantExpr)
-//    {
-//        os << std::string(depth * 4, ' ') << ":" << std::endl;
-//        constantExpr->Print(os, depth + 1);
-//    }
+    os << indent << (isTail ? "└── " : "├── ");
+    os << "StructDeclarator" << std::endl;
+    indent.append(isTail ? "    " : "│   ");
+    if (declarator)
+    {
+        if (constantExpr)
+        {
+            declarator->Print(os, indent, false);
+            constantExpr->Print(os, indent, true);
+            return;
+        }
+        declarator->Print(os, indent, true);
+        return;
+    }
+    constantExpr->Print(os, indent, true);
 }
 
 uint64_t InitializerListNode::Size()
@@ -803,13 +815,16 @@ uint64_t DesignatorListNode::Size()
 
 void ArrayDesignator::Print(std::ostream &os, std::string indent, bool isTail)
 {
+    os << indent << (isTail ? "└── " : "├── ");
+    os << "[]" << std::endl;
+    indent.append(isTail ? "    " : "│   ");
     constantExpr->Print(os, indent, true);
 }
 
 void DesignationNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
-    os << "[]" << std::endl;
+    os << "" << std::endl;
     indent.append(isTail ? "    " : "│   ");
     designatorList->Print(os, indent, true);
 }
@@ -834,7 +849,7 @@ void DesignatedInitializerNode::Print(std::ostream &os, std::string indent, bool
 void FunctionDefinitionNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
-    os << "DesignatedInitializer" << std::endl;
+    os << "FuncDef" << std::endl;
     indent.append(isTail ? "    " : "│   ");
     declarationSpecifiers->Print(os, indent, false);
     declarator->Print(os, indent, false);

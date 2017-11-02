@@ -34,7 +34,7 @@ struct Position
 class Tokenizer
 {
 public:
-    Tokenizer(): currentPos(1, 1) {}
+    Tokenizer() {}
     Tokenizer(std::string fileName);
 
     std::vector<Token *> Tokenize(std::string fileName);
@@ -45,7 +45,8 @@ public:
 private:
     int currentState = 0;
     char currentCharacter = 0;
-    Position currentPos;
+    int prevRowCol = 0;
+    Position currentPos{1, 1};
     Position currentlyProcessingTokenPos;
     Token *currentToken;
     Token *nextToken;

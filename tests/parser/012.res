@@ -1,19 +1,43 @@
+└── Unit
+    └── FuncDef
+        ├── DeclarationSpecifiers
+        │   └── int
+        ├── Declarator
+        │   └── Func Decl
+        │       ├── main
+        │       └── ParameterList
+        │           └── param
+        │               ├── DeclarationSpecifiers
+        │               │   └── void
+        │               └── Declarator
+        └── {}
+            └── BlockItemList
+                ├── Decl
+                │   ├── DeclarationSpecifiers
+                │   │   └── float
+                │   └── InitDeclaratorList
+                │       ├── InitDeclarator
+                │       │   └── Declarator
+                │       │       └── G
+                │       ├── InitDeclarator
+                │       │   └── Declarator
+                │       │       └── m1
+                │       ├── InitDeclarator
+                │       │   └── Declarator
+                │       │       └── m2
+                │       └── InitDeclarator
+                │           └── Declarator
+                │               └── R
+                ├── ;
+                │   └── /
+                │       ├── *
+                │       │   ├── *
+                │       │   │   ├── G
+                │       │   │   └── m1
+                │       │   └── m2
+                │       └── *
+                │           ├── R
+                │           └── R
+                └── return
+                    └── 0
 
-     x----R
-     |         
-x----*
-|    |    
-|    x----R
-|              
-/
-|    
-|    x----m2
-|    |         
-x----*
-     |    
-     |    x----m1
-     |    |         
-     x----*
-          |    
-          x----G
-                    

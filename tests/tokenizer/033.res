@@ -5,7 +5,6 @@ Position		Type			Value			Text
 (1, 10)			ASSIGNMENT			=				  =
 (1, 12)			NUM_INT			0				  0
 (1, 13)			SEMICOLON			;				  ;
-(3, 1)			KEYWORD			7				  double
-(3, 8)			ID			pi				  pi
-(3, 11)			ASSIGNMENT			=				  =
-WrongNumberLiteral at (3, 19). Text:3.14_f
+(2, 1)			KEYWORD			7				  double
+(2, 8)			ID			pi				  pi
+WrongNumberLiteral at (2, 19). Text:3.14_f

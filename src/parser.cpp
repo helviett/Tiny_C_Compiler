@@ -14,7 +14,6 @@ Parser::Parser(Tokenizer *tokenizer)
 void Parser::Parse()
 {
     scanner->Next();
-    scanner->Next();
     tree.root = parseTranslationUnit();
 }
 
@@ -485,7 +484,6 @@ DirectDeclaratorNode *Parser::parseDirectDeclarator(DeclaratorType type)
         auto declarator = parseDeclarator(type);
         if (scanner->Current()->type != TokenType::RBRACKET) throw "";
         scanner->Next();
-        return (DirectDeclaratorNode *)declarator;
     }
     DirectDeclaratorNode *directDeclarator = nullptr;
     if (type == DeclaratorType::NORMAL && scanner->Current()->type != TokenType::ID) throw "";
@@ -643,7 +641,12 @@ InitDeclaratorNode *Parser::parseInitDeclarator()
 InitializerNode *Parser::parseInitializer()
 {
     if (scanner->Current()->type == TokenType::LCURLY_BRACKET)
-        return (InitializerNode *)parseInitializerList();
+    {
+        auto il =  (InitializerNode *)parseInitializerList();
+        if (scanner->Current()->type != TokenType::RCURLY_BRACKET) throw "";
+        scanner->Next();
+        return il;
+    }
     return (InitializerNode *)parseAssignmentExpr();
 }
 
@@ -660,7 +663,7 @@ LabelStatementNode *Parser::parseLabelStatement()
 CompoundStatement *Parser::parseCompoundStatement()
 {
     if (scanner->Current()->type != TokenType::LCURLY_BRACKET) throw "";
-    if (scanner->Next()->type == TokenType::RCURLY_BRACKET) return new CompoundStatement(nullptr);
+    if (scanner->Next()->type == TokenType::RCURLY_BRACKET && scanner->Next()) return new CompoundStatement(nullptr);
     auto blockItemList = parseBlockItemList();
     if (scanner->Current()->type != TokenType::RCURLY_BRACKET) throw "";
     scanner->Next();

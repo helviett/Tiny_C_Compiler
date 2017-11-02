@@ -8,18 +8,18 @@ Position		Type			Value			Text
 (1, 23)			ASTERIX			*				  *
 (1, 24)			ID			e				  e
 (1, 25)			RBRACKET			)				  )
-(3, 1)			LCURLY_BRACKET			{				  {
-(5, 5)			ID			printf				  printf
-(5, 11)			LBRACKET			(				  (
-(5, 12)			STRING			Error %s: Code %d				  "Error %s: Code %d"
-(5, 31)			COMMA			,				  ,
-(5, 33)			ID			e				  e
-(5, 34)			ARROW			->				  ->
-(5, 36)			ID			msg				  msg
-(5, 39)			COMMA			,				  ,
-(5, 41)			ID			e				  e
-(5, 42)			ARROW			->				  ->
-(5, 44)			ID			code				  code
-(5, 48)			RBRACKET			)				  )
-(5, 49)			SEMICOLON			;				  ;
-(7, 1)			RCURLY_BRACKET			}				  }
+(2, 1)			LCURLY_BRACKET			{				  {
+(3, 5)			ID			printf				  printf
+(3, 11)			LBRACKET			(				  (
+(3, 12)			STRING			Error %s: Code %d				  "Error %s: Code %d"
+(3, 31)			COMMA			,				  ,
+(3, 33)			ID			e				  e
+(3, 34)			ARROW			->				  ->
+(3, 36)			ID			msg				  msg
+(3, 39)			COMMA			,				  ,
+(3, 41)			ID			e				  e
+(3, 42)			ARROW			->				  ->
+(3, 44)			ID			code				  code
+(3, 48)			RBRACKET			)				  )
+(3, 49)			SEMICOLON			;				  ;
+(4, 1)			RCURLY_BRACKET			}				  }

@@ -14,6 +14,7 @@ void Tokenizer::OpenFile(std::string fileName)
 {
     currentFile.close();
     currentFile.open(fileName, std::ifstream::in);
+    Next();
 }
 
 std::vector<Token *> Tokenizer::Tokenize(std::string fileName)
@@ -36,9 +37,11 @@ Token *Tokenizer::Next()
     {
         if (currentCharacter == '\n')
         {
+            prevRowCol = currentPos.col;
             currentPos.col = 0;
             currentPos.row++;
         }
+        if (!currentState) currentlyProcessingTokenPos = currentPos;
         currentPos.col++;
         buffer.push_back(currentCharacter);
         if (processNewState(FiniteAutomata[currentState][currentCharacter]))
@@ -71,6 +74,11 @@ Token *Tokenizer::getToken()
     {
         currentPos.col--;
         currentFile.putback(currentCharacter);
+        if (currentCharacter == '\n')
+        {
+            currentPos.col = prevRowCol;
+            currentPos.row--;
+        }
         currentState = 0;
         Token *t = new Token(res->second, currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
         try
