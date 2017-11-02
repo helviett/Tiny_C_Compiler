@@ -15,7 +15,7 @@
 class Node
 {
 public:
-    virtual void Print(std::ostream &os, int depth) = 0;
+    virtual void Print(std::ostream &os, std::string ident, bool isTail) = 0;
 };
 
 class TypeSpecifiers;
@@ -24,14 +24,14 @@ class TypeQualifierNode;
 class DeclarationSpecifierNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 class SimpleSpecifier: public DeclarationSpecifierNode
 {
 public:
     explicit SimpleSpecifier(Token *specifier): value(specifier) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 protected:
     Token *value;
 };
@@ -41,35 +41,35 @@ class TypeSpecifierQualifierNode: public SimpleSpecifier
 public:
     TypeSpecifierQualifierNode() = default;
     explicit TypeSpecifierQualifierNode(Token *value): SimpleSpecifier(value) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class TypeSpecifierNode: public TypeSpecifierQualifierNode
 {
 public:
     explicit TypeSpecifierNode(Token *specifier): TypeSpecifierQualifierNode(specifier) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class TypeQualifierNode: public TypeSpecifierQualifierNode
 {
 public:
     explicit TypeQualifierNode(Token *qualifier): TypeSpecifierQualifierNode(qualifier) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class StorageClassSpecifierNode: public SimpleSpecifier
 {
 public:
     explicit StorageClassSpecifierNode(Token *specifier): SimpleSpecifier(specifier) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class FunctionSpecifierNode: public SimpleSpecifier
 {
 public:
     explicit FunctionSpecifierNode(Token *specifier): SimpleSpecifier(specifier) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 //
@@ -80,14 +80,14 @@ public:
 class PostfixExprNode: public Node
 {
 public:
-    virtual void Print(std::ostream &os, int depth) = 0;
+    virtual void Print(std::ostream &os, std::string ident, bool isTail) = 0;
 };
 
 class PostfixIncrementNode: public PostfixExprNode
 {
 public:
     explicit PostfixIncrementNode(PostfixExprNode *node): node(node) {}
-    virtual void Print(std::ostream &os, int depth);
+    virtual void Print(std::ostream &os, std::string ident, bool isTail);
 private:
     PostfixExprNode *node;
 };
@@ -96,7 +96,7 @@ class PostfixDecrementNode: public PostfixExprNode
 {
 public:
     explicit PostfixDecrementNode(PostfixExprNode *node): node(node) {}
-    virtual void Print(std::ostream &os, int depth);
+    virtual void Print(std::ostream &os, std::string ident, bool isTail);
 private:
     PostfixExprNode *node;
 };
@@ -109,7 +109,7 @@ public:
     StructureOrUnionMemberAccessNode(PostfixExprNode *structureOrUnion, IdNode *member): member(member),
                                                                                      structureOrUnion(structureOrUnion) {}
 
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *structureOrUnion;
     IdNode *member;
@@ -121,7 +121,7 @@ public:
     StructureOrUnionMemberAccessByPointerNode(PostfixExprNode *structureOrUnion, IdNode *member): member(member),
                                                                                      structureOrUnion(structureOrUnion) {}
 
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *structureOrUnion;
     IdNode *member;
@@ -131,7 +131,7 @@ class ArrayAccess: public PostfixExprNode
 {
 public:
     ArrayAccess(PostfixExprNode *left, PostfixExprNode *inBrackets): left(left), inBrackets(inBrackets) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *left, *inBrackets;
 };
@@ -141,7 +141,7 @@ class AssignmentExprNode;
 class ArgumentExprListNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(AssignmentExprNode *assignmentExpr);
     uint64_t Size();
 private:
@@ -153,7 +153,7 @@ class FunctionCallNode: public PostfixExprNode
 public:
     FunctionCallNode(PostfixExprNode *functionName, ArgumentExprListNode *arguments):
             functionName(functionName), arguments(arguments) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *functionName;
     ArgumentExprListNode *arguments;
@@ -164,14 +164,14 @@ private:
 class UnaryExprNode: public PostfixExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 class SizeofExprNode: public  UnaryExprNode
 {
 public:
     SizeofExprNode(PostfixExprNode *expr): expr(expr) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *expr;
 };
@@ -182,7 +182,7 @@ class SizeofTypeNameNode: public UnaryExprNode
 {
 public:
     SizeofTypeNameNode(TypeNameNode *typeName): typeName(typeName) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     TypeNameNode *typeName;
 };
@@ -191,7 +191,7 @@ class UnaryOpNode: public UnaryExprNode
 {
 public:
     UnaryOpNode (Token *unaryOp, PostfixExprNode *expr): unaryOp(unaryOp), expr(expr) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     Token *unaryOp;
     PostfixExprNode *expr;
@@ -201,7 +201,7 @@ class PrefixIncrementNode: public UnaryExprNode
 {
 public:
     explicit PrefixIncrementNode(PostfixExprNode *node): node(node){}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *node;
 };
@@ -210,7 +210,7 @@ class PrefixDecrementNode: public UnaryExprNode
 {
 public:
     explicit PrefixDecrementNode(PostfixExprNode *node): node(node){}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *node;
 };
@@ -220,14 +220,14 @@ class CastExprNode: public UnaryExprNode
 {
 public:
     CastExprNode(){}
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 class BinOpNode: public CastExprNode
 {
 public:
     BinOpNode(PostfixExprNode *left, PostfixExprNode *right, Token *op): left(left), right(right), op(op) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *left, *right;
     Token *op;
@@ -240,7 +240,7 @@ private:
 class MultiplicativeExprNode: public CastExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 //addictive-expr ::= multiplicative-expr
@@ -250,7 +250,7 @@ public:
 class AddictiveExprNode: public CastExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 //shift-expr ::= addictive-expr
@@ -260,7 +260,7 @@ public:
 class ShiftExprNode: public AddictiveExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 //rel-expr ::= shift-expr | rel-expr < shift-expr | rel-expr > shift-expr
@@ -269,7 +269,7 @@ public:
 class RelationalExprNode: public ShiftExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 //eq-expr ::= rel-expr | eq-expr == rel-expr | eq-expr != rel-expr
@@ -277,7 +277,7 @@ public:
 class EqualityExprNode: public RelationalExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 //AND-expr ::= eq-expr | AND-expr & eq-expr
@@ -285,7 +285,7 @@ public:
 class AndExprNode: public EqualityExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 //exclusive-OR-expr ::= AND-expr | exclusive-OR-expr ^ AND-expr
@@ -293,7 +293,7 @@ public:
 class ExclusiveOrExprNode: public AndExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 //inclusive-OR-expr ::= exclusive-OR-expr | inclusive-OR-expr '|' exclusive-OR-expr
@@ -301,7 +301,7 @@ public:
 class InclusiveOrExprNode: public ExclusiveOrExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 //logical-AND-expr ::= inclusive-OR-expr | logical-AND-expr && inclusive-OR-expr
@@ -309,7 +309,7 @@ public:
 class LogicalAndExprNode: public InclusiveOrExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 //logical-OR-expr ::= logical-AND-expr | logical-OR-expr || logical-AND-expr
@@ -317,7 +317,7 @@ public:
 class LogicalOrExprNode: public LogicalAndExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 //conditional-expr ::= logical-OR-expr | logical-OR-expr ? expr : conditional-expr
@@ -325,7 +325,7 @@ public:
 class ConditionalExprNode: public LogicalOrExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 class TernaryOperatorNode: public ConditionalExprNode
@@ -333,7 +333,7 @@ class TernaryOperatorNode: public ConditionalExprNode
 public:
     TernaryOperatorNode(PostfixExprNode *condition, PostfixExprNode *iftrue, PostfixExprNode *iffalse):
                     condition(condition), iftrue(iftrue), iffalse(iffalse) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *condition, *iftrue, *iffalse;
 };
@@ -343,7 +343,7 @@ private:
 class ConstantExprNode: public ConditionalExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 //assignment-expr ::= conditional-expr | unary-expr assignment-op assignment-expr
@@ -351,7 +351,7 @@ public:
 class AssignmentExprNode: public ConditionalExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 class AssignmentNode: public AssignmentExprNode
@@ -359,7 +359,7 @@ class AssignmentNode: public AssignmentExprNode
 public:
     AssignmentNode(PostfixExprNode *left, PostfixExprNode *right, Token *assignmentOp): left(left), right(right),
                                                                                     assignmentOp(assignmentOp) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *left, *right;
     Token *assignmentOp;
@@ -370,14 +370,14 @@ private:
 class ExprNode: public AssignmentExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 class CommaSeparatedExprs: public ExprNode
 {
 public:
     CommaSeparatedExprs(PostfixExprNode *left, PostfixExprNode *right): left(left), right(right) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *left, *right;
 };
@@ -390,7 +390,7 @@ class TypeNameNode: public Node
 public:
     TypeNameNode(SpecifierQualifierListNode *specifierQualifierList, DeclaratorNode *abstractDeclarator):
             specifierQualifierList(specifierQualifierList), abstractDeclarator(abstractDeclarator) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     SpecifierQualifierListNode *specifierQualifierList;
     DeclaratorNode *abstractDeclarator;
@@ -402,11 +402,11 @@ private:
 class SpecifierQualifierListNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(TypeSpecifierQualifierNode *typeSpecifierQualifier);
     uint64_t Size();
 private:
-    std::list<TypeSpecifierQualifierNode *> specifierQualifierList;
+    std::list<TypeSpecifierQualifierNode *> list;
 };
 
 //type-qualifier-list ::= type-qualifier | type-qualifier-list type-qualifier
@@ -414,11 +414,11 @@ private:
 class TypeQualifierListNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(TypeQualifierNode *typeSpecifierQualifier);
     uint64_t Size();
 private:
-    std::list<TypeQualifierNode *> qualifierList;
+    std::list<TypeQualifierNode *> list;
 };
 
 //pointer ::= * `type-qualifier-list | * `type-qualifier-list pointer
@@ -428,7 +428,7 @@ class PointerNode: public Node
 public:
     PointerNode(TypeQualifierListNode *typeQualifierList, PointerNode *pointer):
             typeQualifierList(typeQualifierList), pointer(pointer) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     TypeQualifierListNode *typeQualifierList;
     PointerNode *pointer;
@@ -438,7 +438,7 @@ class TypeCastNode: public CastExprNode
 {
 public:
     TypeCastNode(TypeNameNode *typeName, PostfixExprNode *castExpr): typeName(typeName), castExpr(castExpr) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     TypeNameNode *typeName;
     PostfixExprNode *castExpr;
@@ -451,7 +451,7 @@ private:
 class StatementNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 //expression-statement ::= `expr ;
@@ -460,7 +460,7 @@ class ExprStatmentNode: StatementNode
 {
 public:
     explicit ExprStatmentNode(PostfixExprNode *expr): expr(expr) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *expr;
 };
@@ -472,7 +472,7 @@ private:
 class SelectionStatementNode: public StatementNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 class IfStatementNode: public SelectionStatementNode
@@ -480,7 +480,7 @@ class IfStatementNode: public SelectionStatementNode
 public:
     IfStatementNode() = default;
     IfStatementNode(PostfixExprNode *expr, StatementNode *then): expr(expr), then(then) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 protected:
     PostfixExprNode *expr;
     StatementNode *then;
@@ -491,7 +491,7 @@ class IfElseStatementNode: public IfStatementNode
 public:
     IfElseStatementNode(PostfixExprNode *expr, StatementNode *then, StatementNode *_else):
             IfStatementNode(expr, then), _else(_else) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     StatementNode *_else;
 };
@@ -504,14 +504,14 @@ private:
 class JumpStatementNode: public StatementNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 class GotoStatementNode: public JumpStatementNode
 {
 public:
     explicit GotoStatementNode(IdNode *id): id(id) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     IdNode *id;
 };
@@ -520,21 +520,21 @@ class ContinueStatementNode: public JumpStatementNode
 {
 public:
     ContinueStatementNode() = default;
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class BreakStatementNode: public JumpStatementNode
 {
 public:
     BreakStatementNode() = default;
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class ReturnStatementNode: public JumpStatementNode
 {
 public:
     explicit ReturnStatementNode(PostfixExprNode *expr): expr(expr) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *expr;
 };
@@ -547,14 +547,14 @@ private:
 class IterationStatementNode: public StatementNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 class WhileStatementNode: public IterationStatementNode
 {
 public:
     WhileStatementNode(PostfixExprNode *condition, StatementNode *body): condition(condition), body(body) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *condition;
     StatementNode *body;
@@ -564,7 +564,7 @@ class DoWhileStatementNode: public IterationStatementNode
 {
 public:
     DoWhileStatementNode(PostfixExprNode *condition, StatementNode *body): condition(condition), body(body) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *condition;
     StatementNode *body;
@@ -576,7 +576,7 @@ public:
     ForStatementNode(ExprStatmentNode *init, ExprStatmentNode *condition,
                      PostfixExprNode *iteration, StatementNode *body):
             init(init), condition(condition), iteration(iteration), body(body) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     ExprStatmentNode *init, *condition;
     PostfixExprNode *iteration;
@@ -588,14 +588,14 @@ private:
 class LabeledStatementNode: public StatementNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 class LabelStatementNode: public LabeledStatementNode
 {
 public:
     LabelStatementNode(IdNode *labelName, StatementNode *statement): labelName(labelName), statement(statement) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     IdNode *labelName;
     StatementNode *statement;
@@ -609,7 +609,7 @@ class CompoundStatement: public StatementNode
 {
 public:
     explicit CompoundStatement(BlockItemListNode *blockItemList): blockItemList(blockItemList) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     BlockItemListNode *blockItemList;
 };
@@ -618,7 +618,7 @@ class BlockItemNode: public Node
 {
 public:
     explicit BlockItemNode(Node *declOrStatement): declOrStatement(declOrStatement) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     Node *declOrStatement;
 };
@@ -626,7 +626,7 @@ private:
 class BlockItemListNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(BlockItemNode *blockItem);
     uint64_t Size();
 private:
@@ -644,7 +644,7 @@ public:
     DeclaratorNode () = default;
     DeclaratorNode(PointerNode *pointer, DirectDeclaratorNode *directDeclarator):
             pointer(pointer), directDeclarator(directDeclarator) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     DirectDeclaratorNode *directDeclarator;
     PointerNode *pointer;
@@ -653,7 +653,7 @@ private:
 class DirectDeclaratorNode: public DeclaratorNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 class ArrayDeclaratorNode: public DirectDeclaratorNode
@@ -661,7 +661,7 @@ class ArrayDeclaratorNode: public DirectDeclaratorNode
 public:
     ArrayDeclaratorNode(DirectDeclaratorNode *directDeclarator, ConditionalExprNode *size):
             directDeclarator(directDeclarator), size(size) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     DirectDeclaratorNode *directDeclarator;
     ConditionalExprNode  *size;
@@ -674,7 +674,7 @@ class FunctionDeclaratorNode: public DirectDeclaratorNode
 public:
     FunctionDeclaratorNode(DirectDeclaratorNode *directDeclarator, ParameterTypeList *params):
             params(params), directDeclarator(directDeclarator) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     DirectDeclaratorNode *directDeclarator;
     ParameterTypeList    *params;
@@ -685,7 +685,7 @@ private:
 class DeclarationSpecifiersNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(DeclarationSpecifierNode *specifier);
     uint64_t Size();
 private:
@@ -697,7 +697,7 @@ class ParameterDeclarationNode: public Node
 public:
     ParameterDeclarationNode(DeclarationSpecifiersNode *specifiers, DeclaratorNode *declarator):
             specifiers(specifiers), declarator(declarator) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     DeclarationSpecifiersNode *specifiers;
     DeclaratorNode *declarator;
@@ -708,7 +708,7 @@ private:
 class ParameterTypeList: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 //parameter-list ::= parameter-declaration | parameter-list , parameter-declaration
@@ -716,7 +716,7 @@ public:
 class ParameterList: public ParameterTypeList
 {
 public:
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(ParameterDeclarationNode *specifier);
     uint64_t Size();
 protected:
@@ -731,7 +731,7 @@ class DeclarationNode: public Node
 public:
     DeclarationNode(DeclarationSpecifiersNode *declarationSpecifiers, InitDeclaratorListNode *list):
             declarationSpecifiers(declarationSpecifiers), list(list) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     DeclarationSpecifiersNode *declarationSpecifiers;
     InitDeclaratorListNode    *list;
@@ -744,7 +744,7 @@ class InitDeclaratorNode: public Node
 public:
     InitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer):
             declarator(declarator), initializer(initializer) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     DeclaratorNode *declarator;
     InitializerNode *initializer;
@@ -753,7 +753,7 @@ private:
 class InitDeclaratorListNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(InitDeclaratorNode *initDeclarator);
     uint64_t Size();
 protected:
@@ -765,7 +765,7 @@ protected:
 class InitializerNode: public Node
 {
 public:
-void Print(std::ostream &os, int depth) override = 0;
+void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 //designator ::= [constant-expr] | . id
@@ -773,14 +773,14 @@ void Print(std::ostream &os, int depth) override = 0;
 class DesignatorNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 class ArrayDesignator: public DesignatorNode
 {
 public:
     explicit ArrayDesignator(ConstantExprNode *constantExpr): constantExpr(constantExpr) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     ConstantExprNode *constantExpr;
 };
@@ -789,7 +789,7 @@ class StructMemberDesignator: public DesignatorNode
 {
 public:
     explicit StructMemberDesignator(IdNode *id): id(id) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     IdNode *id;
 };
@@ -799,7 +799,7 @@ private:
 class DesignatorListNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(DesignatorNode *designator);
     uint64_t Size();
 protected:
@@ -812,7 +812,7 @@ class DesignationNode: public Node
 {
 public:
     DesignationNode(DesignatorListNode *designatorList): designatorList(designatorList) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     DesignatorListNode *designatorList;
 };
@@ -822,7 +822,7 @@ class DesignatedInitializerNode: public Node
 public:
     DesignatedInitializerNode(DesignationNode *designation, InitializerNode *initializer):
             designation(designation), initializer(initializer) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     DesignationNode *designation;
     InitializerNode *initializer;
@@ -833,7 +833,7 @@ private:
 class InitializerListNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(DesignatedInitializerNode *initializer);
     uint64_t Size();
 protected:
@@ -847,7 +847,7 @@ class EnumeratorNode: public Node
 public:
     EnumeratorNode(IdNode *enumerationConstant, ConstantExprNode *value):
             enumerationConstant(enumerationConstant), value(value) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     IdNode *enumerationConstant;
     ConstantExprNode *value;
@@ -859,7 +859,7 @@ private:
 class EnumeratorList: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(EnumeratorNode *initDeclarator);
     uint64_t Size();
 protected:
@@ -874,7 +874,7 @@ class EnumSpecifierNode: public Node
 {
 public:
     EnumSpecifierNode(IdNode *id, EnumeratorList *enumeratorList): id(id), enumeratorList(enumeratorList) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     IdNode *id;
     EnumeratorList *enumeratorList;
@@ -887,7 +887,7 @@ class StructDeclaratorNode: public Node
 public:
     StructDeclaratorNode(DeclaratorNode *declarator, ConstantExprNode *constantExpr):
             declarator(declarator), constantExpr(constantExpr) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     DeclaratorNode *declarator;
     ConstantExprNode *constantExpr;
@@ -898,7 +898,7 @@ private:
 class StructDeclaratorListNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(StructDeclaratorNode *initDeclarator);
     uint64_t Size();
 protected:
@@ -913,7 +913,7 @@ public:
     StructDeclarationNode(SpecifierQualifierListNode *specifierQualifierList,
                       StructDeclaratorListNode *structDeclaratorList):
             specifierQualifierList(specifierQualifierList), structDeclaratorList(structDeclaratorList){}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     SpecifierQualifierListNode *specifierQualifierList;
     StructDeclaratorListNode   *structDeclaratorList;
@@ -924,7 +924,7 @@ private:
 class StructDeclarationListNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(StructDeclarationNode *initDeclarator);
     uint64_t Size();
 protected:
@@ -939,7 +939,7 @@ class StructSpecifierNode: public DeclarationSpecifierNode
 public:
     StructSpecifierNode(IdNode *id, StructDeclarationListNode *structDeclaratorList):
             id(id), structDeclaratorList(structDeclaratorList) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     IdNode *id;
     StructDeclarationListNode *structDeclaratorList;
@@ -953,7 +953,7 @@ public:
     FunctionDefinitionNode(DeclarationSpecifiersNode *declarationSpecifiers,
                            DeclaratorNode *declarator, CompoundStatement *compoundStatement):
             declarationSpecifiers{declarationSpecifiers}, declarator(declarator), compoundStatement(compoundStatement) {}
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     DeclarationSpecifiersNode *declarationSpecifiers;
     DeclaratorNode *declarator;
@@ -965,7 +965,7 @@ private:
 class ExternalDeclarationNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 //translation-unit ::= external-declaration | translation-unit external-declaration
@@ -973,7 +973,7 @@ public:
 class TranslationUnitNode: public Node
 {
 public:
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(ExternalDeclarationNode *initDeclarator);
     uint64_t Size();
 protected:
@@ -985,14 +985,14 @@ protected:
 class PrimaryExprNode: public PostfixExprNode
 {
 public:
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 class IdNode: public PrimaryExprNode
 {
 public:
     explicit IdNode(Token *token);
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     Token *token;
 };
@@ -1001,7 +1001,7 @@ class ConstNode: public PrimaryExprNode
 {
 public:
     explicit ConstNode(Token *token): token(token) {}
-    void Print(std::ostream &os, int depth) override = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 protected:
     Token *token;
 };
@@ -1010,21 +1010,21 @@ class IntConstNode: public ConstNode
 {
 public:
     explicit IntConstNode(Token *token);
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class FloatConstNode: public ConstNode
 {
 public:
     explicit FloatConstNode(Token *token);
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class StringLiteralNode: public PrimaryExprNode
 {
 public:
     explicit StringLiteralNode(Token *token);
-    void Print(std::ostream &os, int depth) override;
+    void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     Token *token;
 };
