@@ -116,7 +116,7 @@ static std::unordered_map<int, TokenType> AcceptStates(
 {
         {1, TokenType::ID}, {4, TokenType::NUM_INT}, {6, TokenType::NUM_FLOAT}, {9, TokenType::NUM_FLOAT},
         {12, TokenType::LBRACKET}, {13, TokenType::RBRACKET}, {14, TokenType::LSQUARE_BRACKET},
-        {15, TokenType::RSQUARE_BRACKER}, {16, TokenType::LCURLY_BRACKET}, {17, TokenType::RCURLY_BRACKET},
+        {15, TokenType::RSQUARE_BRACKET}, {16, TokenType::LCURLY_BRACKET}, {17, TokenType::RCURLY_BRACKET},
         {18, TokenType::COLON}, {19, TokenType::SEMICOLON}, {20, TokenType::QUESTION_MARK}, {21, TokenType::COMMA},
         {22, TokenType::ASSIGNMENT}, {23, TokenType::RELOP_EQ}, {24, TokenType::RELOP_GT}, {25, TokenType::RELOP_GE},
         {26, TokenType::RELOP_LT}, {27, TokenType::RELOP_LE}, {28, TokenType::LOGIC_NO}, {29, TokenType::RELOP_NE},

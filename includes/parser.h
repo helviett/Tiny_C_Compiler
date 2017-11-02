@@ -129,6 +129,7 @@ private:
     bool isFunctionSpecifier(Token *token);
     bool isDeclarationSpecifier(Token *token);
     bool isSimpleSpecifier(Token *token);
+    void require(TokenType typeExpectation);
     Tokenizer *scanner;
     SyntaxTree tree;
 };

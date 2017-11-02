@@ -16,7 +16,7 @@ Position		Type			Value			Text
 (2, 20)			LOBIC_OR			||				  ||
 (2, 23)			LOGIC_NO			!				  !
 (2, 27)			LSQUARE_BRACKET			[				  [
-(2, 28)			RSQUARE_BRACKER			]				  ]
+(2, 28)			RSQUARE_BRACKET			]				  ]
 (2, 30)			LCURLY_BRACKET			{				  {
 (2, 32)			RCURLY_BRACKET			}				  }
 (2, 34)			LBRACKET			(				  (
