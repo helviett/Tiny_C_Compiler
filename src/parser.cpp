@@ -379,24 +379,24 @@ SelectionStatementNode *Parser::parseSelectionStatement()
 JumpStatementNode *Parser::parseJumpStatement()
 {
     JumpStatementNode *js = nullptr;
-    if (scanner->Current()->type == TokenType::KEYWORD)
-        switch (scanner->Current()->keyword)
+    Token *t = scanner->Current();
+    scanner->Next();
+    if (t->type == TokenType::KEYWORD)
+        switch (t->keyword)
         {
             case Keyword::GOTO:
-                if (scanner->Next()->type != TokenType::ID) throw "";
+                require(TokenType::ID);
                 js = new GotoStatementNode(new IdNode(scanner->Current()));
                 scanner->Next();
                 break;
             case Keyword::CONTINUE:
-                scanner->Next()->type;
                 js = new ContinueStatementNode();
                 break;
             case Keyword::BREAK:
-                scanner->Next()->type;
                 js = new BreakStatementNode();
                 break;
             case Keyword::RETURN:
-                js = scanner->Next()->type == TokenType::SEMICOLON ? new ReturnStatementNode(nullptr) :
+                js = scanner->Current()->type == TokenType::SEMICOLON ? new ReturnStatementNode(nullptr) :
                      new ReturnStatementNode(parseExpr());
                 break;
             default:
@@ -516,7 +516,7 @@ ArrayDeclaratorNode *Parser::parseArrayDeclarator(DirectDeclaratorNode *directDe
         return new ArrayDeclaratorNode(directDeclarator, nullptr);
     }
     auto ce = parseConstantExpr();
-    if (scanner->Current()->type != TokenType::RSQUARE_BRACKET) throw "";
+    require(TokenType::RSQUARE_BRACKET);
     scanner->Next();
     return new ArrayDeclaratorNode(directDeclarator, (ConditionalExprNode *)(ce));
 }
@@ -703,7 +703,7 @@ EnumSpecifierNode *Parser::parseEnumSpecifier()
         id = new IdNode(scanner->Current());
         scanner->Next();
     }
-    if (!id && scanner->Current()->type != TokenType::LCURLY_BRACKET) throw "";
+    if (!id) require(TokenType::LCURLY_BRACKET);
     if (scanner->Current()->type == TokenType::LCURLY_BRACKET && scanner->Next())
     {
         list = parseEnumeratorList();
@@ -727,7 +727,7 @@ EnumeratorList *Parser::parseEnumeratorList()
 
 EnumeratorNode *Parser::parseEnumerator()
 {
-    if (scanner->Current()->type != TokenType::ID) throw "";
+    require(TokenType::ID);
     auto id = new IdNode(scanner->Current());
     scanner->Next();
     if (scanner->Current()->type == TokenType::ASSIGNMENT && scanner->Next())
@@ -748,7 +748,7 @@ StructSpecifierNode *Parser::parseStructSpecifier()
     IdNode *id = scanner->Current()->type == TokenType::ID ? new IdNode(scanner->Current()) : nullptr;
     if (!id)
     {
-        if (scanner->Current()->type != TokenType::LCURLY_BRACKET) throw "";
+        require(TokenType::LCURLY_BRACKET);
         scanner->Next();
         return new StructSpecifierNode(id, parseStructDeclarationList());
     }
@@ -829,7 +829,7 @@ InitializerListNode *Parser::parseInitializerList()
 DesignationNode *Parser::parseDesignation()
 {
     auto designatorList = parseDesignatorList();
-    if (scanner->Current()->type != TokenType::ASSIGNMENT) throw "";
+    require(TokenType::ASSIGNMENT);
     scanner->Next();
     return new DesignationNode(designatorList);
 }
