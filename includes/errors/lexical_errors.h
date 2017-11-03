@@ -12,34 +12,33 @@ class LexicalError: public CompilationError
 public:
     LexicalError () = default;
 
-    LexicalError(int row, int col, std::string text): row(row), col(col), text(std::move(text)) {}
+    LexicalError(int row, int col, std::string text): row(row), col(col)
+    {
+        msg = "Lexical error has occured at (" + std::to_string(row) + ", " + std::to_string(col) +
+                        "). Text: " + text;
+    }
 
     const char * what() const throw() override
     {
-        std::string s = "Lexical error has occured at (" + std::to_string(row) + ", " + std::to_string(col) +
-                        "). Text: " + text;
-        char *res = new char[s.length() + 1];
-        std::strcpy(res, s.c_str());
-        return res;
+        return msg.c_str();
     }
 
 protected:
     int row, col;
-    std::string text;
 };
 
 class WrongStringLiteral: public LexicalError
 {
 public:
-    WrongStringLiteral(int row, int col, std::string text): LexicalError(row, col, std::move(text)) {}
+    WrongStringLiteral(int row, int col, std::string text): LexicalError(row, col, std::move(text))
+    {
+        msg = "WrongStringLiteral at (" + std::to_string(row) + ", " + std::to_string(col) +
+              "). Text:" + text;
+    }
 
     const char *what() const throw() override
     {
-        std::string s = "WrongStringLiteral at (" + std::to_string(row) + ", " + std::to_string(col) +
-                        "). Text:" + text;
-        char *res = new char[s.length() + 1];
-        std::strcpy(res, s.c_str());
-        return res;
+        return msg.c_str();
     }
 
 };
@@ -47,60 +46,60 @@ public:
 class WrongNumberLiteral: public LexicalError
 {
 public:
-    WrongNumberLiteral(int row, int col, std::string text): LexicalError(row, col, std::move(text)) {}
+    WrongNumberLiteral(int row, int col, std::string text): LexicalError(row, col, std::move(text))
+    {
+        msg = "WrongNumberLiteral at (" + std::to_string(row) + ", " + std::to_string(col) +
+                        "). Text:" + text;
+    }
 
     const char *what() const throw() override
     {
-        std::string s = "WrongNumberLiteral at (" + std::to_string(row) + ", " + std::to_string(col) +
-                        "). Text:" + text;
-        char *res = new char[s.length() + 1];
-        std::strcpy(res, s.c_str());
-        return res;
+        return msg.c_str();
     }
 };
 
 class WrongCharacterLiteral: public LexicalError
 {
 public:
-    WrongCharacterLiteral(int row, int col, std::string text): LexicalError(row, col, std::move(text)) {}
+    WrongCharacterLiteral(int row, int col, std::string text): LexicalError(row, col, std::move(text))
+    {
+        msg = "WrongCharacterLiteral at (" + std::to_string(row) + ", " + std::to_string(col) +
+        "). Text:" + text;
+    }
 
     const char *what() const throw() override
     {
-        std::string s = "WrongCharacterLiteral at (" + std::to_string(row) + ", " + std::to_string(col) +
-                        "). Text:" + text;
-        char *res = new char[s.length() + 1];
-        std::strcpy(res, s.c_str());
-        return res;
+        return msg.c_str();
     }
 };
 
 class UnknownSymbol: public LexicalError
 {
 public:
-    UnknownSymbol(int row, int col, std::string text): LexicalError(row, col, std::move(text)) {}
+    UnknownSymbol(int row, int col, std::string text): LexicalError(row, col, std::move(text))
+    {
+        msg = "UnknownSymbol at (" + std::to_string(row) + ", " + std::to_string(col) +
+        "). Text:" + text;
+    }
 
     const char *what() const throw() override
     {
-        std::string s = "UnknownSymbol at (" + std::to_string(row) + ", " + std::to_string(col) +
-                        "). Text:" + text;
-        char *res = new char[s.length() + 1];
-        std::strcpy(res, s.c_str());
-        return res;
+        return msg.c_str();
     }
 };
 
 class NumberOutOfRange: public LexicalError
 {
 public:
-    NumberOutOfRange(int row, int col, std::string text): LexicalError(row, col, std::move(text)) {}
+    NumberOutOfRange(int row, int col, std::string text): LexicalError(row, col, std::move(text))
+    {
+        msg = "NumberOutOfRange at (" + std::to_string(row) + ", " + std::to_string(col) +
+        "). Text:" + text;
+    }
 
     const char *what() const throw() override
     {
-        std::string s = "NumberOutOfRange at (" + std::to_string(row) + ", " + std::to_string(col) +
-                        "). Text:" + text;
-        char *res = new char[s.length() + 1];
-        std::strcpy(res, s.c_str());
-        return res;
+        return msg.c_str();
     }
 };
 

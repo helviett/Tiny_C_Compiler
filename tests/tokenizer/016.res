@@ -10,4 +10,7 @@ Position		Type			Value			Text
 (3, 51)			NUM_FLOAT			0.765935				  765.935E-3
 (3, 64)			NUM_FLOAT			123.000000				  0.0123e4
 (3, 75)			NUM_FLOAT			987.000000				  0.0987e+4
-WrongNumberLiteral at (3, 106). Text:.654e-
+(3, 87)			NUM_FLOAT			65428700000.000000				  654.287E+8
+(3, 100)			NUM_FLOAT			0.000654				  .654e-3
+(3, 110)			NUM_FLOAT			12300.000000				  .123e+5
+(3, 120)			NUM_FLOAT			980000.000000				  .098E7

@@ -12,6 +12,8 @@ class CompilationError: public std::exception
 {
 public:
     const char * what() const throw() override = 0;
+protected:
+    std::string msg;
 };
 
 #endif //TINY_C_COMPILER_COMPILATION_ERROR_H

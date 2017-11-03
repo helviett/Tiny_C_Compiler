@@ -5,6 +5,6 @@ int main(void)
     a + b & c;
     a + b * c & d;
     a ^ b == c & e;
-    f << 12 * 8 ^ & <= 3;
+    f << 12 * 8 ^ 13 & 12 <= 3;
     return 0;
 }

@@ -1,3 +1,3 @@
 Position		Type			Value			Text
 
-WrongNumberLiteral at (1, 5). Text:0m
+WrongNumberLiteral at (1, 5). Text:

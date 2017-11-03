@@ -11,21 +11,26 @@ class SyntaxError: public CompilationError
 {
 public:
     SyntaxError(Token *token): token(token) {}
+    const char * what() const throw() override = 0;
+protected:
+    Token *token;
+};
 
-    SyntaxError(Token *token, std::string msg): token(token), msg(std::move(msg)) {}
+class UnexpectedTokenError: public SyntaxError
+{
+public:
+    UnexpectedTokenError(Token *token, TokenType expectation): SyntaxError(token), expectation(expectation)
+    {
+        msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
+                ") SyntaxError: expected " + TokenTypeToString[expectation] + ", got " + token->text + ".";
+    }
 
     const char * what() const throw() override
     {
-        std::string s = "Syntax error has occured at (" + std::to_string(token->row) + ", " + std::to_string(token->col)
-                        + "). "  + msg + " Text: " + token->text;
-        char *res = new char[s.length() + 1];
-        std::strcpy(res, s.c_str());
-        return res;
+        return msg.c_str();
     }
-
 private:
-    Token *token;
-    std::string msg;
+    TokenType expectation;
 };
 
 #endif //TINY_C_COMPILER_SYNTAX_ERRORS_H

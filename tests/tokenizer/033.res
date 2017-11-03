@@ -7,4 +7,4 @@ Position		Type			Value			Text
 (1, 13)			SEMICOLON			;				  ;
 (2, 1)			KEYWORD			7				  double
 (2, 8)			ID			pi				  pi
-WrongNumberLiteral at (2, 19). Text:3.14_f
+WrongNumberLiteral at (2, 19). Text:

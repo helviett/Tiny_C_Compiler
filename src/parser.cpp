@@ -43,7 +43,7 @@ PostfixExprNode *Parser::parsePrimaryExpr()
             scanner->Next();
             return e;
     }
-    throw SyntaxError(t, "Missing operand. ");
+    throw "";//SyntaxError(t, "Missing operand. ");
 }
 
 
@@ -888,5 +888,5 @@ ExternalDeclarationNode *Parser::parseExternalDeclaration()
 
 void Parser::require(TokenType typeExpectation)
 {
-    if (scanner->Current()->type != typeExpectation) throw "";
+    if (scanner->Current()->type != typeExpectation) throw UnexpectedTokenError(scanner->Current(), typeExpectation);
 }
