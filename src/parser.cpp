@@ -42,7 +42,7 @@ PostfixExprNode *Parser::parsePrimaryExpr()
             scanner->Next();
             return e;
     }
-    throw "";//SyntaxError(t, "Missing operand. ");
+    throw InvalidExpression(scanner->Current());
 }
 
 
@@ -127,7 +127,6 @@ PostfixExprNode *Parser::parseUnaryExpr()
                 else
                     ue = new SizeofExprNode(parseUnaryExpr());
             }
-            else throw "";
             break;
         default:
             if (isUnaryOp(t))
@@ -275,8 +274,8 @@ PostfixExprNode *Parser::parseExpr()
 TypeNameNode *Parser::parseTypeName()
 {
     auto tnn = parseSpecifierQualifierList();
+    if (tnn->Size() == 0) throw NoDeclarationSpecifiers(scanner->Current());
     auto abstractDeclarator = parseDeclarator(DeclaratorType::ABSTRACT);
-    if (tnn->Size() == 0) throw "";
     return new TypeNameNode(tnn, abstractDeclarator);
 }
 
@@ -360,7 +359,7 @@ ExprStatmentNode *Parser::parseExprStatement()
 
 SelectionStatementNode *Parser::parseSelectionStatement()
 {
-    if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::IF) throw "";
+    requierKeyword(Keyword::IF);
     scanner->Next();
     require(TokenType::LBRACKET);
     scanner->Next();
@@ -399,8 +398,6 @@ JumpStatementNode *Parser::parseJumpStatement()
                 js = scanner->Current()->type == TokenType::SEMICOLON ? new ReturnStatementNode(nullptr) :
                      new ReturnStatementNode(parseExpr());
                 break;
-            default:
-                throw "";
         }
     require(TokenType::SEMICOLON);
     scanner->Next();
@@ -424,7 +421,7 @@ IterationStatementNode *Parser::parseIterationStatement()
 
 ForStatementNode *Parser::parseForStatement()
 {
-    if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::FOR) throw "";
+    requierKeyword(Keyword::FOR);
     scanner->Next();
     require(TokenType::LBRACKET);
     scanner->Next();
@@ -442,7 +439,7 @@ ForStatementNode *Parser::parseForStatement()
 
 WhileStatementNode *Parser::parseWhileStatement()
 {
-    if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::WHILE) throw "";
+    requierKeyword(Keyword::WHILE);
     scanner->Next();
     require(TokenType::LBRACKET);
     scanner->Next();
@@ -454,10 +451,10 @@ WhileStatementNode *Parser::parseWhileStatement()
 
 DoWhileStatementNode *Parser::parseDoWhileStatement()
 {
-    if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::DO) throw "";
+    requierKeyword(Keyword::DO);
     scanner->Next();
     auto body = parseStatement();
-    if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::WHILE) throw "";
+    requierKeyword(Keyword::WHILE);
     scanner->Next();
     require(TokenType::LBRACKET);
     scanner->Next();
@@ -492,7 +489,6 @@ DirectDeclaratorNode *Parser::parseDirectDeclarator(DeclaratorType type)
     if (type == DeclaratorType::NORMAL && !gotId) require(TokenType::ID);
     if (type != DeclaratorType::ABSTRACT && scanner->Current()->type == TokenType::ID)
     {
-        if (gotId) throw "";
         directDeclarator = (DirectDeclaratorNode *)new IdNode(scanner->Current());
         scanner->Next();
     }
@@ -567,18 +563,22 @@ DeclarationSpecifiersNode *Parser::parseDeclarationSpecifiers()
             scanner->Next();
         }
     }
-    if (!ds->Size()) throw "";
+    if (!ds->Size()) throw NoDeclarationSpecifiers(scanner->Current());
     return ds;
 }
 
 ParameterList *Parser::parseParameterList()
 {
     auto pl = new ParameterList();
-    do
+    while (scanner->Current()->type != TokenType::RBRACKET)
     {
         pl->Add(parseParameterDeclaration());
-    } while(scanner->Current()->type == TokenType::COMMA && scanner->Next());
-    if (!pl->Size()) throw "";
+        if (scanner->Current()->type != TokenType::RBRACKET)
+        {
+            require(TokenType::COMMA);
+            scanner->Next();
+        }
+    }
     return pl;
 }
 
@@ -697,7 +697,7 @@ EnumSpecifierNode *Parser::parseEnumSpecifier()
 {
     IdNode *id = nullptr;
     EnumeratorList *list = nullptr;
-    if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::ENUM) throw "";
+    requierKeyword(Keyword::ENUM);
     if (scanner->Next()->type == TokenType::ID)
     {
         id = new IdNode(scanner->Current());
@@ -707,7 +707,7 @@ EnumSpecifierNode *Parser::parseEnumSpecifier()
     if (scanner->Current()->type == TokenType::LCURLY_BRACKET && scanner->Next())
     {
         list = parseEnumeratorList();
-        if (!list->Size()) throw "";
+        if (!list->Size()) EmptyEnumeratorListError(scanner->Current());
         require(TokenType::RCURLY_BRACKET);
         scanner->Next();
     }
@@ -743,7 +743,7 @@ bool Parser::isSimpleSpecifier(Token *token)
 
 StructSpecifierNode *Parser::parseStructSpecifier()
 {
-    if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::STRUCT) throw "";
+    requierKeyword(Keyword::STRUCT);
     scanner->Next();
     IdNode *id = scanner->Current()->type == TokenType::ID ? new IdNode(scanner->Current()) : nullptr;
     if (!id)
@@ -899,4 +899,10 @@ ExternalDeclarationNode *Parser::parseExternalDeclaration()
 void Parser::require(TokenType typeExpectation)
 {
     if (scanner->Current()->type != typeExpectation) throw UnexpectedTokenError(scanner->Current(), typeExpectation);
+}
+
+void Parser::requierKeyword(Keyword expectedKeyword)
+{
+    if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != expectedKeyword)
+        throw UnexpectedKeywordError(scanner->Current(), expectedKeyword);
 }

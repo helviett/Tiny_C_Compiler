@@ -458,7 +458,6 @@ uint64_t DeclarationSpecifiersNode::Size()
 
 void ParameterList::Print(std::ostream &os, std::string indent, bool isTail)
 {
-    if (list.empty()) return;
     os << indent << (isTail ? "└── " : "├── ");
     os << "ParameterList" << std::endl;
     indent.append(isTail ? "    " : "│   ");
