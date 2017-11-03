@@ -318,8 +318,13 @@ void ForStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
     indent.append(isTail ? "    " : "│   ");
     init->Print(os, indent, false);
     condition->Print(os, indent, false);
-    iteration->Print(os, indent, false);
+
+    if (iteration)
+        iteration->Print(os, indent, false);
+    else
+        os << indent << "├── " << std::endl;
     body->Print(os, indent, true);
+
 }
 
 void LabelStatementNode::Print(std::ostream &os, std::string indent, bool isTail)

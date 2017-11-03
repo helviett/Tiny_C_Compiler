@@ -17,7 +17,6 @@ void Parser::Parse()
     tree.root = parseTranslationUnit();
 }
 
-// primary-expr ::= id | constant | string-literal | (expr)
 
 PostfixExprNode *Parser::parsePrimaryExpr()
 {
@@ -426,6 +425,7 @@ IterationStatementNode *Parser::parseIterationStatement()
 ForStatementNode *Parser::parseForStatement()
 {
     if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::FOR) throw "";
+    scanner->Next();
     require(TokenType::LBRACKET);
     scanner->Next();
     auto init = parseExprStatement(), condition = parseExprStatement();
@@ -443,6 +443,7 @@ ForStatementNode *Parser::parseForStatement()
 WhileStatementNode *Parser::parseWhileStatement()
 {
     if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != Keyword::WHILE) throw "";
+    scanner->Next();
     require(TokenType::LBRACKET);
     scanner->Next();
     auto condition = parseExpr();
@@ -462,7 +463,8 @@ DoWhileStatementNode *Parser::parseDoWhileStatement()
     scanner->Next();
     auto condition = parseExpr();
     require(TokenType::RBRACKET);
-    if (scanner->Next()->type != TokenType::SEMICOLON) throw "";
+    scanner->Next();
+    require(TokenType::SEMICOLON);
     scanner->Next();
     return new DoWhileStatementNode(condition, body);
 }
@@ -476,17 +478,21 @@ DeclaratorNode *Parser::parseDeclarator(DeclaratorType type)
 
 DirectDeclaratorNode *Parser::parseDirectDeclarator(DeclaratorType type)
 {
+    bool gotId = false;
+    DirectDeclaratorNode *directDeclarator = nullptr;
     if (scanner->Current()->type == TokenType::LBRACKET)
     {
         scanner->Next();
-        auto declarator = parseDeclarator(type);
+        directDeclarator =(DirectDeclaratorNode *)(parseDeclarator(type));
+        gotId = true;
         require(TokenType::RBRACKET);
         scanner->Next();
     }
-    DirectDeclaratorNode *directDeclarator = nullptr;
-    if (type == DeclaratorType::NORMAL && scanner->Current()->type != TokenType::ID) throw "";
+
+    if (type == DeclaratorType::NORMAL && !gotId) require(TokenType::ID);
     if (type != DeclaratorType::ABSTRACT && scanner->Current()->type == TokenType::ID)
     {
+        if (gotId) throw "";
         directDeclarator = (DirectDeclaratorNode *)new IdNode(scanner->Current());
         scanner->Next();
     }
@@ -502,9 +508,13 @@ DirectDeclaratorNode *Parser::parseDirectDeclarator(DeclaratorType type)
 
 ArrayDeclaratorNode *Parser::parseArrayDeclarator(DirectDeclaratorNode *directDeclarator)
 {
-    if (scanner->Current()->type == TokenType::RSQUARE_BRACKET)
-        return new ArrayDeclaratorNode(directDeclarator, nullptr);
+    require(TokenType::LSQUARE_BRACKET);
     scanner->Next();
+    if (scanner->Current()->type == TokenType::RSQUARE_BRACKET)
+    {
+        scanner->Next();
+        return new ArrayDeclaratorNode(directDeclarator, nullptr);
+    }
     auto ce = parseConstantExpr();
     if (scanner->Current()->type != TokenType::RSQUARE_BRACKET) throw "";
     scanner->Next();
@@ -845,7 +855,7 @@ DesignatorNode *Parser::parseDesignator()
         return new ArrayDesignator((ConstantExprNode *)constExpr);
     }
     require(TokenType::DOT);
-scanner->Next();
+    scanner->Next();
     require(TokenType::ID);
     auto smd = new StructMemberDesignator(new IdNode(scanner->Current()));
     scanner->Next();

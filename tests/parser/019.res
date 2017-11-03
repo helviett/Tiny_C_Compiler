@@ -53,6 +53,8 @@
                 │       │   │   └── int
                 │       │   └── Declarator
                 │       │       └── Func Decl
+                │       │           ├── Declarator
+                │       │           │   └── *
                 │       │           └── ParameterList
                 │       │               └── param
                 │       │                   ├── DeclarationSpecifiers

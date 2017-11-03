@@ -1,0 +1,5 @@
+void eternalforloop (void)
+{
+    for (;;)
+        ;
+}
