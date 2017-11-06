@@ -1,0 +1,162 @@
+primary-expr ::= id | constant | string-literal | (expr)  
+
+postfix-expr ::= primary-expr | postifx-expr [expr] | postfix-expr (`argument-expr-list)
+				| postfix-expr . id | postfix-expr -> id | postfix-expr ++ | postfix-expr -- 
+				| (type-name) {initializer-list} | (type-name) {initializer-list, } 
+
+argument-expr-list ::= argument-expr | argument-expr-list, argument-expr
+
+unary-expr ::= postfix-expr | ++ unary-expr | -- unary-expr | unary-op cast-expr 
+			  | sizeof unary-expr | sizeof (type-name)  
+
+unary-op  ::= & | * | + | - | ~ | !  
+
+cast-expr ::= unary-expr | (type-name) cast-expr  
+
+multiplicative-expr ::= cast-expr | multiplicative-expr * cast-expr
+					   | multiplicative-expr / cast-expr 
+					   | multiplicative-expr % cast-expr
+
+addictive-expr ::= multiplicative-expr
+				  | addictive-expr + multiplicative-expr  
+				  | addictive-expr - multiplicative-expr
+
+shift-expr ::= addictive-expr
+			  | shift-expr << addictive-expr  
+			  | shift-expr >> addictive-expr
+
+rel-expr ::= shift-expr | rel-expr < shift-expr | rel-expr > shift-expr  
+			| rel-expr <= shift expr | rel-expr >= shift-expr
+
+eq-expr ::= rel-expr | eq-expr == rel-expr | eq-expr != rel-expr  
+
+AND-expr ::= eq-expr | AND-expr & eq-expr  
+
+exclusive-OR-expr ::= AND-expr | exclusive-OR-expr ^ AND-expr  
+
+inclusive-OR-expr ::= exclusive-OR-expr | inclusive-OR-expr '|' exclusive-OR-expr  
+
+logical-AND-expr ::= inclusive-OR-expr | logical-AND-expr && inclusive-OR-expr  
+
+logical-OR-expr ::= logical-AND-expr | logical-OR-expr || logical-AND-expr  
+
+conditional-expr ::= logical-OR-expr | logical-OR-expr ? expr : conditional-expr  
+
+assignment-expr ::= conditional-expr | unary-expr assignment-op assignment-expr  
+
+assignment-op ::= = | *= | /= | %= | += | -= | <<= | >>= | &= | ^= | |=  
+
+expr ::= assignment-expr | expr , assignment-expr  
+
+constant-expr ::= conditional-expr   
+
+declaration ::= declaration-specifiers `init-declarator-list ;
+
+declaration-specifiers ::= storage-class-specifier `declaration-specifier |
+						  | type-specifier `declaration-specifier
+						  | type-qualifier `declaration-specifier
+						  | function-specifier declaration-specifier
+
+init-declarator-list ::= init-declarator | init-declarator-list , init-declarator
+
+init-declarator ::= declarator | declaratxor = initializer
+
+storage-class-specifier ::= typedef | extern | static | auto | register
+
+type-specifier ::= void | char | short | int | long | float | double | singed
+					 | unsigned | struct-specifier | enum-specifier |
+					 | typedef-name
+
+struct-specifier ::= struct `id {struct-declaration-list}
+							 | struct id
+
+struct-declaration-list ::= struct-declaration | struct-declaration-list struct-declaration
+
+struct-declaration ::= specifier-qualifier-list struct-declarator-list ;
+
+specifier-qualifier-list ::= type-specifier `specifier-qualifier-list
+							| type-qualifier `specifier-qualifier-list
+
+struct-declarator-list ::= struct-declarator | struct-declarator-list , struct-declarator
+
+struct-declarator ::= declarator | `declarator : constant-expr
+
+enum-specifier ::= enum `id {enumerator-list}
+				  | enum `id {enumerator-list , }
+				  | enum id
+
+enumerator-list ::= enumerator | enumerator-list , enumerator
+
+enumerator ::= enumeration-constant, enumeration-constant = constant-expr
+
+type-qualifier ::= const
+
+function-specifier ::= inline
+
+declarator ::= `pointer direct-declarator
+
+direct-declarator ::= id | (declarator) 
+					 | direct-declarator [constant-expr]
+					 | direct-declarator (`parameter-type-list)
+
+pointer ::= * `type-qualifier-list | * `type-qualifier-list pointer
+
+type-qualifier-list ::= type-qualifier | type-qualifier-list type-qualifier
+
+parameter-type-list ::= parameter-list
+
+parameter-list ::= parameter-declaration | parameter-list , parameter-declaration
+
+parameter-declaration ::= declaration-specifiers declarator | declaration-specifiers `abstract-declarator
+
+type-name ::= specifier-qualifier-list `abstract-declarator
+
+abstract-declarator ::= pointer | `pointer direct-abstract-declarator
+
+direct-abstract-declarator ::= (abstract-declarator) | `direct-abstract-declarator [constant-expr]
+							  | `direct-abstract-declarator (`parameter-type-list)
+
+initializer ::= assignment-expr | {initializer-list} | {initializer-list , }
+
+initializer-list ::= `designation initializer | initializer-list , `designation initializer
+
+designation ::= designator-list = 
+
+designator-list ::= designator | designator-list designator
+
+designator ::= [constant-expr] | . id
+
+statement ::= labeled-statement | compound-statement
+			 | expression-statement | selection-statement
+			 | iteration-statement | jump-statement
+
+labeled-statement ::= id : statement
+
+compound-statement ::= {`block-item-list}
+
+block-item-list ::= block-item | block-item-list block-item
+
+block-item ::= declaration | statement
+
+expression-statement ::= `expr ;
+
+selection-statement ::= if (expr) statement  
+					   | if (expr) statement else statement
+
+iteration-statement ::= while (expr) statement  
+					   | do statement while (expr) ;
+					   | for (`expr ; `expr ; `expr) statement
+					   | for (declaration `expr; `expr) statement
+
+jump-statement ::= goto id ;  
+				  | continue ;
+				  | break ;
+				  | return `expr ;
+
+translation-unit ::= external-declaration | translation-unit external-declaration
+
+external-declaration ::= function-definition | declaration
+
+function-definition ::= declaration-specifier declarator compound-statement
+
+declaration-list ::= declaration | declaration-list declaration
