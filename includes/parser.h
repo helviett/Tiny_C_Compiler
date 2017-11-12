@@ -7,7 +7,10 @@
 
 #include "tokenizer.h"
 #include "syntax_tree.h"
+#include "symbols.h"
 #include <functional>
+#include <stack>
+#include <map>
 
 static std::unordered_set<Keyword> TypeSpecifiers =
 {
@@ -131,6 +134,8 @@ private:
     bool isSimpleSpecifier(Token *token);
     void require(TokenType typeExpectation);
     void requierKeyword(Keyword expectedKeyword);
+
+    std::vector<std::map<std::string, Symbol *>> tablesOfSymbols;
     Tokenizer *scanner;
     SyntaxTree tree;
 };

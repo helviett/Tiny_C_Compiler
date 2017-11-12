@@ -184,17 +184,17 @@ public:
 //                   | addictive-expr + multiplicative-expr
 //                   | addictive-expr - multiplicative-expr
 
-class AddictiveExprNode: public CastExprNode
+class AdditiveExprNode: public CastExprNode
 {
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
-//shift-expr ::= addictive-expr
-//               | shift-expr << addictive-expr
-//               | shift-expr >> addictive-expr
+//shift-expr ::= additive-expr
+//               | shift-expr << additive-expr
+//               | shift-expr >> additive-expr
 
-class ShiftExprNode: public AddictiveExprNode
+class ShiftExprNode: public AdditiveExprNode
 {
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;

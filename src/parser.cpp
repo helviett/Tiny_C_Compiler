@@ -480,7 +480,7 @@ DirectDeclaratorNode *Parser::parseDirectDeclarator(DeclaratorType type)
     if (scanner->Current()->type == TokenType::LBRACKET)
     {
         scanner->Next();
-        directDeclarator =(DirectDeclaratorNode *)(parseDeclarator(type));
+        directDeclarator = (DirectDeclaratorNode *)(parseDeclarator(type));
         gotId = true;
         require(TokenType::RBRACKET);
         scanner->Next();
