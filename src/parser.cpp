@@ -20,7 +20,7 @@ void Parser::Parse()
 
 PostfixExprNode *Parser::parsePrimaryExpr()
 {
-    Token *t = scanner->Current();
+    auto t = scanner->Current();
     switch (t->type)
     {
         case TokenType::NUM_INT:
@@ -54,7 +54,7 @@ std::ostream &operator<<(std::ostream &os, Parser &parser)
 
 PostfixExprNode *Parser::parsePostfixExpr()
 {
-    Token *t = scanner->Current();
+    auto t = scanner->Current();
     PostfixExprNode *pe = parsePrimaryExpr();
     t = scanner->Current();
     bool stillPostfixOperator = true;
@@ -102,7 +102,7 @@ PostfixExprNode *Parser::parsePostfixExpr()
 PostfixExprNode *Parser::parseUnaryExpr()
 {
     PostfixExprNode *ue;
-    Token *t = scanner->Current();
+    auto t = scanner->Current();
     switch (t->type)
     {
         case TokenType::DOUBLE_PLUS:
@@ -219,7 +219,7 @@ PostfixExprNode *Parser::parseGeneral(Parser *self, PostfixExprNode *(Parser::*f
                                       std::unordered_set<TokenType> types)
 {
     auto *e = (PostfixExprNode *)(self->*f)();
-    Token *t = self->scanner->Current();
+    auto t = self->scanner->Current();
     while (types.find(t->type) != types.end())
     {
         self->scanner->Next();
@@ -233,7 +233,7 @@ PostfixExprNode *Parser::parseGeneral(Parser *self, PostfixExprNode *(Parser::*f
 PostfixExprNode *Parser::parseConditionalExpr()
 {
     PostfixExprNode *loe =  parseLogicalOrExpr();
-    Token *t = scanner->Current();
+    auto t = scanner->Current();
     if (t->type == TokenType::QUESTION_MARK)
     {
         t = scanner->Next();
@@ -250,7 +250,7 @@ PostfixExprNode *Parser::parseConditionalExpr()
 PostfixExprNode *Parser::parseAssignmentExpr()
 {
     PostfixExprNode *ce = parseConditionalExpr();
-    Token *t = scanner->Current();
+    auto t = scanner->Current();
     if (isAssignmentOp(t))
     {
         scanner->Next();
@@ -279,22 +279,22 @@ TypeNameNode *Parser::parseTypeName()
     return new TypeNameNode(tnn, abstractDeclarator);
 }
 
-bool Parser::isTypeSpecifier(Token *token)
+bool Parser::isTypeSpecifier(std::shared_ptr<Token> token)
 {
     return token->type == TokenType::KEYWORD ? TypeSpecifiers.find(token->keyword) != TypeSpecifiers.end() : false;
 }
 
-bool Parser::isUnaryOp(Token *token)
+bool Parser::isUnaryOp(std::shared_ptr<Token> token)
 {
     return UnaryOps.find(token->type) != UnaryOps.end();
 }
 
-bool Parser::isAssignmentOp(Token *token)
+bool Parser::isAssignmentOp(std::shared_ptr<Token> token)
 {
     return  AssignmentOps.find(token->type) != AssignmentOps.end();
 }
 
-bool Parser::isTypeQualifier(Token *token)
+bool Parser::isTypeQualifier(std::shared_ptr<Token> token)
 {
     return token->type == TokenType::KEYWORD ? TypeQualifiers.find(token->keyword) != TypeQualifiers.end() : false;
 }
@@ -307,7 +307,7 @@ PostfixExprNode *Parser::parseConstantExpr()
 TypeQualifierListNode *Parser::parseTypeQualifierList()
 {
     auto tql = new TypeQualifierListNode();
-    Token *t = scanner->Current();
+    auto t = scanner->Current();
     while (isTypeQualifier(t))
     {
 
@@ -378,7 +378,7 @@ SelectionStatementNode *Parser::parseSelectionStatement()
 JumpStatementNode *Parser::parseJumpStatement()
 {
     JumpStatementNode *js = nullptr;
-    Token *t = scanner->Current();
+    auto t = scanner->Current();
     scanner->Next();
     if (t->type == TokenType::KEYWORD)
         switch (t->keyword)
@@ -532,13 +532,13 @@ ArgumentExprListNode *Parser::parseArgumentExprList()
     return ael;
 }
 
-bool Parser::isStorageClassSpecifier(Token *token)
+bool Parser::isStorageClassSpecifier(std::shared_ptr<Token> token)
 {
     return token->type == TokenType::KEYWORD ?
            StorageClassSpecifiers.find(token->keyword) != StorageClassSpecifiers.end() : false;
 }
 
-bool Parser::isFunctionSpecifier(Token *token)
+bool Parser::isFunctionSpecifier(std::shared_ptr<Token> token)
 {
     return token->type == TokenType::KEYWORD && token->keyword == Keyword::INLINE;
 }
@@ -587,7 +587,7 @@ ParameterTypeList *Parser::parseParameterTypeList()
     return parseParameterList();
 }
 
-bool Parser::isDeclarationSpecifier(Token *token)
+bool Parser::isDeclarationSpecifier(std::shared_ptr<Token> token)
 {
     return isTypeSpecifier(token) || isStorageClassSpecifier(token) || isTypeQualifier(token)
            || isFunctionSpecifier(token);
@@ -735,7 +735,7 @@ EnumeratorNode *Parser::parseEnumerator()
     return new EnumeratorNode(id, nullptr);
 }
 
-bool Parser::isSimpleSpecifier(Token *token)
+bool Parser::isSimpleSpecifier(std::shared_ptr<Token> token)
 {
     return isTypeQualifier(token) || isTypeSpecifier(token) ||
             isStorageClassSpecifier(token) || isFunctionSpecifier(token);
@@ -801,7 +801,7 @@ StructDeclaratorListNode *Parser::parseStructDeclaratorList()
 SpecifierQualifierListNode *Parser::parseSpecifierQualifierList()
 {
     auto tnn = new SpecifierQualifierListNode();
-    Token *t = scanner->Current();
+    auto t = scanner->Current();
     bool spec;
     while ((spec = isTypeSpecifier(t)) || isTypeQualifier(t))
     {

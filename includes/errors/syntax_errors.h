@@ -10,16 +10,16 @@
 class SyntaxError: public CompilationError
 {
 public:
-    SyntaxError(Token *token): token(token) {}
+    SyntaxError(std::shared_ptr<Token> token): token(token) {}
     const char * what() const throw() override = 0;
 protected:
-    Token *token;
+    std::shared_ptr<Token> token;
 };
 
 class UnexpectedTokenError: public SyntaxError
 {
 public:
-    UnexpectedTokenError(Token *token, TokenType expectation): SyntaxError(token), expectation(expectation)
+    UnexpectedTokenError(std::shared_ptr<Token> token, TokenType expectation): SyntaxError(token), expectation(expectation)
     {
         msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
               ") SyntaxError: expected " + TokenTypeToString[expectation] + ", got " + token->text + ".";
@@ -36,7 +36,7 @@ private:
 class UnexpectedKeywordError: public SyntaxError
 {
 public:
-    UnexpectedKeywordError(Token *token, Keyword expectation): SyntaxError(token)
+    UnexpectedKeywordError(std::shared_ptr<Token> token, Keyword expectation): SyntaxError(token)
     {
         msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
               ") SyntaxError: expected " + std::to_string((int)expectation) + ", got " + token->text + ".";
@@ -51,7 +51,7 @@ public:
 class NoDeclarationSpecifiers: public SyntaxError
 {
 public:
-    NoDeclarationSpecifiers(Token *token): SyntaxError(token)
+    NoDeclarationSpecifiers(std::shared_ptr<Token> token): SyntaxError(token)
     {
         msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
               ") SyntaxError: missing declaration specifiers";
@@ -66,7 +66,7 @@ public:
 class EmptyEnumeratorListError: public SyntaxError
 {
 public:
-    EmptyEnumeratorListError(Token *token): SyntaxError(token)
+    EmptyEnumeratorListError(std::shared_ptr<Token> token): SyntaxError(token)
             {
                     msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
                           ") SyntaxError: empty enumerator list";
@@ -81,7 +81,7 @@ public:
 class InvalidExpression: public SyntaxError
 {
 public:
-    InvalidExpression(Token *token): SyntaxError(token)
+    InvalidExpression(std::shared_ptr<Token> token): SyntaxError(token)
             {
                     msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
                           ") SyntaxError: invalid expression";

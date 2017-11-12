@@ -6,6 +6,7 @@
 #define TINY_C_COMPILER_NODE_H
 
 #include <ostream>
+#include <memory>
 
 // Abstract Class
 class Node

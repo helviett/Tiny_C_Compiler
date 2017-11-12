@@ -54,7 +54,7 @@ class SymPointer: SymType
 class SymArray: SymType
 {
 private:
-    ConstantExprNode *size;
+//    ConstantExprNode *size;
 };
 
 class SymAlias: SymType

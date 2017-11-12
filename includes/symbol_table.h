@@ -12,7 +12,7 @@
 class SymbolTabel
 {
 private:
-    std::vector<std::set<Symbol *>> table;
+//    std::vector<std::set<Symbol *>> table;
 };
 
 #endif //TINY_C_COMPILER_SYMBOL_TABLE_H

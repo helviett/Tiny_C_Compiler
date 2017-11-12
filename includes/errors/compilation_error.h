@@ -7,6 +7,7 @@
 
 #include "token.h"
 #include <cstring>
+#include <memory>
 
 class CompilationError: public std::exception
 {

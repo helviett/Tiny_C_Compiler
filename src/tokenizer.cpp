@@ -2,7 +2,7 @@
 // Created by keltar on 10/8/17.
 //
 
-#include <tokenizer.h>
+    #include <tokenizer.h>
 
 Tokenizer::Tokenizer(std::string fileName)
 {
@@ -22,14 +22,14 @@ std::vector<Token *> Tokenizer::Tokenize(std::string fileName)
     buffer.reserve(256);
     currentState = 0;
     std::vector<Token *> result;
-    OpenFile(std::move(fileName));
-    while(Next()->type != TokenType::END_OF_FILE)
-        result.push_back(currentToken);
+//    OpenFile(std::move(fileName));
+//    while(Next()->type != TokenType::END_OF_FILE)
+//        result.push_back(currentToken);
     return result;
 
 }
 
-Token *Tokenizer::Next()
+std::shared_ptr<Token> Tokenizer::Next()
 {
     currentlyProcessingTokenPos = currentPos;
     currentToken = nextToken;
@@ -55,16 +55,16 @@ Token *Tokenizer::Next()
         nextToken = getToken();
         return currentToken;
     }
-    (nextToken = new Token(TokenType::END_OF_FILE, currentPos.row, currentPos.col, ""));
+    nextToken = std::make_shared<Token>(TokenType::END_OF_FILE, currentPos.row, currentPos.col, "");
     return currentToken;
 }
 
-Token *Tokenizer::Current()
+std::shared_ptr<Token> Tokenizer::Current()
 {
     return currentToken;
 }
 
-Token *Tokenizer::getToken()
+std::shared_ptr<Token> Tokenizer::getToken()
 {
 
     auto res = AcceptStates.find(currentState);
@@ -80,9 +80,10 @@ Token *Tokenizer::getToken()
             currentPos.row--;
         }
         currentState = 0;
-        Token *t = new Token(res->second, currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
+        auto t = std::make_shared<Token>(res->second, currentlyProcessingTokenPos.row, currentlyProcessingTokenPos.col, buffer);
         try
         {
+
             if (t->type == TokenType::ID && Keywords.find(t->text) != Keywords.end())
             {
                 t->type = TokenType::KEYWORD;
@@ -244,7 +245,7 @@ char Tokenizer::toEscape(char c)
     }
 }
 
-Token *Tokenizer::Peek()
+std::shared_ptr<Token> Tokenizer::Peek()
 {
     return nextToken;
 }

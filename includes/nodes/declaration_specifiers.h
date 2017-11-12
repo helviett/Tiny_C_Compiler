@@ -21,45 +21,45 @@ public:
 class SimpleSpecifier: public DeclarationSpecifierNode
 {
 public:
-    explicit SimpleSpecifier(Token *specifier): value(specifier) {}
+    explicit SimpleSpecifier(std::shared_ptr<Token> specifier): value(specifier) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 protected:
-    Token *value;
+    std::shared_ptr<Token> value;
 };
 
 class TypeSpecifierQualifierNode: public SimpleSpecifier
 {
 public:
     TypeSpecifierQualifierNode() = default;
-    explicit TypeSpecifierQualifierNode(Token *value): SimpleSpecifier(value) {}
+    explicit TypeSpecifierQualifierNode(std::shared_ptr<Token> value): SimpleSpecifier(value) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class TypeSpecifierNode: public TypeSpecifierQualifierNode
 {
 public:
-    explicit TypeSpecifierNode(Token *specifier): TypeSpecifierQualifierNode(specifier) {}
+    explicit TypeSpecifierNode(std::shared_ptr<Token> specifier): TypeSpecifierQualifierNode(specifier) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class TypeQualifierNode: public TypeSpecifierQualifierNode
 {
 public:
-    explicit TypeQualifierNode(Token *qualifier): TypeSpecifierQualifierNode(qualifier) {}
+    explicit TypeQualifierNode(std::shared_ptr<Token> qualifier): TypeSpecifierQualifierNode(qualifier) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class StorageClassSpecifierNode: public SimpleSpecifier
 {
 public:
-    explicit StorageClassSpecifierNode(Token *specifier): SimpleSpecifier(specifier) {}
+    explicit StorageClassSpecifierNode(std::shared_ptr<Token> specifier): SimpleSpecifier(specifier) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class FunctionSpecifierNode: public SimpleSpecifier
 {
 public:
-    explicit FunctionSpecifierNode(Token *specifier): SimpleSpecifier(specifier) {}
+    explicit FunctionSpecifierNode(std::shared_ptr<Token> specifier): SimpleSpecifier(specifier) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 

@@ -14,7 +14,7 @@ void TokenizeOnly()
     Tokenizer tok;
     printf("Position\t\tType\t\t\tValue\t\t\tText\n\n");
     tok.OpenFile(sourceFile.Get());
-    Token *t;
+    std::shared_ptr<Token> t;
     while ((t = tok.Next())->type != TokenType::END_OF_FILE)
         switch (t->type)
         {

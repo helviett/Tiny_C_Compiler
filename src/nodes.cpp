@@ -10,7 +10,7 @@ void IntConstNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << token->intValue << std::endl;
 }
 
-IntConstNode::IntConstNode(Token *token): ConstNode(token)
+IntConstNode::IntConstNode(std::shared_ptr<Token> token): ConstNode(token)
 {
     if (token->type != TokenType::NUM_INT) throw "";
 }
@@ -21,7 +21,7 @@ void FloatConstNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << token->floatValue << std::endl;
 }
 
-FloatConstNode::FloatConstNode(Token *token): ConstNode(token)
+FloatConstNode::FloatConstNode(std::shared_ptr<Token> token): ConstNode(token)
 {
     if (token->type != TokenType::NUM_FLOAT) throw "";
 }
@@ -32,7 +32,7 @@ void IdNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << token->text << std::endl;
 }
 
-IdNode::IdNode(Token *token): token(token)
+IdNode::IdNode(std::shared_ptr<Token> token): token(token)
 {
     if (token->type != TokenType::ID) throw "";
 }
@@ -43,7 +43,7 @@ void StringLiteralNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << token->text << std::endl;
 }
 
-StringLiteralNode::StringLiteralNode(Token *token): token(token)
+StringLiteralNode::StringLiteralNode(std::shared_ptr<Token> token): token(token)
 {
     if (token->type != TokenType::STRING) throw "";
 }

@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <iostream>
 #include <utility>
+#include <memory>
 
 static std::unordered_set<std::string> Keywords =
 {
@@ -38,9 +39,9 @@ public:
     Tokenizer(std::string fileName);
 
     std::vector<Token *> Tokenize(std::string fileName);
-    Token *Next();
-    Token *Current();
-    Token *Peek();
+    std::shared_ptr<Token> Next();
+    std::shared_ptr<Token> Current();
+    std::shared_ptr<Token> Peek();
     void OpenFile(std::string fileName);
 private:
     int currentState = 0;
@@ -48,11 +49,11 @@ private:
     int prevRowCol = 0;
     Position currentPos{1, 1};
     Position currentlyProcessingTokenPos;
-    Token *currentToken;
-    Token *nextToken;
+    std::shared_ptr<Token> currentToken;
+    std::shared_ptr<Token> nextToken;
     std::ifstream currentFile;
     std::string buffer;
-    Token *getToken();
+    std::shared_ptr<Token> getToken();
     bool processNewState(int state);
     void parseMultilineComment();
     void parseComment();

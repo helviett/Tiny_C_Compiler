@@ -127,10 +127,10 @@ private:
 class UnaryOpNode: public UnaryExprNode
 {
 public:
-    UnaryOpNode (Token *unaryOp, PostfixExprNode *expr): unaryOp(unaryOp), expr(expr) {}
+    UnaryOpNode (std::shared_ptr<Token> unaryOp, PostfixExprNode *expr): unaryOp(unaryOp), expr(expr) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    Token *unaryOp;
+    std::shared_ptr<Token> unaryOp;
     PostfixExprNode *expr;
 };
 
@@ -163,11 +163,11 @@ public:
 class BinOpNode: public CastExprNode
 {
 public:
-    BinOpNode(PostfixExprNode *left, PostfixExprNode *right, Token *op): left(left), right(right), op(op) {}
+    BinOpNode(PostfixExprNode *left, PostfixExprNode *right, std::shared_ptr<Token> op): left(left), right(right), op(op) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *left, *right;
-    Token *op;
+    std::shared_ptr<Token> op;
 };
 
 //multiplicative-expr ::= cast-expr | multiplicative-expr * cast-expr
@@ -294,12 +294,12 @@ public:
 class AssignmentNode: public AssignmentExprNode
 {
 public:
-    AssignmentNode(PostfixExprNode *left, PostfixExprNode *right, Token *assignmentOp): left(left), right(right),
+    AssignmentNode(PostfixExprNode *left, PostfixExprNode *right, std::shared_ptr<Token> assignmentOp): left(left), right(right),
                                                                                         assignmentOp(assignmentOp) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     PostfixExprNode *left, *right;
-    Token *assignmentOp;
+    std::shared_ptr<Token> assignmentOp;
 };
 
 //expr ::= assignment-expr | expr , assignment-expr
@@ -330,42 +330,42 @@ public:
 class IdNode: public PrimaryExprNode
 {
 public:
-    explicit IdNode(Token *token);
+    explicit IdNode(std::shared_ptr<Token> token);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    Token *token;
+    std::shared_ptr<Token> token;
 };
 
 class ConstNode: public PrimaryExprNode
 {
 public:
-    explicit ConstNode(Token *token): token(token) {}
+    explicit ConstNode(std::shared_ptr<Token> token): token(token) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 protected:
-    Token *token;
+    std::shared_ptr<Token> token;
 };
 
 class IntConstNode: public ConstNode
 {
 public:
-    explicit IntConstNode(Token *token);
+    explicit IntConstNode(std::shared_ptr<Token> token);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class FloatConstNode: public ConstNode
 {
 public:
-    explicit FloatConstNode(Token *token);
+    explicit FloatConstNode(std::shared_ptr<Token> token);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class StringLiteralNode: public PrimaryExprNode
 {
 public:
-    explicit StringLiteralNode(Token *token);
+    explicit StringLiteralNode(std::shared_ptr<Token> token);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    Token *token;
+    std::shared_ptr<Token> token;
 };
 
 #endif //TINY_C_COMPILER_EXPRESSIONS_H

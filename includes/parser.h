@@ -124,14 +124,14 @@ private:
     ExternalDeclarationNode    *parseExternalDeclaration();
     PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
                                   std::unordered_set<TokenType> types);
-    bool isTypeSpecifier(Token *token);
-    bool isUnaryOp(Token *token);
-    bool isAssignmentOp(Token *token);
-    bool isTypeQualifier(Token *token);
-    bool isStorageClassSpecifier(Token *token);
-    bool isFunctionSpecifier(Token *token);
-    bool isDeclarationSpecifier(Token *token);
-    bool isSimpleSpecifier(Token *token);
+    bool isTypeSpecifier(std::shared_ptr<Token> token);
+    bool isUnaryOp(std::shared_ptr<Token> token);
+    bool isAssignmentOp(std::shared_ptr<Token> token);
+    bool isTypeQualifier(std::shared_ptr<Token> token);
+    bool isStorageClassSpecifier(std::shared_ptr<Token> token);
+    bool isFunctionSpecifier(std::shared_ptr<Token> token);
+    bool isDeclarationSpecifier(std::shared_ptr<Token> token);
+    bool isSimpleSpecifier(std::shared_ptr<Token> token);
     void require(TokenType typeExpectation);
     void requierKeyword(Keyword expectedKeyword);
 
