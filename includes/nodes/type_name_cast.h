@@ -6,7 +6,7 @@
 #define TINY_C_COMPILER_TYPE_NAME_CAST_H
 
 #include "node.h"
-#include "declaration_specifiers.h"
+#include "declaration_specifier_nodes.h"
 #include "decls.h"
 
 class TypeNameNode: public Node
@@ -20,14 +20,14 @@ private:
     DeclaratorNode *abstractDeclarator;
 };
 
-class TypeCastNode: public CastExprNode
+class TypeCastNode: public ExprNode
 {
 public:
-    TypeCastNode(TypeNameNode *typeName, PostfixExprNode *castExpr): typeName(typeName), castExpr(castExpr) {}
+    TypeCastNode(TypeNameNode *typeName, ExprNode *castExpr): typeName(typeName), castExpr(castExpr) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     TypeNameNode *typeName;
-    PostfixExprNode *castExpr;
+    ExprNode *castExpr;
 };
 
 

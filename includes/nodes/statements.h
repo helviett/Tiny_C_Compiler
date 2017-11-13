@@ -23,15 +23,11 @@ public:
 class ExprStatmentNode: StatementNode
 {
 public:
-    explicit ExprStatmentNode(PostfixExprNode *expr): expr(expr) {}
+    explicit ExprStatmentNode(ExprNode *expr): expr(expr) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    PostfixExprNode *expr;
+    ExprNode *expr;
 };
-
-//selection-statement ::= if (expr) statement
-//| if (expr) statement else statement
-//| switch (expr) statement
 
 class SelectionStatementNode: public StatementNode
 {
@@ -43,17 +39,17 @@ class IfStatementNode: public SelectionStatementNode
 {
 public:
     IfStatementNode() = default;
-    IfStatementNode(PostfixExprNode *expr, StatementNode *then): expr(expr), then(then) {}
+    IfStatementNode(ExprNode *expr, StatementNode *then): expr(expr), then(then) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 protected:
-    PostfixExprNode *expr;
+    ExprNode *expr;
     StatementNode *then;
 };
 
 class IfElseStatementNode: public IfStatementNode
 {
 public:
-    IfElseStatementNode(PostfixExprNode *expr, StatementNode *then, StatementNode *_else):
+    IfElseStatementNode(ExprNode *expr, StatementNode *then, StatementNode *_else):
             IfStatementNode(expr, then), _else(_else) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
@@ -97,16 +93,11 @@ public:
 class ReturnStatementNode: public JumpStatementNode
 {
 public:
-    explicit ReturnStatementNode(PostfixExprNode *expr): expr(expr) {}
+    explicit ReturnStatementNode(ExprNode *expr): expr(expr) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    PostfixExprNode *expr;
+    ExprNode *expr;
 };
-
-//iteration-statement ::= while (expr) statement
-//                      | do statement while (expr) ;
-//                      | for (`expr ; `expr ; `expr) statement
-//                      | for (declaration `expr; `expr) statement
 
 class IterationStatementNode: public StatementNode
 {
@@ -117,20 +108,20 @@ public:
 class WhileStatementNode: public IterationStatementNode
 {
 public:
-    WhileStatementNode(PostfixExprNode *condition, StatementNode *body): condition(condition), body(body) {}
+    WhileStatementNode(ExprNode *condition, StatementNode *body): condition(condition), body(body) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    PostfixExprNode *condition;
+    ExprNode *condition;
     StatementNode *body;
 };
 
 class DoWhileStatementNode: public IterationStatementNode
 {
 public:
-    DoWhileStatementNode(PostfixExprNode *condition, StatementNode *body): condition(condition), body(body) {}
+    DoWhileStatementNode(ExprNode *condition, StatementNode *body): condition(condition), body(body) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    PostfixExprNode *condition;
+    ExprNode *condition;
     StatementNode *body;
 };
 
@@ -138,12 +129,12 @@ class ForStatementNode: public IterationStatementNode
 {
 public:
     ForStatementNode(ExprStatmentNode *init, ExprStatmentNode *condition,
-                     PostfixExprNode *iteration, StatementNode *body):
+                     ExprNode *iteration, StatementNode *body):
             init(init), condition(condition), iteration(iteration), body(body) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     ExprStatmentNode *init, *condition;
-    PostfixExprNode *iteration;
+    ExprNode *iteration;
     StatementNode *body;
 };
 

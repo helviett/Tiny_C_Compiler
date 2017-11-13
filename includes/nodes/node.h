@@ -13,6 +13,7 @@ class Node
 {
 public:
     virtual void Print(std::ostream &os, std::string ident, bool isTail) = 0;
+
 };
 
 #endif //TINY_C_COMPILER_NODE_H

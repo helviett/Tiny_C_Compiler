@@ -50,10 +50,10 @@ public:
 class ArrayDesignator: public DesignatorNode
 {
 public:
-    explicit ArrayDesignator(ConstantExprNode *constantExpr): constantExpr(constantExpr) {}
+    explicit ArrayDesignator(ExprNode *constantExpr): constantExpr(constantExpr) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    ConstantExprNode *constantExpr;
+    ExprNode *constantExpr;
 };
 
 class StructMemberDesignator: public DesignatorNode

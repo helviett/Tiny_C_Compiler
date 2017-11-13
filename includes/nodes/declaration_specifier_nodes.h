@@ -2,8 +2,8 @@
 // Created by keltar on 11/4/17.
 //
 
-#ifndef TINY_C_COMPILER_DECLARATION_SPECIFIERS_H
-#define TINY_C_COMPILER_DECLARATION_SPECIFIERS_H
+#ifndef TINY_C_COMPILER_DECLARATION_SPECIFIERS_NODES_H
+#define TINY_C_COMPILER_DECLARATION_SPECIFIERS_NODES_H
 
 #include "node.h"
 #include "../token.h"
@@ -91,6 +91,8 @@ private:
 class DeclarationSpecifiersNode: public Node
 {
 public:
+    DeclarationSpecifiersNode() = default;
+    DeclarationSpecifiersNode(std::initializer_list<DeclarationSpecifierNode *> initializerList);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(DeclarationSpecifierNode *specifier);
     uint64_t Size();
@@ -99,4 +101,4 @@ private:
 };
 
 
-#endif //TINY_C_COMPILER_DECLARATION_SPECIFIERS_H
+#endif //TINY_C_COMPILER_DECLARATION_SPECIFIERS_NODES_H

@@ -6,9 +6,7 @@
 #define TINY_C_COMPILER_POINTER_H
 
 #include "node.h"
-#include "declaration_specifiers.h"
-
-//pointer ::= * `type-qualifier-list | * `type-qualifier-list pointer
+#include "declaration_specifier_nodes.h"
 
 class PointerNode: public Node
 {

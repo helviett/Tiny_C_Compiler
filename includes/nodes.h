@@ -8,7 +8,7 @@
 #include "nodes/node.h"
 #include "nodes/expressions.h"
 #include "nodes/statements.h"
-#include "nodes/declaration_specifiers.h"
+#include "nodes/declaration_specifier_nodes.h"
 #include "nodes/pointer.h"
 #include "nodes/enum.h"
 #include "nodes/decls.h"

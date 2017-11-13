@@ -9,68 +9,63 @@
 #include "../token.h"
 #include <list>
 
-//
-//postfix-expr ::= primary-expr | postfix-expr [expr] | postfix-expr (`argument-expr-list)
-//                | postfix-expr . id | postfix-expr -> id | postfix-expr ++ | postfix-expr --
-//                | (type-name) {initializer-list} | (type-name) {initializer-list, }
-
-class PostfixExprNode: public Node
+class ExprNode: public Node
 {
 public:
-    virtual void Print(std::ostream &os, std::string ident, bool isTail) = 0;
+    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
-class PostfixIncrementNode: public PostfixExprNode
+class PostfixIncrementNode: public ExprNode
 {
 public:
-    explicit PostfixIncrementNode(PostfixExprNode *node): node(node) {}
+    explicit PostfixIncrementNode(ExprNode *node): node(node) {}
     virtual void Print(std::ostream &os, std::string ident, bool isTail);
 private:
-    PostfixExprNode *node;
+    ExprNode *node;
 };
 
-class PostfixDecrementNode: public PostfixExprNode
+class PostfixDecrementNode: public ExprNode
 {
 public:
-    explicit PostfixDecrementNode(PostfixExprNode *node): node(node) {}
+    explicit PostfixDecrementNode(ExprNode *node): node(node) {}
     virtual void Print(std::ostream &os, std::string ident, bool isTail);
 private:
-    PostfixExprNode *node;
+    ExprNode *node;
 };
 
 class IdNode;
 
-class StructureOrUnionMemberAccessNode: public PostfixExprNode
+class StructureOrUnionMemberAccessNode: public ExprNode
 {
 public:
-    StructureOrUnionMemberAccessNode(PostfixExprNode *structureOrUnion, IdNode *member): member(member),
+    StructureOrUnionMemberAccessNode(ExprNode *structureOrUnion, IdNode *member): member(member),
                                                                                          structureOrUnion(structureOrUnion) {}
 
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    PostfixExprNode *structureOrUnion;
+    ExprNode *structureOrUnion;
     IdNode *member;
 };
 
-class StructureOrUnionMemberAccessByPointerNode: public PostfixExprNode
+class StructureOrUnionMemberAccessByPointerNode: public ExprNode
 {
 public:
-    StructureOrUnionMemberAccessByPointerNode(PostfixExprNode *structureOrUnion, IdNode *member): member(member),
+    StructureOrUnionMemberAccessByPointerNode(ExprNode *structureOrUnion, IdNode *member): member(member),
                                                                                                   structureOrUnion(structureOrUnion) {}
 
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    PostfixExprNode *structureOrUnion;
+    ExprNode *structureOrUnion;
     IdNode *member;
 };
 
-class ArrayAccess: public PostfixExprNode
+class ArrayAccess: public ExprNode
 {
 public:
-    ArrayAccess(PostfixExprNode *left, PostfixExprNode *inBrackets): left(left), inBrackets(inBrackets) {}
+    ArrayAccess(ExprNode *left, ExprNode *inBrackets): left(left), inBrackets(inBrackets) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    PostfixExprNode *left, *inBrackets;
+    ExprNode *left, *inBrackets;
 };
 
 class AssignmentExprNode;
@@ -85,37 +80,29 @@ private:
     std::list<AssignmentExprNode *> list;
 };
 
-class FunctionCallNode: public PostfixExprNode
+class FunctionCallNode: public ExprNode
 {
 public:
-    FunctionCallNode(PostfixExprNode *functionName, ArgumentExprListNode *arguments):
+    FunctionCallNode(ExprNode *functionName, ArgumentExprListNode *arguments):
             functionName(functionName), arguments(arguments) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    PostfixExprNode *functionName;
+    ExprNode *functionName;
     ArgumentExprListNode *arguments;
 };
 
-//unary-expr ::= postfix-expr | ++ unary-expr | -- unary-expr | unary-op cast-expr
-//              | sizeof unary-expr | sizeof (type-name)
-class UnaryExprNode: public PostfixExprNode
+class SizeofExprNode: public  ExprNode
 {
 public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-class SizeofExprNode: public  UnaryExprNode
-{
-public:
-    SizeofExprNode(PostfixExprNode *expr): expr(expr) {}
+    SizeofExprNode(ExprNode *expr): expr(expr) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    PostfixExprNode *expr;
+    ExprNode *expr;
 };
 
 class TypeNameNode;
 
-class SizeofTypeNameNode: public UnaryExprNode
+class SizeofTypeNameNode: public ExprNode
 {
 public:
     SizeofTypeNameNode(TypeNameNode *typeName): typeName(typeName) {}
@@ -124,168 +111,55 @@ private:
     TypeNameNode *typeName;
 };
 
-class UnaryOpNode: public UnaryExprNode
+class UnaryOpNode: public ExprNode
 {
 public:
-    UnaryOpNode (std::shared_ptr<Token> unaryOp, PostfixExprNode *expr): unaryOp(unaryOp), expr(expr) {}
+    UnaryOpNode (std::shared_ptr<Token> unaryOp, ExprNode *expr): unaryOp(unaryOp), expr(expr) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     std::shared_ptr<Token> unaryOp;
-    PostfixExprNode *expr;
+    ExprNode *expr;
 };
 
-class PrefixIncrementNode: public UnaryExprNode
+class PrefixIncrementNode: public ExprNode
 {
 public:
-    explicit PrefixIncrementNode(PostfixExprNode *node): node(node){}
+    explicit PrefixIncrementNode(ExprNode *node): node(node){}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    PostfixExprNode *node;
+    ExprNode *node;
 };
 
-class PrefixDecrementNode: public UnaryExprNode
+class PrefixDecrementNode: public ExprNode
 {
 public:
-    explicit PrefixDecrementNode(PostfixExprNode *node): node(node){}
+    explicit PrefixDecrementNode(ExprNode *node): node(node){}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    PostfixExprNode *node;
+    ExprNode *node;
 };
 
-// cast-expr ::= unary-expr | (type-name) cast-expr
-class CastExprNode: public UnaryExprNode
+class BinOpNode: public ExprNode
 {
 public:
-    CastExprNode(){}
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-class BinOpNode: public CastExprNode
-{
-public:
-    BinOpNode(PostfixExprNode *left, PostfixExprNode *right, std::shared_ptr<Token> op): left(left), right(right), op(op) {}
+    BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op): left(left), right(right), op(op) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    PostfixExprNode *left, *right;
+    ExprNode *left, *right;
     std::shared_ptr<Token> op;
 };
 
-//multiplicative-expr ::= cast-expr | multiplicative-expr * cast-expr
-//                       | multiplicative-expr / cast-expr
-//                       | multiplicative-expr % cast-expr
-
-class MultiplicativeExprNode: public CastExprNode
+class TernaryOperatorNode: public ExprNode
 {
 public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-//addictive-expr ::= multiplicative-expr
-//                   | addictive-expr + multiplicative-expr
-//                   | addictive-expr - multiplicative-expr
-
-class AdditiveExprNode: public CastExprNode
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-//shift-expr ::= additive-expr
-//               | shift-expr << additive-expr
-//               | shift-expr >> additive-expr
-
-class ShiftExprNode: public AdditiveExprNode
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-//rel-expr ::= shift-expr | rel-expr < shift-expr | rel-expr > shift-expr
-//             | rel-expr <= shift expr | rel-expr >= shift-expr
-
-class RelationalExprNode: public ShiftExprNode
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-//eq-expr ::= rel-expr | eq-expr == rel-expr | eq-expr != rel-expr
-
-class EqualityExprNode: public RelationalExprNode
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-//AND-expr ::= eq-expr | AND-expr & eq-expr
-
-class AndExprNode: public EqualityExprNode
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-//exclusive-OR-expr ::= AND-expr | exclusive-OR-expr ^ AND-expr
-
-class ExclusiveOrExprNode: public AndExprNode
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-//inclusive-OR-expr ::= exclusive-OR-expr | inclusive-OR-expr '|' exclusive-OR-expr
-
-class InclusiveOrExprNode: public ExclusiveOrExprNode
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-//logical-AND-expr ::= inclusive-OR-expr | logical-AND-expr && inclusive-OR-expr
-
-class LogicalAndExprNode: public InclusiveOrExprNode
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-//logical-OR-expr ::= logical-AND-expr | logical-OR-expr || logical-AND-expr
-
-class LogicalOrExprNode: public LogicalAndExprNode
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-//conditional-expr ::= logical-OR-expr | logical-OR-expr ? expr : conditional-expr
-
-class ConditionalExprNode: public LogicalOrExprNode
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-class TernaryOperatorNode: public ConditionalExprNode
-{
-public:
-    TernaryOperatorNode(PostfixExprNode *condition, PostfixExprNode *iftrue, PostfixExprNode *iffalse):
+    TernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, ExprNode *iffalse):
             condition(condition), iftrue(iftrue), iffalse(iffalse) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    PostfixExprNode *condition, *iftrue, *iffalse;
+    ExprNode *condition, *iftrue, *iffalse;
 };
 
-//constant-expr ::= conditional-expr
-
-class ConstantExprNode: public ConditionalExprNode
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-//assignment-expr ::= conditional-expr | unary-expr assignment-op assignment-expr
-
-class AssignmentExprNode: public ConditionalExprNode
+class AssignmentExprNode: public ExprNode
 {
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
@@ -294,40 +168,24 @@ public:
 class AssignmentNode: public AssignmentExprNode
 {
 public:
-    AssignmentNode(PostfixExprNode *left, PostfixExprNode *right, std::shared_ptr<Token> assignmentOp): left(left), right(right),
+    AssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp): left(left), right(right),
                                                                                         assignmentOp(assignmentOp) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    PostfixExprNode *left, *right;
+    ExprNode *left, *right;
     std::shared_ptr<Token> assignmentOp;
-};
-
-//expr ::= assignment-expr | expr , assignment-expr
-
-class ExprNode: public AssignmentExprNode
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
 class CommaSeparatedExprs: public ExprNode
 {
 public:
-    CommaSeparatedExprs(PostfixExprNode *left, PostfixExprNode *right): left(left), right(right) {}
+    CommaSeparatedExprs(ExprNode *left, ExprNode *right): left(left), right(right) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    PostfixExprNode *left, *right;
+    ExprNode *left, *right;
 };
 
-// primary-expr ::= id | constant | string-literal | (expr)
-
-class PrimaryExprNode: public PostfixExprNode
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-class IdNode: public PrimaryExprNode
+class IdNode: public ExprNode
 {
 public:
     explicit IdNode(std::shared_ptr<Token> token);
@@ -336,7 +194,7 @@ private:
     std::shared_ptr<Token> token;
 };
 
-class ConstNode: public PrimaryExprNode
+class ConstNode: public ExprNode
 {
 public:
     explicit ConstNode(std::shared_ptr<Token> token): token(token) {}
@@ -359,7 +217,7 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
-class StringLiteralNode: public PrimaryExprNode
+class StringLiteralNode: public ExprNode
 {
 public:
     explicit StringLiteralNode(std::shared_ptr<Token> token);

@@ -59,24 +59,24 @@ public:
     void Parse();
     friend std::ostream &operator<<(std::ostream &os, Parser &parser);
 private:
-    PostfixExprNode            *parsePrimaryExpr();
-    PostfixExprNode            *parsePostfixExpr();
-    PostfixExprNode            *parseUnaryExpr();
-    PostfixExprNode            *parseCastExpr();
-    PostfixExprNode            *parseMultiplicativeExpr();
-    PostfixExprNode            *parseAddictiveExpr();
-    PostfixExprNode            *parseShiftExpr();
-    PostfixExprNode            *parseRelationalExpr();
-    PostfixExprNode            *parseEqualityExpr();
-    PostfixExprNode            *parseAndExpr();
-    PostfixExprNode            *parseExclusiveOrExpr();
-    PostfixExprNode            *parseInclusiveOrExpr();
-    PostfixExprNode            *parseLogicalAndExpr();
-    PostfixExprNode            *parseLogicalOrExpr();
-    PostfixExprNode            *parseConditionalExpr();
-    PostfixExprNode            *parseAssignmentExpr();
-    PostfixExprNode            *parseExpr();
-    PostfixExprNode            *parseConstantExpr();
+    ExprNode            *parsePrimaryExpr();
+    ExprNode            *parsePostfixExpr();
+    ExprNode            *parseUnaryExpr();
+    ExprNode            *parseCastExpr();
+    ExprNode            *parseMultiplicativeExpr();
+    ExprNode            *parseAddictiveExpr();
+    ExprNode            *parseShiftExpr();
+    ExprNode            *parseRelationalExpr();
+    ExprNode            *parseEqualityExpr();
+    ExprNode            *parseAndExpr();
+    ExprNode            *parseExclusiveOrExpr();
+    ExprNode            *parseInclusiveOrExpr();
+    ExprNode            *parseLogicalAndExpr();
+    ExprNode            *parseLogicalOrExpr();
+    ExprNode            *parseConditionalExpr();
+    ExprNode            *parseAssignmentExpr();
+    ExprNode            *parseExpr();
+    ExprNode            *parseConstantExpr();
     TypeNameNode               *parseTypeName();
     TypeQualifierListNode      *parseTypeQualifierList();
     PointerNode                *parsePointer();
@@ -122,7 +122,7 @@ private:
     DesignatedInitializerNode  *parseDesignatedInitializer();
     TranslationUnitNode        *parseTranslationUnit();
     ExternalDeclarationNode    *parseExternalDeclaration();
-    PostfixExprNode *parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
+    ExprNode *parseGeneral(Parser *self, ExprNode *(Parser::*f)(),
                                   std::unordered_set<TokenType> types);
     bool isTypeSpecifier(std::shared_ptr<Token> token);
     bool isUnaryOp(std::shared_ptr<Token> token);

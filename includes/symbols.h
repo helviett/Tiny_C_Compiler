@@ -27,7 +27,7 @@ class SymVariable: Symbol
 class SymFunc: Symbol
 {
 private:
-    SymbolTabel *params, body;
+    SymbolTable *params, body;
 };
 
 class SymInteger: SymType
@@ -43,7 +43,7 @@ class SymFloat: SymType
 class SymStruct: SymType
 {
 private:
-    SymbolTabel *fields;
+    SymbolTable *fields;
 };
 
 class SymPointer: SymType

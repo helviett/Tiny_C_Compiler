@@ -9,21 +9,16 @@
 #include "expressions.h"
 #include <list>
 
-//enumerator ::= enumeration-constant, enumeration-constant = constant-expr
-
 class EnumeratorNode: public Node
 {
 public:
-    EnumeratorNode(IdNode *enumerationConstant, ConstantExprNode *value):
+    EnumeratorNode(IdNode *enumerationConstant, ExprNode *value):
             enumerationConstant(enumerationConstant), value(value) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     IdNode *enumerationConstant;
-    ConstantExprNode *value;
+    ExprNode *value;
 };
-
-//enumerator-list ::= enumerator | enumerator-list , enumerator
-
 
 class EnumeratorList: public Node
 {
@@ -34,10 +29,6 @@ public:
 protected:
     std::list<EnumeratorNode *> list;
 };
-
-//enum-specifier ::= enum `id {enumerator-list}
-//                  | enum `id {enumerator-list , }
-//                  | enum id
 
 class EnumSpecifierNode: public Node
 {

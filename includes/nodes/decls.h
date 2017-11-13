@@ -35,12 +35,12 @@ public:
 class ArrayDeclaratorNode: public DirectDeclaratorNode
 {
 public:
-    ArrayDeclaratorNode(DirectDeclaratorNode *directDeclarator, ConditionalExprNode *size):
+    ArrayDeclaratorNode(DirectDeclaratorNode *directDeclarator, ExprNode *size):
             directDeclarator(directDeclarator), size(size) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     DirectDeclaratorNode *directDeclarator;
-    ConditionalExprNode  *size;
+    ExprNode  *size;
 };
 
 class ParameterTypeList;

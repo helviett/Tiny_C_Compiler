@@ -9,7 +9,7 @@
 #include <set>
 #include "symbols.h"
 
-class SymbolTabel
+class SymbolTable
 {
 private:
 //    std::vector<std::set<Symbol *>> table;

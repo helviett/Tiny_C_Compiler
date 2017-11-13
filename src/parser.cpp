@@ -18,7 +18,7 @@ void Parser::Parse()
 }
 
 
-PostfixExprNode *Parser::parsePrimaryExpr()
+ExprNode *Parser::parsePrimaryExpr()
 {
     auto t = scanner->Current();
     switch (t->type)
@@ -37,7 +37,7 @@ PostfixExprNode *Parser::parsePrimaryExpr()
             return new StringLiteralNode(t);
         case TokenType::LBRACKET:
             scanner->Next();
-            PostfixExprNode *e = parseExpr();
+            ExprNode *e = parseExpr();
             require(TokenType::RBRACKET);
             scanner->Next();
             return e;
@@ -52,10 +52,10 @@ std::ostream &operator<<(std::ostream &os, Parser &parser)
     return os;
 }
 
-PostfixExprNode *Parser::parsePostfixExpr()
+ExprNode *Parser::parsePostfixExpr()
 {
     auto t = scanner->Current();
-    PostfixExprNode *pe = parsePrimaryExpr();
+    ExprNode *pe = parsePrimaryExpr();
     t = scanner->Current();
     bool stillPostfixOperator = true;
     while (stillPostfixOperator)
@@ -99,9 +99,9 @@ PostfixExprNode *Parser::parsePostfixExpr()
     return pe;
 }
 
-PostfixExprNode *Parser::parseUnaryExpr()
+ExprNode *Parser::parseUnaryExpr()
 {
-    PostfixExprNode *ue;
+    ExprNode *ue;
     auto t = scanner->Current();
     switch (t->type)
     {
@@ -141,7 +141,7 @@ PostfixExprNode *Parser::parseUnaryExpr()
     return ue;
 }
 
-PostfixExprNode *Parser::parseCastExpr()
+ExprNode *Parser::parseCastExpr()
 {
     if (scanner->Current()->type == TokenType::LBRACKET &&
             (isTypeQualifier(scanner->Peek()) || isTypeSpecifier(scanner->Peek())))
@@ -154,102 +154,102 @@ PostfixExprNode *Parser::parseCastExpr()
     return parseUnaryExpr();
 }
 
-PostfixExprNode *Parser::parseMultiplicativeExpr()
+ExprNode *Parser::parseMultiplicativeExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::ASTERIX, TokenType::FORWARD_SLASH, TokenType::REMINDER};
     return parseGeneral(this, &Parser::parseCastExpr, types);
 }
 
-PostfixExprNode *Parser::parseAddictiveExpr()
+ExprNode *Parser::parseAddictiveExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::PLUS, TokenType::MINUS};
     return parseGeneral(this, &Parser::parseMultiplicativeExpr, types);
 }
 
-PostfixExprNode *Parser::parseShiftExpr()
+ExprNode *Parser::parseShiftExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::BITWISE_LSHIFT, TokenType::BITWISE_RSHIFT};
     return parseGeneral(this, &Parser::parseAddictiveExpr, types);
 }
 
-PostfixExprNode *Parser::parseRelationalExpr()
+ExprNode *Parser::parseRelationalExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::RELOP_GT, TokenType::RELOP_LT,
                                                   TokenType::RELOP_GE, TokenType::RELOP_LE};
     return parseGeneral(this, &Parser::parseShiftExpr, types);
 }
 
-PostfixExprNode *Parser::parseEqualityExpr()
+ExprNode *Parser::parseEqualityExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::RELOP_EQ, TokenType::RELOP_NE};
     return parseGeneral(this, &Parser::parseRelationalExpr, types);
 }
 
-PostfixExprNode *Parser::parseAndExpr()
+ExprNode *Parser::parseAndExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::BITWISE_AND};
     return parseGeneral(this, &Parser::parseEqualityExpr, types);
 }
 
-PostfixExprNode *Parser::parseExclusiveOrExpr()
+ExprNode *Parser::parseExclusiveOrExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::BITWISE_XOR};
     return parseGeneral(this, &Parser::parseAndExpr, types);
 }
 
-PostfixExprNode *Parser::parseInclusiveOrExpr()
+ExprNode *Parser::parseInclusiveOrExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::BITWISE_OR};
     return parseGeneral(this, &Parser::parseExclusiveOrExpr, types);
 }
 
-PostfixExprNode *Parser::parseLogicalAndExpr()
+ExprNode *Parser::parseLogicalAndExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::LOGIC_AND};
     return parseGeneral(this, &Parser::parseInclusiveOrExpr, types);
 }
 
-PostfixExprNode *Parser::parseLogicalOrExpr()
+ExprNode *Parser::parseLogicalOrExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::LOGIC_OR};
     return parseGeneral(this, &Parser::parseLogicalAndExpr, types);
 }
 
-PostfixExprNode *Parser::parseGeneral(Parser *self, PostfixExprNode *(Parser::*f)(),
+ExprNode *Parser::parseGeneral(Parser *self, ExprNode *(Parser::*f)(),
                                       std::unordered_set<TokenType> types)
 {
-    auto *e = (PostfixExprNode *)(self->*f)();
+    auto *e = (ExprNode *)(self->*f)();
     auto t = self->scanner->Current();
     while (types.find(t->type) != types.end())
     {
         self->scanner->Next();
-        auto right = (PostfixExprNode *) ((*self).*f)();
+        auto right = (ExprNode *) ((*self).*f)();
         e = new BinOpNode(e, right, t);
         t = self->scanner->Current();
     }
     return e;
 }
 
-PostfixExprNode *Parser::parseConditionalExpr()
+ExprNode *Parser::parseConditionalExpr()
 {
-    PostfixExprNode *loe =  parseLogicalOrExpr();
+    ExprNode *loe =  parseLogicalOrExpr();
     auto t = scanner->Current();
     if (t->type == TokenType::QUESTION_MARK)
     {
         t = scanner->Next();
-        PostfixExprNode *then = parseExpr();
+        ExprNode *then = parseExpr();
         t = scanner->Current();
         require(TokenType::COLON);
         t = scanner->Next();
-        PostfixExprNode *lse = parseConditionalExpr();
+        ExprNode *lse = parseConditionalExpr();
         return new TernaryOperatorNode(loe, then, lse);
     }
     return loe;
 }
 
-PostfixExprNode *Parser::parseAssignmentExpr()
+ExprNode *Parser::parseAssignmentExpr()
 {
-    PostfixExprNode *ce = parseConditionalExpr();
+    ExprNode *ce = parseConditionalExpr();
     auto t = scanner->Current();
     if (isAssignmentOp(t))
     {
@@ -260,9 +260,9 @@ PostfixExprNode *Parser::parseAssignmentExpr()
     return ce;
 }
 
-PostfixExprNode *Parser::parseExpr()
+ExprNode *Parser::parseExpr()
 {
-    PostfixExprNode *ae = parseAssignmentExpr();
+    ExprNode *ae = parseAssignmentExpr();
     while (scanner->Current()->type == TokenType::COMMA)
     {
         scanner->Next();
@@ -299,7 +299,7 @@ bool Parser::isTypeQualifier(std::shared_ptr<Token> token)
     return token->type == TokenType::KEYWORD ? TypeQualifiers.find(token->keyword) != TypeQualifiers.end() : false;
 }
 
-PostfixExprNode *Parser::parseConstantExpr()
+ExprNode *Parser::parseConstantExpr()
 {
     return parseConditionalExpr();
 }
@@ -514,7 +514,7 @@ ArrayDeclaratorNode *Parser::parseArrayDeclarator(DirectDeclaratorNode *directDe
     auto ce = parseConstantExpr();
     require(TokenType::RSQUARE_BRACKET);
     scanner->Next();
-    return new ArrayDeclaratorNode(directDeclarator, (ConditionalExprNode *)(ce));
+    return new ArrayDeclaratorNode(directDeclarator, (ExprNode *)(ce));
 }
 
 ArgumentExprListNode *Parser::parseArgumentExprList()
@@ -731,7 +731,7 @@ EnumeratorNode *Parser::parseEnumerator()
     auto id = new IdNode(scanner->Current());
     scanner->Next();
     if (scanner->Current()->type == TokenType::ASSIGNMENT && scanner->Next())
-        return new EnumeratorNode(id, (ConstantExprNode *)parseConstantExpr());
+        return new EnumeratorNode(id, (ExprNode *)parseConstantExpr());
     return new EnumeratorNode(id, nullptr);
 }
 
@@ -780,10 +780,10 @@ StructDeclarationNode *Parser::parseStructDeclaration()
 StructDeclaratorNode *Parser::parseStructDeclarator()
 {
     if (scanner->Current()->type == TokenType::COLON && scanner->Next())
-        return new StructDeclaratorNode(nullptr, (ConstantExprNode *)parseConstantExpr());
+        return new StructDeclaratorNode(nullptr, (ExprNode *)parseConstantExpr());
     auto declarator = parseDeclarator(DeclaratorType::NORMAL);
     if (scanner->Current()->type == TokenType::COLON && scanner->Next())
-        return new StructDeclaratorNode(declarator, (ConstantExprNode *)parseConstantExpr());
+        return new StructDeclaratorNode(declarator, (ExprNode *)parseConstantExpr());
     return new StructDeclaratorNode(declarator, nullptr);
 }
 
@@ -852,7 +852,7 @@ DesignatorNode *Parser::parseDesignator()
         auto constExpr = parseConstantExpr();
         require(TokenType::RSQUARE_BRACKET);
         scanner->Next();
-        return new ArrayDesignator((ConstantExprNode *)constExpr);
+        return new ArrayDesignator((ExprNode *)constExpr);
     }
     require(TokenType::DOT);
     scanner->Next();

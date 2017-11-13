@@ -8,7 +8,7 @@
 //function-definition ::= declaration-specifier declarator compound-statement
 
 #include "node.h"
-#include "declaration_specifiers.h"
+#include "declaration_specifier_nodes.h"
 #include "decls.h"
 #include "statements.h"
 

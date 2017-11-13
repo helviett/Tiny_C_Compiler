@@ -13,12 +13,12 @@
 class StructDeclaratorNode: public Node
 {
 public:
-    StructDeclaratorNode(DeclaratorNode *declarator, ConstantExprNode *constantExpr):
+    StructDeclaratorNode(DeclaratorNode *declarator, ExprNode *constantExpr):
             declarator(declarator), constantExpr(constantExpr) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     DeclaratorNode *declarator;
-    ConstantExprNode *constantExpr;
+    ExprNode *constantExpr;
 };
 
 //struct-declarator-list ::= struct-declarator | struct-declarator-list , struct-declarator

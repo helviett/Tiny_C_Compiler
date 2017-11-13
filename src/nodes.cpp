@@ -456,6 +456,12 @@ uint64_t DeclarationSpecifiersNode::Size()
     return list.size();
 }
 
+DeclarationSpecifiersNode::DeclarationSpecifiersNode(std::initializer_list<DeclarationSpecifierNode *> initializerList)
+{
+    for (auto it : initializerList)
+        Add(it);
+}
+
 void ParameterList::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
