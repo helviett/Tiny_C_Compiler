@@ -5,8 +5,6 @@
 #ifndef TINY_C_COMPILER_FUNCTION_DEFINITION_H
 #define TINY_C_COMPILER_FUNCTION_DEFINITION_H
 
-//function-definition ::= declaration-specifier declarator compound-statement
-
 #include "node.h"
 #include "declaration_specifier_nodes.h"
 #include "decls.h"

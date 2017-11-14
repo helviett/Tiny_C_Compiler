@@ -8,8 +8,6 @@
 #include "node.h"
 #include "decls.h"
 
-//struct-declarator ::= declarator | `declarator : constant-expr
-
 class StructDeclaratorNode: public Node
 {
 public:
@@ -21,8 +19,6 @@ private:
     ExprNode *constantExpr;
 };
 
-//struct-declarator-list ::= struct-declarator | struct-declarator-list , struct-declarator
-
 class StructDeclaratorListNode: public Node
 {
 public:
@@ -32,8 +28,6 @@ public:
 protected:
     std::list<StructDeclaratorNode *> list;
 };
-
-//struct-declaration ::= specifier-qualifier-list struct-declarator-list ;
 
 class StructDeclarationNode: public Node
 {
@@ -47,8 +41,6 @@ private:
     StructDeclaratorListNode   *structDeclaratorList;
 };
 
-//struct-declaration-list ::= struct-declaration | struct-declaration-list struct declaration
-
 class StructDeclarationListNode: public Node
 {
 public:
@@ -58,9 +50,6 @@ public:
 protected:
     std::list<StructDeclarationNode *> list;
 };
-
-//struct-specifier ::= struct `id {struct-declaration-list}
-//                     | struct id
 
 class StructSpecifierNode: public DeclarationSpecifierNode
 {

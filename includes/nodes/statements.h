@@ -8,17 +8,11 @@
 #include "node.h"
 #include "expressions.h"
 
-//statement ::= labeled-statement | compound-statement
-//              | expression-statement | selection-statement
-//              | iteration-statement | jump-statement
-
 class StatementNode: public Node
 {
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
-
-//expression-statement ::= `expr ;
 
 class ExprStatmentNode: StatementNode
 {
@@ -55,11 +49,6 @@ public:
 private:
     StatementNode *_else;
 };
-
-//jump-statement ::= goto id ;
-//                  | continue ;
-//                  | break ;
-//                  | return `expr ;
 
 class JumpStatementNode: public StatementNode
 {
@@ -138,8 +127,6 @@ private:
     StatementNode *body;
 };
 
-//labeled-statement ::= id : statement
-
 class LabeledStatementNode: public StatementNode
 {
 public:
@@ -155,8 +142,6 @@ private:
     IdNode *labelName;
     StatementNode *statement;
 };
-
-//compound-statement ::= {`block-item-list}
 
 class BlockItemListNode;
 

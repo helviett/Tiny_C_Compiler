@@ -31,15 +31,11 @@ protected:
     std::list<InitDeclaratorNode *> list;
 };
 
-//initializer ::= assignment-expr | {initializer-list} | {initializer-list , }
-
 class InitializerNode: public Node
 {
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
-
-//designator ::= [constant-expr] | . id
 
 class DesignatorNode: public Node
 {
@@ -65,8 +61,6 @@ private:
     IdNode *id;
 };
 
-//designator-list ::= designator | designator-list designator
-
 class DesignatorListNode: public Node
 {
 public:
@@ -76,8 +70,6 @@ public:
 protected:
     std::list<DesignatorNode *> list;
 };
-
-// designation ::= designator-list =
 
 class DesignationNode: public Node
 {
@@ -98,8 +90,6 @@ private:
     DesignationNode *designation;
     InitializerNode *initializer;
 };
-
-//initializer-list ::= `designation initializer | initializer-list , `designation initializer
 
 class InitializerListNode: public Node
 {

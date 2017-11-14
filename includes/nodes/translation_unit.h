@@ -8,15 +8,11 @@
 #include "node.h"
 #include <list>
 
-//external-declaration ::= function-definition | declaration
-
 class ExternalDeclarationNode: public Node
 {
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
-
-//translation-unit ::= external-declaration | translation-unit external-declaration
 
 class TranslationUnitNode: public Node
 {

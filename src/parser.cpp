@@ -17,6 +17,13 @@ void Parser::Parse()
     tree.root = parseTranslationUnit();
 }
 
+std::ostream &operator<<(std::ostream &os, Parser &parser)
+{
+    os << parser.tree;
+    return os;
+}
+
+// primary-expr ::= id | constant | string-literal | (expr)
 
 ExprNode *Parser::parsePrimaryExpr()
 {
@@ -45,12 +52,9 @@ ExprNode *Parser::parsePrimaryExpr()
     throw InvalidExpression(scanner->Current());
 }
 
-
-std::ostream &operator<<(std::ostream &os, Parser &parser)
-{
-    os << parser.tree;
-    return os;
-}
+//postfix-expr ::= primary-expr | postifx-expr [expr] | postfix-expr (`argument-expr-list)
+//| postfix-expr . id | postfix-expr -> id | postfix-expr ++ | postfix-expr --
+//| (type-name) {initializer-list} | (type-name) {initializer-list, }
 
 ExprNode *Parser::parsePostfixExpr()
 {
@@ -99,6 +103,9 @@ ExprNode *Parser::parsePostfixExpr()
     return pe;
 }
 
+//unary-expr ::= postfix-expr | ++ unary-expr | -- unary-expr | unary-op cast-expr
+//| sizeof unary-expr | sizeof (type-name)
+
 ExprNode *Parser::parseUnaryExpr()
 {
     ExprNode *ue;
@@ -141,6 +148,8 @@ ExprNode *Parser::parseUnaryExpr()
     return ue;
 }
 
+//cast-expr ::= unary-expr | (type-name) cast-expr
+
 ExprNode *Parser::parseCastExpr()
 {
     if (scanner->Current()->type == TokenType::LBRACKET &&
@@ -154,69 +163,96 @@ ExprNode *Parser::parseCastExpr()
     return parseUnaryExpr();
 }
 
+//multiplicative-expr ::= cast-expr | multiplicative-expr * cast-expr
+//                        | multiplicative-expr / cast-expr
+//                        | multiplicative-expr % cast-expr
+
 ExprNode *Parser::parseMultiplicativeExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::ASTERIX, TokenType::FORWARD_SLASH, TokenType::REMINDER};
-    return parseGeneral(this, &Parser::parseCastExpr, types);
+    return parseBinoOps(this, &Parser::parseCastExpr, types);
 }
+
+//addictive-expr ::= multiplicative-expr
+//                   | addictive-expr + multiplicative-expr
+//                   | addictive-expr - multiplicative-expr
 
 ExprNode *Parser::parseAddictiveExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::PLUS, TokenType::MINUS};
-    return parseGeneral(this, &Parser::parseMultiplicativeExpr, types);
+    return parseBinoOps(this, &Parser::parseMultiplicativeExpr, types);
 }
+
+//shift-expr ::= addictive-expr
+//               | shift-expr << addictive-expr
+//               | shift-expr >> addictive-expr
 
 ExprNode *Parser::parseShiftExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::BITWISE_LSHIFT, TokenType::BITWISE_RSHIFT};
-    return parseGeneral(this, &Parser::parseAddictiveExpr, types);
+    return parseBinoOps(this, &Parser::parseAddictiveExpr, types);
 }
+
+//rel-expr ::= shift-expr | rel-expr < shift-expr | rel-expr > shift-expr
+//             | rel-expr <= shift expr | rel-expr >= shift-expr
 
 ExprNode *Parser::parseRelationalExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::RELOP_GT, TokenType::RELOP_LT,
                                                   TokenType::RELOP_GE, TokenType::RELOP_LE};
-    return parseGeneral(this, &Parser::parseShiftExpr, types);
+    return parseBinoOps(this, &Parser::parseShiftExpr, types);
 }
+
+//eq-expr ::= rel-expr | eq-expr == rel-expr | eq-expr != rel-expr
 
 ExprNode *Parser::parseEqualityExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::RELOP_EQ, TokenType::RELOP_NE};
-    return parseGeneral(this, &Parser::parseRelationalExpr, types);
+    return parseBinoOps(this, &Parser::parseRelationalExpr, types);
 }
+
+//AND-expr ::= eq-expr | AND-expr & eq-expr
 
 ExprNode *Parser::parseAndExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::BITWISE_AND};
-    return parseGeneral(this, &Parser::parseEqualityExpr, types);
+    return parseBinoOps(this, &Parser::parseEqualityExpr, types);
 }
+
+//exclusive-OR-expr ::= AND-expr | exclusive-OR-expr ^ AND-expr
 
 ExprNode *Parser::parseExclusiveOrExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::BITWISE_XOR};
-    return parseGeneral(this, &Parser::parseAndExpr, types);
+    return parseBinoOps(this, &Parser::parseAndExpr, types);
 }
+
+//inclusive-OR-expr ::= exclusive-OR-expr | inclusive-OR-expr '|' exclusive-OR-expr
 
 ExprNode *Parser::parseInclusiveOrExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::BITWISE_OR};
-    return parseGeneral(this, &Parser::parseExclusiveOrExpr, types);
+    return parseBinoOps(this, &Parser::parseExclusiveOrExpr, types);
 }
+
+//logical-AND-expr ::= inclusive-OR-expr | logical-AND-expr && inclusive-OR-expr
 
 ExprNode *Parser::parseLogicalAndExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::LOGIC_AND};
-    return parseGeneral(this, &Parser::parseInclusiveOrExpr, types);
+    return parseBinoOps(this, &Parser::parseInclusiveOrExpr, types);
 }
+
+//logical-OR-expr ::= logical-AND-expr | logical-OR-expr || logical-AND-expr
 
 ExprNode *Parser::parseLogicalOrExpr()
 {
     static std::unordered_set<TokenType> types = {TokenType::LOGIC_OR};
-    return parseGeneral(this, &Parser::parseLogicalAndExpr, types);
+    return parseBinoOps(this, &Parser::parseLogicalAndExpr, types);
 }
 
-ExprNode *Parser::parseGeneral(Parser *self, ExprNode *(Parser::*f)(),
-                                      std::unordered_set<TokenType> types)
+ExprNode *Parser::parseBinoOps(Parser *self, ExprNode *(Parser::*f)(),
+                               std::unordered_set<TokenType> types)
 {
     auto *e = (ExprNode *)(self->*f)();
     auto t = self->scanner->Current();
@@ -229,6 +265,8 @@ ExprNode *Parser::parseGeneral(Parser *self, ExprNode *(Parser::*f)(),
     }
     return e;
 }
+
+//conditional-expr ::= logical-OR-expr | logical-OR-expr ? expr : conditional-expr
 
 ExprNode *Parser::parseConditionalExpr()
 {
@@ -247,6 +285,8 @@ ExprNode *Parser::parseConditionalExpr()
     return loe;
 }
 
+//assignment-expr ::= conditional-expr | unary-expr assignment-op assignment-expr
+
 ExprNode *Parser::parseAssignmentExpr()
 {
     ExprNode *ce = parseConditionalExpr();
@@ -260,6 +300,8 @@ ExprNode *Parser::parseAssignmentExpr()
     return ce;
 }
 
+//expr ::= assignment-expr | expr , assignment-expr
+
 ExprNode *Parser::parseExpr()
 {
     ExprNode *ae = parseAssignmentExpr();
@@ -271,6 +313,8 @@ ExprNode *Parser::parseExpr()
     return ae;
 }
 
+//type-name ::= specifier-qualifier-list `abstract-declarator
+
 TypeNameNode *Parser::parseTypeName()
 {
     auto tnn = parseSpecifierQualifierList();
@@ -279,30 +323,44 @@ TypeNameNode *Parser::parseTypeName()
     return new TypeNameNode(tnn, abstractDeclarator);
 }
 
+//type-specifier ::= void | char | short | int | long | float | double | singed
+//                   | unsigned | struct-specifier | enum-specifier |
+//                   | typedef-name
+
 bool Parser::isTypeSpecifier(std::shared_ptr<Token> token)
 {
     return token->type == TokenType::KEYWORD ? TypeSpecifiers.find(token->keyword) != TypeSpecifiers.end() : false;
 }
+
+//unary-op  ::= & | * | + | - | ~ | !
 
 bool Parser::isUnaryOp(std::shared_ptr<Token> token)
 {
     return UnaryOps.find(token->type) != UnaryOps.end();
 }
 
+//assignment-op ::= = | *= | /= | %= | += | -= | <<= | >>= | &= | ^= | |=
+
 bool Parser::isAssignmentOp(std::shared_ptr<Token> token)
 {
     return  AssignmentOps.find(token->type) != AssignmentOps.end();
 }
+
+//type-qualifier ::= const
 
 bool Parser::isTypeQualifier(std::shared_ptr<Token> token)
 {
     return token->type == TokenType::KEYWORD ? TypeQualifiers.find(token->keyword) != TypeQualifiers.end() : false;
 }
 
+//constant-expr ::= conditional-expr
+
 ExprNode *Parser::parseConstantExpr()
 {
     return parseConditionalExpr();
 }
+
+//type-qualifier-list ::= type-qualifier | type-qualifier-list type-qualifier
 
 TypeQualifierListNode *Parser::parseTypeQualifierList()
 {
@@ -317,12 +375,18 @@ TypeQualifierListNode *Parser::parseTypeQualifierList()
     return tql;
 }
 
+//pointer ::= * `type-qualifier-list | * `type-qualifier-list pointer
+
 PointerNode *Parser::parsePointer()
 {
     if (scanner->Current()->type != TokenType::ASTERIX) return nullptr;
     scanner->Next();
     return new PointerNode(parseTypeQualifierList(), parsePointer());
 }
+
+//statement ::= labeled-statement | compound-statement
+//              | expression-statement | selection-statement
+//              | iteration-statement | jump-statement
 
 StatementNode *Parser::parseStatement()
 {
@@ -344,6 +408,8 @@ StatementNode *Parser::parseStatement()
     return reinterpret_cast<StatementNode *>(parseExprStatement());
 }
 
+//expression-statement ::= `expr ;
+
 ExprStatmentNode *Parser::parseExprStatement()
 {
     if (scanner->Current()->type == TokenType::SEMICOLON)
@@ -356,6 +422,9 @@ ExprStatmentNode *Parser::parseExprStatement()
     scanner->Next();
     return et;
 }
+
+//selection-statement ::= if (expr) statement
+//| if (expr) statement else statement
 
 SelectionStatementNode *Parser::parseSelectionStatement()
 {
@@ -374,6 +443,11 @@ SelectionStatementNode *Parser::parseSelectionStatement()
     }
     return new IfStatementNode(expr, then);
 }
+
+//jump-statement ::= goto id ;
+//| continue ;
+//| break ;
+//| return `expr ;
 
 JumpStatementNode *Parser::parseJumpStatement()
 {
@@ -404,6 +478,10 @@ JumpStatementNode *Parser::parseJumpStatement()
     return js;
 }
 
+//iteration-statement ::= while (expr) statement
+//| do statement while (expr) ;
+//| for (`expr ; `expr ; `expr) statement
+
 IterationStatementNode *Parser::parseIterationStatement()
 {
     require(TokenType::KEYWORD);
@@ -418,6 +496,8 @@ IterationStatementNode *Parser::parseIterationStatement()
 
     }
 }
+
+//for (`expr ; `expr ; `expr) statement
 
 ForStatementNode *Parser::parseForStatement()
 {
@@ -437,6 +517,8 @@ ForStatementNode *Parser::parseForStatement()
     return new ForStatementNode(init, condition, iteration, parseStatement());
 }
 
+//while (expr) statement
+
 WhileStatementNode *Parser::parseWhileStatement()
 {
     requierKeyword(Keyword::WHILE);
@@ -448,6 +530,8 @@ WhileStatementNode *Parser::parseWhileStatement()
     scanner->Next();
     return new WhileStatementNode(condition, parseStatement());
 }
+
+//do statement while (expr) ;
 
 DoWhileStatementNode *Parser::parseDoWhileStatement()
 {
@@ -466,12 +550,18 @@ DoWhileStatementNode *Parser::parseDoWhileStatement()
     return new DoWhileStatementNode(condition, body);
 }
 
+//declarator ::= `pointer direct-declarator
+
 DeclaratorNode *Parser::parseDeclarator(DeclaratorType type)
 {
     PointerNode *pointer = nullptr;
     if (scanner->Current()->type == TokenType::ASTERIX) pointer = parsePointer();
     return new DeclaratorNode(pointer, parseDirectDeclarator(type));
 }
+
+//direct-declarator ::= id | (declarator)
+//                      | direct-declarator [constant-expr]
+//                      | direct-declarator (`parameter-type-list)
 
 DirectDeclaratorNode *Parser::parseDirectDeclarator(DeclaratorType type)
 {
@@ -502,6 +592,8 @@ DirectDeclaratorNode *Parser::parseDirectDeclarator(DeclaratorType type)
     return directDeclarator;
 }
 
+//direct-declarator [constant-expr]
+
 ArrayDeclaratorNode *Parser::parseArrayDeclarator(DirectDeclaratorNode *directDeclarator)
 {
     require(TokenType::LSQUARE_BRACKET);
@@ -516,6 +608,19 @@ ArrayDeclaratorNode *Parser::parseArrayDeclarator(DirectDeclaratorNode *directDe
     scanner->Next();
     return new ArrayDeclaratorNode(directDeclarator, (ExprNode *)(ce));
 }
+
+//direct-declarator (`parameter-type-list)
+
+FunctionDeclaratorNode *Parser::parseFunctionDeclarator(DirectDeclaratorNode *directDeclarator)
+{
+    scanner->Next();
+    auto ptl = parseParameterTypeList();
+    require(TokenType::RBRACKET);
+    scanner->Next();
+    return new FunctionDeclaratorNode(directDeclarator, ptl);
+}
+
+//argument-expr-list ::= argument-expr | argument-expr-list, argument-expr
 
 ArgumentExprListNode *Parser::parseArgumentExprList()
 {
@@ -532,21 +637,32 @@ ArgumentExprListNode *Parser::parseArgumentExprList()
     return ael;
 }
 
+//storage-class-specifier ::= typedef | extern | static | auto | register
+
 bool Parser::isStorageClassSpecifier(std::shared_ptr<Token> token)
 {
     return token->type == TokenType::KEYWORD ?
            StorageClassSpecifiers.find(token->keyword) != StorageClassSpecifiers.end() : false;
 }
 
+//function-specifier ::= inline
+
 bool Parser::isFunctionSpecifier(std::shared_ptr<Token> token)
 {
     return token->type == TokenType::KEYWORD && token->keyword == Keyword::INLINE;
 }
 
+//parameter-declaration ::= declaration-specifiers declarator | declaration-specifiers `abstract-declarator
+
 ParameterDeclarationNode *Parser::parseParameterDeclaration()
 {
     return new ParameterDeclarationNode(parseDeclarationSpecifiers(), parseDeclarator(DeclaratorType::ABSTRACT_OR_NORMAL));
 }
+
+//declaration-specifiers ::= storage-class-specifier `declaration-specifier |
+//| type-specifier `declaration-specifier
+//| type-qualifier `declaration-specifier
+//| function-specifier declaration-specifier
 
 DeclarationSpecifiersNode *Parser::parseDeclarationSpecifiers()
 {
@@ -567,6 +683,8 @@ DeclarationSpecifiersNode *Parser::parseDeclarationSpecifiers()
     return ds;
 }
 
+//parameter-list ::= parameter-declaration | parameter-list , parameter-declaration
+
 ParameterList *Parser::parseParameterList()
 {
     auto pl = new ParameterList();
@@ -582,10 +700,17 @@ ParameterList *Parser::parseParameterList()
     return pl;
 }
 
+//parameter-type-list ::= parameter-list
+
 ParameterTypeList *Parser::parseParameterTypeList()
 {
     return parseParameterList();
 }
+
+//declaration-specifiers ::= storage-class-specifier `declaration-specifier |
+//| type-specifier `declaration-specifier
+//| type-qualifier `declaration-specifier
+//| function-specifier declaration-specifier
 
 bool Parser::isDeclarationSpecifier(std::shared_ptr<Token> token)
 {
@@ -593,14 +718,7 @@ bool Parser::isDeclarationSpecifier(std::shared_ptr<Token> token)
            || isFunctionSpecifier(token);
 }
 
-FunctionDeclaratorNode *Parser::parseFunctionDeclarator(DirectDeclaratorNode *directDeclarator)
-{
-    scanner->Next();
-    auto ptl = parseParameterTypeList();
-    require(TokenType::RBRACKET);
-    scanner->Next();
-    return new FunctionDeclaratorNode(directDeclarator, ptl);
-}
+//declaration ::= declaration-specifiers `init-declarator-list ;
 
 DeclarationNode * Parser::parseDeclaration(DeclarationSpecifiersNode *declarationSpecifiers,
                                            InitDeclaratorNode *declarator)
@@ -618,6 +736,8 @@ DeclarationNode * Parser::parseDeclaration(DeclarationSpecifiersNode *declaratio
     return new DeclarationNode(ds, idl);
 }
 
+//init-declarator-list ::= init-declarator | init-declarator-list , init-declarator
+
 InitDeclaratorListNode *Parser::parseInitDeclaratorList(InitDeclaratorNode *declarator)
 {
     auto idl = new InitDeclaratorListNode();
@@ -634,6 +754,8 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList(InitDeclaratorNode *decl
     return idl;
 }
 
+//init-declarator ::= declarator | declaratxor = initializer
+
 InitDeclaratorNode *Parser::parseInitDeclarator()
 {
     auto dcltr = parseDeclarator(DeclaratorType::NORMAL);
@@ -645,6 +767,8 @@ InitDeclaratorNode *Parser::parseInitDeclarator()
     }
     return new InitDeclaratorNode(dcltr, initializer);
 }
+
+//initializer ::= assignment-expr | {initializer-list} | {initializer-list , }
 
 InitializerNode *Parser::parseInitializer()
 {
@@ -658,6 +782,8 @@ InitializerNode *Parser::parseInitializer()
     return (InitializerNode *)parseAssignmentExpr();
 }
 
+//labeled-statement ::= id : statement
+
 LabelStatementNode *Parser::parseLabelStatement()
 {
     require(TokenType::ID);
@@ -667,6 +793,8 @@ LabelStatementNode *Parser::parseLabelStatement()
     scanner->Next();
     return new LabelStatementNode(id, parseStatement());
 }
+
+//compound-statement ::= {`block-item-list}
 
 CompoundStatement *Parser::parseCompoundStatement()
 {
@@ -678,6 +806,8 @@ CompoundStatement *Parser::parseCompoundStatement()
     return new CompoundStatement(blockItemList);
 }
 
+//block-item-list ::= block-item | block-item-list block-item
+
 BlockItemListNode *Parser::parseBlockItemList()
 {
     auto blockItemList = new BlockItemListNode();
@@ -688,10 +818,16 @@ BlockItemListNode *Parser::parseBlockItemList()
     return blockItemList;
 }
 
+//block-item ::= declaration | statement
+
 BlockItemNode *Parser::parseBlockItem()
 {
     return (isDeclarationSpecifier(scanner->Current()) ? (BlockItemNode *)parseDeclaration() : (BlockItemNode *)parseStatement());
 }
+
+//enum-specifier ::= enum `id {enumerator-list}
+//| enum `id {enumerator-list , }
+//| enum id
 
 EnumSpecifierNode *Parser::parseEnumSpecifier()
 {
@@ -714,6 +850,8 @@ EnumSpecifierNode *Parser::parseEnumSpecifier()
     return new EnumSpecifierNode(id, list);
 }
 
+//enumerator-list ::= enumerator | enumerator-list , enumerator
+
 EnumeratorList *Parser::parseEnumeratorList()
 {
     auto list = new EnumeratorList();
@@ -725,6 +863,8 @@ EnumeratorList *Parser::parseEnumeratorList()
     return list;
 }
 
+//enumerator ::= enumeration-constant, enumeration-constant = constant-expr
+
 EnumeratorNode *Parser::parseEnumerator()
 {
     require(TokenType::ID);
@@ -735,11 +875,17 @@ EnumeratorNode *Parser::parseEnumerator()
     return new EnumeratorNode(id, nullptr);
 }
 
+// a specifier that consists of 1 keyword: type-qualifier | type-specifier
+// | storage-class-specifier | function-specifier
+
 bool Parser::isSimpleSpecifier(std::shared_ptr<Token> token)
 {
     return isTypeQualifier(token) || isTypeSpecifier(token) ||
             isStorageClassSpecifier(token) || isFunctionSpecifier(token);
 }
+
+//struct-specifier ::= struct `id {struct-declaration-list}
+//| struct id
 
 StructSpecifierNode *Parser::parseStructSpecifier()
 {
@@ -758,6 +904,8 @@ StructSpecifierNode *Parser::parseStructSpecifier()
     return new StructSpecifierNode(id, nullptr);
 }
 
+//struct-declaration-list ::= struct-declaration | struct-declaration-list struct-declaration
+
 StructDeclarationListNode *Parser::parseStructDeclarationList()
 {
     auto sdl = new StructDeclarationListNode();
@@ -769,6 +917,8 @@ StructDeclarationListNode *Parser::parseStructDeclarationList()
     return sdl;
 }
 
+//struct-declaration ::= specifier-qualifier-list struct-declarator-list ;
+
 StructDeclarationNode *Parser::parseStructDeclaration()
 {
     auto structDecl = new StructDeclarationNode(parseSpecifierQualifierList(), parseStructDeclaratorList());
@@ -776,6 +926,8 @@ StructDeclarationNode *Parser::parseStructDeclaration()
     scanner->Next();
     return structDecl;
 }
+
+//struct-declarator ::= declarator | `declarator : constant-expr
 
 StructDeclaratorNode *Parser::parseStructDeclarator()
 {
@@ -787,6 +939,7 @@ StructDeclaratorNode *Parser::parseStructDeclarator()
     return new StructDeclaratorNode(declarator, nullptr);
 }
 
+//struct-declarator-list ::= struct-declarator | struct-declarator-list , struct-declarator
 
 StructDeclaratorListNode *Parser::parseStructDeclaratorList()
 {
@@ -797,6 +950,9 @@ StructDeclaratorListNode *Parser::parseStructDeclaratorList()
     } while (scanner->Current()->type == TokenType::COMMA && scanner->Next());
     return sdl;
 }
+
+//specifier-qualifier-list ::= type-specifier `specifier-qualifier-list
+//| type-qualifier `specifier-qualifier-list
 
 SpecifierQualifierListNode *Parser::parseSpecifierQualifierList()
 {
@@ -813,6 +969,8 @@ SpecifierQualifierListNode *Parser::parseSpecifierQualifierList()
     return tnn;
 }
 
+//initializer-list ::= `designation initializer | initializer-list , `designation initializer
+
 InitializerListNode *Parser::parseInitializerList()
 {
     require(TokenType::LCURLY_BRACKET);
@@ -826,6 +984,8 @@ InitializerListNode *Parser::parseInitializerList()
     return il;
 }
 
+//designation ::= designator-list =
+
 DesignationNode *Parser::parseDesignation()
 {
     auto designatorList = parseDesignatorList();
@@ -833,6 +993,8 @@ DesignationNode *Parser::parseDesignation()
     scanner->Next();
     return new DesignationNode(designatorList);
 }
+
+//designator-list ::= designator | designator-list designator
 
 DesignatorListNode *Parser::parseDesignatorList()
 {
@@ -843,6 +1005,8 @@ DesignatorListNode *Parser::parseDesignatorList()
     } while(scanner->Current()->type == TokenType::LSQUARE_BRACKET || scanner->Current()->type == TokenType::DOT);
     return dl;
 }
+
+//designator ::= [constant-expr] | . id
 
 DesignatorNode *Parser::parseDesignator()
 {
@@ -862,12 +1026,16 @@ DesignatorNode *Parser::parseDesignator()
     return smd;
 }
 
+// `designation initializer
+
 DesignatedInitializerNode *Parser::parseDesignatedInitializer()
 {
     if (scanner->Current()->type == TokenType::DOT || scanner->Current()->type == TokenType::LSQUARE_BRACKET)
         return new DesignatedInitializerNode(parseDesignation(), parseInitializer());
     return new DesignatedInitializerNode(nullptr, parseInitializer());
 }
+
+//translation-unit ::= external-declaration | translation-unit external-declaration
 
 TranslationUnitNode *Parser::parseTranslationUnit()
 {
@@ -876,6 +1044,8 @@ TranslationUnitNode *Parser::parseTranslationUnit()
         tu->Add(parseExternalDeclaration());
     return tu;
 }
+
+//external-declaration ::= function-definition | declaration
 
 ExternalDeclarationNode *Parser::parseExternalDeclaration()
 {

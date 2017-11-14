@@ -122,8 +122,8 @@ private:
     DesignatedInitializerNode  *parseDesignatedInitializer();
     TranslationUnitNode        *parseTranslationUnit();
     ExternalDeclarationNode    *parseExternalDeclaration();
-    ExprNode *parseGeneral(Parser *self, ExprNode *(Parser::*f)(),
-                                  std::unordered_set<TokenType> types);
+    ExprNode *parseBinoOps(Parser *self, ExprNode *(Parser::*f)(),
+                           std::unordered_set<TokenType> types);
     bool isTypeSpecifier(std::shared_ptr<Token> token);
     bool isUnaryOp(std::shared_ptr<Token> token);
     bool isAssignmentOp(std::shared_ptr<Token> token);

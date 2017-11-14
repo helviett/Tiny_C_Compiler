@@ -5,9 +5,6 @@
 #ifndef TINY_C_COMPILER_DECLS_H
 #define TINY_C_COMPILER_DECLS_H
 
-//direct-declarator ::= id | direct-declarator [constant-expr]
-//                      | direct-declarator (parameter-type-list)
-
 #include "node.h"
 #include "pointer.h"
 #include "expressions.h"
@@ -56,8 +53,6 @@ private:
     ParameterTypeList    *params;
 };
 
-//parameter-declaration ::= declaration-specifiers declarator | declaration-specifiers `abstract-declarator
-
 class ParameterDeclarationNode: public Node
 {
 public:
@@ -69,15 +64,11 @@ private:
     DeclaratorNode *declarator;
 };
 
-//parameter-type-list ::= parameter-list | parameter-list , ...
-
 class ParameterTypeList: public Node
 {
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
-
-//parameter-list ::= parameter-declaration | parameter-list , parameter-declaration
 
 class ParameterList: public ParameterTypeList
 {
@@ -89,7 +80,6 @@ protected:
     std::list<ParameterDeclarationNode *> list;
 };
 
-//declaration ::= declaration-specifiers `init-declarator-list ;
 class InitDeclaratorListNode;
 
 class DeclarationNode: public Node

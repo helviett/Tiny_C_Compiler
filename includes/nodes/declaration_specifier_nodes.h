@@ -63,9 +63,6 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
-//specifier-qualifier-list ::= type-specifier `specifier-qualifier-list
-//| type-qualifier `specifier-qualifier-list
-
 class SpecifierQualifierListNode: public Node
 {
 public:
@@ -75,8 +72,6 @@ public:
 private:
     std::list<TypeSpecifierQualifierNode *> list;
 };
-
-//type-qualifier-list ::= type-qualifier | type-qualifier-list type-qualifier
 
 class TypeQualifierListNode: public Node
 {
