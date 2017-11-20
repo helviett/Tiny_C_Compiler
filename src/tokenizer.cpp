@@ -61,6 +61,7 @@ std::shared_ptr<Token> Tokenizer::Next()
 
 std::shared_ptr<Token> Tokenizer::Current()
 {
+    auto debugging = currentToken.get();
     return currentToken;
 }
 

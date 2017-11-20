@@ -789,7 +789,7 @@ DeclarationNode * Parser::parseDeclaration(DeclarationSpecifiersNode *declaratio
         scanner->Next();
         return new DeclarationNode(ds, nullptr);
     }
-    auto idl = parseInitDeclaratorList(declarator);
+    auto idl = parseInitDeclaratorList(ds, declarator);
     require(TokenType::SEMICOLON);
     scanner->Next();
     return new DeclarationNode(ds, idl);
@@ -797,7 +797,7 @@ DeclarationNode * Parser::parseDeclaration(DeclarationSpecifiersNode *declaratio
 
 //init-declarator-list ::= init-declarator | init-declarator-list , init-declarator
 
-InitDeclaratorListNode *Parser::parseInitDeclaratorList(InitDeclaratorNode *declarator)
+InitDeclaratorListNode *Parser::parseInitDeclaratorList(DeclarationSpecifiersNode *declarationSpecifiers, InitDeclaratorNode *declarator)
 {
     auto idl = new InitDeclaratorListNode();
     if (declarator)
@@ -808,17 +808,19 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList(InitDeclaratorNode *decl
     }
     do
     {
-        idl->Add(parseInitDeclarator());
+        idl->Add(parseInitDeclarator(declarationSpecifiers));
     } while (scanner->Current()->type == TokenType::COMMA && scanner->Next());
     return idl;
 }
 
 //init-declarator ::= declarator | declaratxor = initializer
 
-InitDeclaratorNode *Parser::parseInitDeclarator()
+InitDeclaratorNode *Parser::parseInitDeclarator(DeclarationSpecifiersNode *declarationSpecifiers)
 {
     auto dcltr = new DeclaratorNode();
-    // TODO pass an initial type of declarator
+    Type **type = new Type *[1];
+    *type = TypeBuilder::Build(declarationSpecifiers);
+    dcltr->SetType(type);
     parseDeclarator(DeclaratorKind::NORMAL, dcltr);
     InitializerNode *initializer = nullptr;
     if (scanner->Current()->type == TokenType::ASSIGNMENT)
@@ -1118,7 +1120,7 @@ ExternalDeclarationNode *Parser::parseExternalDeclaration()
     if (scanner->Current()->type == TokenType::SEMICOLON)
     {
         scanner->Next();
-//        return (ExternalDeclarationNode *)new DeclarationNode(ds, nullptr);
+        return (ExternalDeclarationNode *)new DeclarationNode(ds, nullptr);
     }
     auto declarator = new DeclaratorNode();
     declarator->SetType(type);

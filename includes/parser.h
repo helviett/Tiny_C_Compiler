@@ -101,8 +101,8 @@ private:
     ParameterTypeList          *parseParameterTypeList();
     DeclarationNode            *parseDeclaration(DeclarationSpecifiersNode *declarationSpecifiers = nullptr,
                                                  InitDeclaratorNode *declarator = nullptr);
-    InitDeclaratorListNode     *parseInitDeclaratorList(InitDeclaratorNode *declarator = nullptr);
-    InitDeclaratorNode         *parseInitDeclarator();
+    InitDeclaratorListNode     *parseInitDeclaratorList(DeclarationSpecifiersNode *declarationSpecifiers, InitDeclaratorNode *declarator = nullptr);
+    InitDeclaratorNode         *parseInitDeclarator(DeclarationSpecifiersNode *declarationSpecifiers);
     InitializerNode            *parseInitializer();
     LabelStatementNode         *parseLabelStatement();
     CompoundStatement          *parseCompoundStatement();

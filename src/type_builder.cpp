@@ -57,7 +57,7 @@ Type *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
                 case Keyword::VOID:
                     if (kind != NONE) throw "";
                     kind = VOID;
-                    if (!longTimes) throw "";
+                    if (longTimes) throw "";
                     if (isSinged != DEFAULT) throw "";
                     break;
                 case Keyword::CHAR:
