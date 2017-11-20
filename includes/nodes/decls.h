@@ -15,17 +15,13 @@ class DirectDeclaratorNode;
 class DeclaratorNode: public Node
 {
 public:
-    DeclaratorNode () { type = nullptr; }//type = new Type *[1]; *type = nullptr; };
-    DeclaratorNode(PointerNode *pointer, DirectDeclaratorNode *directDeclarator):
-            pointer(pointer), directDeclarator(directDeclarator) {}
+    DeclaratorNode () { type = nullptr; }
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void SetType(Type **type);
     Type **GetType() const;
     void SetName(IdNode *name);
     IdNode *GetName() const;
 private:
-    DirectDeclaratorNode *directDeclarator;
-    PointerNode *pointer;
     Type **type;
     IdNode *name;
 };

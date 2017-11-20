@@ -817,7 +817,7 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList(InitDeclaratorNode *decl
 
 InitDeclaratorNode *Parser::parseInitDeclarator()
 {
-    auto dcltr = new DeclaratorNode;
+    auto dcltr = new DeclaratorNode();
     // TODO pass an initial type of declarator
     parseDeclarator(DeclaratorKind::NORMAL, dcltr);
     InitializerNode *initializer = nullptr;
