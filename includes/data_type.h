@@ -30,7 +30,6 @@ public:
     TypeKind GetTypeKind() const;
     void SetTypeKind(TypeKind typeKind);
     virtual void Print(std::ostream &os, std::string indent, bool isTail) = 0;
-    ~Type() { std::cout << "I am fucking dead" << std::endl; }
 protected:
     TypeKind kind;
 };
@@ -42,7 +41,6 @@ public:
     BuiltInTypeKind GetBuiltIntTypeKind() const;
     void SetBuiltIntTypeKind(BuiltInTypeKind typeKind);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
-    ~BuiltInType() { std::cout << "I am fucking dead" << std::endl; }
 private:
     BuiltInTypeKind builtInTypeKind;
 };
@@ -60,24 +58,24 @@ class ExprNode;
 class ArrayType: public Type
 {
 public:
-    explicit ArrayType(Type **valueType, ExprNode *size);
+    explicit ArrayType(Type *valueType, ExprNode *size);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
-    Type **GetValueType() const;
-    void SetValueType(Type **valueType);
+    Type *GetValueType() const;
+    void SetValueType(Type *valueType);
 private:
-    Type **valueType;
+    Type *valueType;
     ExprNode *size;
 };
 
 class FunctionType: public Type
 {
 public:
-    explicit FunctionType(Type **returnType);
+    explicit FunctionType(Type *returnType);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
-    Type **GetReturnType() const;
-    void SetReturnType(Type **returnType);
+    Type *GetReturnType() const;
+    void SetReturnType(Type *returnType);
 private:
-    Type **returnType;
+    Type *returnType;
     // TODO SymTable *params;
 };
 
@@ -85,12 +83,12 @@ class PointerType: public Type
 {
 public:
     // double pointer mean that target of a pointer may be unconstructed yet e.g. in complex decls
-    explicit PointerType(Type **target);
+    explicit PointerType(Type *target);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
-    Type **GetTarget() const;
-    void SetTarget(Type **target);
+    Type *GetTarget() const;
+    void SetTarget(Type *target);
 private:
-    Type **target;
+    Type *target;
     // TODO TypeQualifiers or so;
 };
 

@@ -356,16 +356,15 @@ void DeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << "Declarator" << std::endl;
     indent.append(isTail ? "    " : "│   ");
     if (name) name->Print(os, indent, false);
-    auto lol = *type;
-    lol->Print(os, indent, true);
+    type->Print(os, indent, true);
 }
 
-void DeclaratorNode::SetType(Type **type)
+void DeclaratorNode::SetType(Type *type)
 {
     this->type = type;
 }
 
-Type **DeclaratorNode::GetType() const
+Type *DeclaratorNode::GetType() const
 {
     return type;
 }

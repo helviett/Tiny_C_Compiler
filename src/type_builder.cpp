@@ -62,7 +62,7 @@ Type *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
                     break;
                 case Keyword::CHAR:
                     if (scalarKind != UNKNOWN) throw "";
-                    scalarKind = INTEGER;
+                    scalarKind = CHAR;
                     if (kind != SCALAR && kind != NONE) throw "";
                     kind = SCALAR;
                 // TODO static, auto, extern

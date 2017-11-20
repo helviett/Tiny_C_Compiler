@@ -17,12 +17,12 @@ class DeclaratorNode: public Node
 public:
     DeclaratorNode () { type = nullptr; }
     void Print(std::ostream &os, std::string ident, bool isTail) override;
-    void SetType(Type **type);
-    Type **GetType() const;
+    void SetType(Type *type);
+    Type *GetType() const;
     void SetName(IdNode *name);
     IdNode *GetName() const;
 private:
-    Type **type;
+    Type *type;
     IdNode *name;
 };
 
