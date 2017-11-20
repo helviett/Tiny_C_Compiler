@@ -319,7 +319,9 @@ TypeNameNode *Parser::parseTypeName()
 {
     auto tnn = parseSpecifierQualifierList();
     if (tnn->Size() == 0) throw NoDeclarationSpecifiers(scanner->Current());
-    auto abstractDeclarator = parseDeclarator(DeclaratorType::ABSTRACT);
+    DeclaratorNode *abstractDeclarator = new DeclaratorNode();
+    // TODO TypeBuilder::Build(tnn);
+    parseDeclarator(DeclaratorKind::ABSTRACT, abstractDeclarator);
     return new TypeNameNode(tnn, abstractDeclarator);
 }
 
@@ -373,15 +375,6 @@ TypeQualifierListNode *Parser::parseTypeQualifierList()
         t = scanner->Next();
     }
     return tql;
-}
-
-//pointer ::= * `type-qualifier-list | * `type-qualifier-list pointer
-
-PointerNode *Parser::parsePointer()
-{
-    if (scanner->Current()->type != TokenType::ASTERIX) return nullptr;
-    scanner->Next();
-    return new PointerNode(parseTypeQualifierList(), parsePointer());
 }
 
 //statement ::= labeled-statement | compound-statement
@@ -550,75 +543,137 @@ DoWhileStatementNode *Parser::parseDoWhileStatement()
     return new DoWhileStatementNode(condition, body);
 }
 
-//declarator ::= `pointer direct-declarator
-
-DeclaratorNode *Parser::parseDeclarator(DeclaratorType type)
+void Parser::parsePointer(DeclaratorNode *declarator)
 {
-    PointerNode *pointer = nullptr;
-    if (scanner->Current()->type == TokenType::ASTERIX) pointer = parsePointer();
-    return new DeclaratorNode(pointer, parseDirectDeclarator(type));
+    if (scanner->Current()->type != TokenType::ASTERIX) return;
+    scanner->Next();
+    auto tql = parseTypeQualifierList(); // TODO that's what PointerType gonna store
+    auto pptr = new Type *[1];
+    *pptr = new PointerType(declarator->GetType());
+    declarator->SetType((Type **)pptr);
+    parsePointer(declarator);
 }
 
-//direct-declarator ::= id | (declarator)
-//                      | direct-declarator [constant-expr]
-//                      | direct-declarator (`parameter-type-list)
 
-DirectDeclaratorNode *Parser::parseDirectDeclarator(DeclaratorType type)
+void Parser::parseDeclarator(DeclaratorKind kind, DeclaratorNode *declarator)
+{
+    parsePointer(declarator);
+    parseDirectDeclarator(kind, declarator);
+}
+
+void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarator)
 {
     bool gotId = false;
-    DirectDeclaratorNode *directDeclarator = nullptr;
+    Type **lastType = nullptr;
+    DeclaratorNode *newDecl = nullptr;
     if (scanner->Current()->type == TokenType::LBRACKET)
     {
         scanner->Next();
-        directDeclarator = (DirectDeclaratorNode *)(parseDeclarator(type));
+        newDecl = new DeclaratorNode();
+        parseDeclarator(kind, newDecl);
+        auto type = newDecl->GetType();
+
+        while (type)
+        {
+            switch ((*type)->GetTypeKind())
+            {
+                case TypeKind::POINTER:
+                    lastType = type;
+                    type = ((PointerType *)(*type))->GetTarget();
+                    break;
+                case TypeKind::ARRAY:
+                    lastType = type;
+                    type = ((ArrayType *)(*type))->GetValueType();
+                    break;
+                case TypeKind::FUNCTION:
+                    lastType = type;
+                    type = ((FunctionType *)(*type))->GetReturnType();
+                    break;
+            }
+        }
         gotId = true;
         require(TokenType::RBRACKET);
         scanner->Next();
     }
 
-    if (type == DeclaratorType::NORMAL && !gotId) require(TokenType::ID);
-    if (type != DeclaratorType::ABSTRACT && scanner->Current()->type == TokenType::ID)
+    if (kind == DeclaratorKind::NORMAL && !gotId) require(TokenType::ID);
+    if (kind != DeclaratorKind::ABSTRACT && scanner->Current()->type == TokenType::ID)
     {
-        directDeclarator = (DirectDeclaratorNode *)new IdNode(scanner->Current());
+        declarator->SetName(new IdNode(scanner->Current()));
         scanner->Next();
     }
     while (scanner->Current()->type == TokenType::LSQUARE_BRACKET || scanner->Current()->type == TokenType::LBRACKET)
     {
         if (scanner->Current()->type == TokenType::LSQUARE_BRACKET)
-            directDeclarator = parseArrayDeclarator(directDeclarator);
+            parseArrayDeclarator(declarator);
         else
-            directDeclarator = parseFunctionDeclarator(directDeclarator);
+            parseFunctionDeclarator(declarator);
     }
-    return directDeclarator;
+    if (lastType)
+    {
+        switch ((*lastType)->GetTypeKind())
+        {
+            case TypeKind::POINTER:
+                ((PointerType *)(*lastType))->SetTarget(declarator->GetType());
+                break;
+            case TypeKind::ARRAY:
+                ((ArrayType *)(*lastType))->SetValueType(declarator->GetType());
+                break;
+            case TypeKind::FUNCTION:
+                ((FunctionType *)(*lastType))->SetReturnType(declarator->GetType());
+                break;
+        }
+        declarator->SetType(newDecl->GetType());
+    }
 }
 
-//direct-declarator [constant-expr]
 
-ArrayDeclaratorNode *Parser::parseArrayDeclarator(DirectDeclaratorNode *directDeclarator)
+void Parser::parseFunctionDeclarator(DeclaratorNode *declarator)
+{
+    scanner->Next();
+    auto ptl = parseParameterTypeList(); // TODO FunctionType must store a SymTable of this
+    require(TokenType::RBRACKET);
+    auto ft = new Type *[1];
+    *ft = new FunctionType(declarator->GetType());
+    declarator->SetType(ft);
+    scanner->Next();
+}
+
+void Parser::parseArrayDeclarator(DeclaratorNode *declarator)
 {
     require(TokenType::LSQUARE_BRACKET);
     scanner->Next();
+    auto at = new Type *[1];
     if (scanner->Current()->type == TokenType::RSQUARE_BRACKET)
     {
         scanner->Next();
-        return new ArrayDeclaratorNode(directDeclarator, nullptr);
+        *at = new ArrayType(declarator->GetType(), nullptr);
+        declarator->SetType(at);
+        return;
     }
     auto ce = parseConstantExpr();
     require(TokenType::RSQUARE_BRACKET);
     scanner->Next();
-    return new ArrayDeclaratorNode(directDeclarator, (ExprNode *)(ce));
+
+    *at = new ArrayType(declarator->GetType(), ce);
+    declarator->SetType(at);
 }
 
-//direct-declarator (`parameter-type-list)
+//pointer ::= * `type-qualifier-list | * `type-qualifier-list pointer
 
-FunctionDeclaratorNode *Parser::parseFunctionDeclarator(DirectDeclaratorNode *directDeclarator)
+PointerNode *Parser::parsePointer()
 {
+    if (scanner->Current()->type != TokenType::ASTERIX) return nullptr;
     scanner->Next();
-    auto ptl = parseParameterTypeList();
-    require(TokenType::RBRACKET);
-    scanner->Next();
-    return new FunctionDeclaratorNode(directDeclarator, ptl);
+    return new PointerNode(parseTypeQualifierList(), parsePointer());
 }
+
+//declarator ::= `pointer direct-declarator
+
+//direct-declarator ::= id | (declarator)
+//                      | direct-declarator [constant-expr]
+//                      | direct-declarator (`parameter-type-list)
+
 
 //argument-expr-list ::= argument-expr | argument-expr-list, argument-expr
 
@@ -656,7 +711,10 @@ bool Parser::isFunctionSpecifier(std::shared_ptr<Token> token)
 
 ParameterDeclarationNode *Parser::parseParameterDeclaration()
 {
-    return new ParameterDeclarationNode(parseDeclarationSpecifiers(), parseDeclarator(DeclaratorType::ABSTRACT_OR_NORMAL));
+    auto declarator = new DeclaratorNode();
+    parseDeclarator(DeclaratorKind::ABSTRACT_OR_NORMAL, declarator);
+    // TODO remove declspecifiers from parameter decl
+    return new ParameterDeclarationNode(parseDeclarationSpecifiers(),  declarator);
 }
 
 //declaration-specifiers ::= storage-class-specifier `declaration-specifier |
@@ -758,7 +816,9 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList(InitDeclaratorNode *decl
 
 InitDeclaratorNode *Parser::parseInitDeclarator()
 {
-    auto dcltr = parseDeclarator(DeclaratorType::NORMAL);
+    auto dcltr = new DeclaratorNode;
+    // TODO pass an initial type of declarator
+    parseDeclarator(DeclaratorKind::NORMAL, dcltr);
     InitializerNode *initializer = nullptr;
     if (scanner->Current()->type == TokenType::ASSIGNMENT)
     {
@@ -933,7 +993,9 @@ StructDeclaratorNode *Parser::parseStructDeclarator()
 {
     if (scanner->Current()->type == TokenType::COLON && scanner->Next())
         return new StructDeclaratorNode(nullptr, (ExprNode *)parseConstantExpr());
-    auto declarator = parseDeclarator(DeclaratorType::NORMAL);
+    auto declarator = new DeclaratorNode;
+    // TODO lots of work on struct
+    parseDeclarator(DeclaratorKind::NORMAL, declarator);
     if (scanner->Current()->type == TokenType::COLON && scanner->Next())
         return new StructDeclaratorNode(declarator, (ExprNode *)parseConstantExpr());
     return new StructDeclaratorNode(declarator, nullptr);
@@ -1050,12 +1112,17 @@ TranslationUnitNode *Parser::parseTranslationUnit()
 ExternalDeclarationNode *Parser::parseExternalDeclaration()
 {
     auto ds = parseDeclarationSpecifiers();
+    Type **type = new Type*[1];
+    *type = TypeBuilder::Build(ds);
     if (scanner->Current()->type == TokenType::SEMICOLON)
     {
         scanner->Next();
-        return (ExternalDeclarationNode *)new DeclarationNode(ds, nullptr);
+//        return (ExternalDeclarationNode *)new DeclarationNode(ds, nullptr);
     }
-    auto declarator = parseDeclarator(DeclaratorType::NORMAL);
+    auto declarator = new DeclaratorNode();
+    declarator->SetType(type);
+    parseDeclarator(DeclaratorKind::NORMAL, declarator);
+
     if (scanner->Current()->type == TokenType::LCURLY_BRACKET)
         return (ExternalDeclarationNode *)new FunctionDefinitionNode(ds, declarator, parseCompoundStatement());
     if (scanner->Current()->type == TokenType::ASSIGNMENT)

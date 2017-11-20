@@ -5,6 +5,7 @@
 #ifndef TINY_C_COMPILER_DECLS_H
 #define TINY_C_COMPILER_DECLS_H
 
+#include <data_type.h>
 #include "node.h"
 #include "pointer.h"
 #include "expressions.h"
@@ -14,13 +15,19 @@ class DirectDeclaratorNode;
 class DeclaratorNode: public Node
 {
 public:
-    DeclaratorNode () = default;
+    DeclaratorNode () { type = nullptr; }//type = new Type *[1]; *type = nullptr; };
     DeclaratorNode(PointerNode *pointer, DirectDeclaratorNode *directDeclarator):
             pointer(pointer), directDeclarator(directDeclarator) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    void SetType(Type **type);
+    Type **GetType() const;
+    void SetName(IdNode *name);
+    IdNode *GetName() const;
 private:
     DirectDeclaratorNode *directDeclarator;
     PointerNode *pointer;
+    Type **type;
+    IdNode *name;
 };
 
 class DirectDeclaratorNode: public DeclaratorNode

@@ -9,6 +9,11 @@
 #include "../token.h"
 #include <list>
 
+enum class SpecifierKind
+{
+    SIMPLE, COMPLEX
+};
+
 class TypeSpecifiers;
 class TypeQualifierNode;
 
@@ -16,13 +21,17 @@ class DeclarationSpecifierNode: public Node
 {
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
+    SpecifierKind Kind();
+protected:
+    SpecifierKind kind;
 };
 
 class SimpleSpecifier: public DeclarationSpecifierNode
 {
 public:
-    explicit SimpleSpecifier(std::shared_ptr<Token> specifier): value(specifier) {}
+    explicit SimpleSpecifier(std::shared_ptr<Token> specifier): value(specifier) { kind = SpecifierKind::SIMPLE; }
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    std::shared_ptr<Token> Value();
 protected:
     std::shared_ptr<Token> value;
 };
@@ -90,6 +99,7 @@ public:
     DeclarationSpecifiersNode(std::initializer_list<DeclarationSpecifierNode *> initializerList);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(DeclarationSpecifierNode *specifier);
+    std::list<DeclarationSpecifierNode *> &List();
     uint64_t Size();
 private:
     std::list<DeclarationSpecifierNode *> list;

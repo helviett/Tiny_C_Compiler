@@ -355,22 +355,29 @@ void DeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << indent << (isTail ? "└── " : "├── ");
     os << "Declarator" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    if (pointer)
-    {
-        if (directDeclarator)
-        {
-            pointer->Print(os, indent, false);
-            directDeclarator->Print(os, indent, true);
-            return;
-        }
-        pointer->Print(os, indent, true);
-        return;
-    }
-    else
-    {
-        if (directDeclarator)
-            directDeclarator->Print(os, indent, true);
-    }
+    if (name) name->Print(os, indent, false);
+    auto lol = *type;
+    lol->Print(os, indent, true);
+}
+
+void DeclaratorNode::SetType(Type **type)
+{
+    this->type = type;
+}
+
+Type **DeclaratorNode::GetType() const
+{
+    return type;
+}
+
+void DeclaratorNode::SetName(IdNode *name)
+{
+    this->name = name;
+}
+
+IdNode *DeclaratorNode::GetName() const
+{
+    return name;
 }
 
 void ArrayDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -460,6 +467,11 @@ DeclarationSpecifiersNode::DeclarationSpecifiersNode(std::initializer_list<Decla
 {
     for (auto it : initializerList)
         Add(it);
+}
+
+std::list<DeclarationSpecifierNode *> &DeclarationSpecifiersNode::List()
+{
+    return list;
 }
 
 void ParameterList::Print(std::ostream &os, std::string indent, bool isTail)
@@ -684,6 +696,11 @@ void SimpleSpecifier::Print(std::ostream &os, std::string indent, bool isTail)
     os << value->text << std::endl;
 }
 
+std::shared_ptr<Token> SimpleSpecifier::Value()
+{
+    return value;
+}
+
 void StructDeclaratorListNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     if (list.empty()) return;
@@ -887,4 +904,9 @@ void TranslationUnitNode::Add(ExternalDeclarationNode *initDeclarator)
 uint64_t TranslationUnitNode::Size()
 {
     return list.size();
+}
+
+SpecifierKind DeclarationSpecifierNode::Kind()
+{
+    return kind;
 }

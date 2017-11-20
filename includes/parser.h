@@ -8,6 +8,7 @@
 #include "tokenizer.h"
 #include "syntax_tree.h"
 #include "symbols.h"
+#include "type_builder.h"
 #include <functional>
 #include <stack>
 #include <map>
@@ -45,7 +46,7 @@ static std::unordered_set<TokenType> UnaryOps =
     TokenType::BITWISE_AND
 };
 
-enum class DeclaratorType
+enum class DeclaratorKind
 {
     ABSTRACT, NORMAL, ABSTRACT_OR_NORMAL
 };
@@ -88,9 +89,11 @@ private:
     ForStatementNode           *parseForStatement();
     WhileStatementNode         *parseWhileStatement();
     DoWhileStatementNode       *parseDoWhileStatement();
-    DeclaratorNode             *parseDeclarator(DeclaratorType type);
-    DirectDeclaratorNode       *parseDirectDeclarator(DeclaratorType type);
-    ArrayDeclaratorNode        *parseArrayDeclarator(DirectDeclaratorNode *directDeclarator);
+    void                        parseDeclarator(DeclaratorKind kind, DeclaratorNode *declarator);
+    void                        parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarator);
+    void                        parsePointer(DeclaratorNode *declarator);
+    void                        parseFunctionDeclarator(DeclaratorNode *declarator);
+    void                        parseArrayDeclarator(DeclaratorNode *declarator);
     ArgumentExprListNode       *parseArgumentExprList();
     ParameterDeclarationNode   *parseParameterDeclaration();
     DeclarationSpecifiersNode  *parseDeclarationSpecifiers();
@@ -101,7 +104,6 @@ private:
     InitDeclaratorListNode     *parseInitDeclaratorList(InitDeclaratorNode *declarator = nullptr);
     InitDeclaratorNode         *parseInitDeclarator();
     InitializerNode            *parseInitializer();
-    FunctionDeclaratorNode     *parseFunctionDeclarator(DirectDeclaratorNode *directDeclarator);
     LabelStatementNode         *parseLabelStatement();
     CompoundStatement          *parseCompoundStatement();
     BlockItemListNode          *parseBlockItemList();

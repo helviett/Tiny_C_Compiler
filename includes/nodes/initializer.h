@@ -14,7 +14,10 @@ class InitDeclaratorNode: public Node
 {
 public:
     InitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer):
-            declarator(declarator), initializer(initializer) {}
+            declarator(declarator), initializer(initializer) {
+        auto decl = this->declarator;
+        auto decl1 = decl;
+    }
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     DeclaratorNode *declarator;
