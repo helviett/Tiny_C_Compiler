@@ -1,0 +1,8 @@
+//
+// Created by keltar on 11/16/17.
+//
+
+#ifndef TINY_C_COMPILER_TYPE_BUILDER_H
+#define TINY_C_COMPILER_TYPE_BUILDER_H
+
+#endif //TINY_C_COMPILER_TYPE_BUILDER_H
