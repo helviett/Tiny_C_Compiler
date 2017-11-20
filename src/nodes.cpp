@@ -501,7 +501,6 @@ void ParameterDeclarationNode::Print(std::ostream &os, std::string indent, bool 
     os << indent << (isTail ? "└── " : "├── ");
     os << "param" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    specifiers->Print(os, indent, false);
     declarator->Print(os, indent, true);
 }
 

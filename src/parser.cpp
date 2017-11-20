@@ -712,9 +712,10 @@ bool Parser::isFunctionSpecifier(std::shared_ptr<Token> token)
 ParameterDeclarationNode *Parser::parseParameterDeclaration()
 {
     auto declarator = new DeclaratorNode();
+    Type **type = new Type *[1];
+    *type = TypeBuilder::Build(parseDeclarationSpecifiers());
     parseDeclarator(DeclaratorKind::ABSTRACT_OR_NORMAL, declarator);
-    // TODO remove declspecifiers from parameter decl
-    return new ParameterDeclarationNode(parseDeclarationSpecifiers(),  declarator);
+    return new ParameterDeclarationNode(declarator);
 }
 
 //declaration-specifiers ::= storage-class-specifier `declaration-specifier |

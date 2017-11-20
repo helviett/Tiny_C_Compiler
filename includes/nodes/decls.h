@@ -63,11 +63,9 @@ private:
 class ParameterDeclarationNode: public Node
 {
 public:
-    ParameterDeclarationNode(DeclarationSpecifiersNode *specifiers, DeclaratorNode *declarator):
-            specifiers(specifiers), declarator(declarator) {}
+    ParameterDeclarationNode(DeclaratorNode *declarator): declarator(declarator) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    DeclarationSpecifiersNode *specifiers;
     DeclaratorNode *declarator;
 };
 
