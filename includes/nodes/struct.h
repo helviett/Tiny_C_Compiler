@@ -32,12 +32,9 @@ protected:
 class StructDeclarationNode: public Node
 {
 public:
-    StructDeclarationNode(SpecifierQualifierListNode *specifierQualifierList,
-                          StructDeclaratorListNode *structDeclaratorList):
-            specifierQualifierList(specifierQualifierList), structDeclaratorList(structDeclaratorList){}
+    StructDeclarationNode(StructDeclaratorListNode *structDeclaratorList): structDeclaratorList(structDeclaratorList) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    SpecifierQualifierListNode *specifierQualifierList;
     StructDeclaratorListNode   *structDeclaratorList;
 };
 
@@ -55,7 +52,7 @@ class StructSpecifierNode: public DeclarationSpecifierNode
 {
 public:
     StructSpecifierNode(IdNode *id, StructDeclarationListNode *structDeclaratorList):
-            id(id), structDeclaratorList(structDeclaratorList) {}
+            id(id), structDeclaratorList(structDeclaratorList) { kind = SpecifierKind::COMPLEX; }
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     IdNode *id;

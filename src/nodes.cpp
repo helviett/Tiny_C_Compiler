@@ -178,52 +178,6 @@ void CommaSeparatedExprs::Print(std::ostream &os, std::string indent, bool isTai
     right->Print(os, indent, true);
 }
 
-void SpecifierQualifierListNode::Print(std::ostream &os, std::string indent, bool isTail)
-{
-    if (list.empty()) return;
-    os << indent << (isTail ? "└── " : "├── ");
-    os << "SpecQualList" << std::endl;
-    indent.append(isTail ? "    " : "│   ");
-    auto it = list.begin();
-    if (list.size() > 1)
-        for (; it != --list.end(); it++)
-            (*it)->Print(os, indent, false);
-    (*it)->Print(os, indent, true);
-}
-
-void SpecifierQualifierListNode::Add(TypeSpecifierQualifierNode *typeSpecifierQualifier)
-{
-    list.push_back(typeSpecifierQualifier);
-}
-
-uint64_t SpecifierQualifierListNode::Size()
-{
-    return list.size();
-}
-
-void TypeQualifierListNode::Print(std::ostream &os, std::string indent, bool isTail)
-{
-    if (list.empty()) return;
-    os << indent << (isTail ? "└── " : "├── ");
-    os << "TypeQualList" << std::endl;
-    indent.append(isTail ? "    " : "│   ");
-    auto it = list.begin();
-    if (list.size() > 1)
-        for (; it != --list.end(); it++)
-            (*it)->Print(os, indent, false);
-    (*it)->Print(os, indent, true);
-}
-
-void TypeQualifierListNode::Add(TypeQualifierNode *typeSpecifierQualifier)
-{
-    list.push_back(typeSpecifierQualifier);
-}
-
-uint64_t TypeQualifierListNode::Size()
-{
-    return list.size();
-}
-
 void PointerNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -727,7 +681,6 @@ void StructDeclarationNode::Print(std::ostream &os, std::string indent, bool isT
     os << indent << (isTail ? "└── " : "├── ");
     os << "StructDeclaratorList" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    specifierQualifierList->Print(os, indent, false);
     structDeclaratorList->Print(os, indent, true);
 }
 

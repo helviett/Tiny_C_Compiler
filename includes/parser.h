@@ -79,7 +79,7 @@ private:
     ExprNode            *parseExpr();
     ExprNode            *parseConstantExpr();
     TypeNameNode               *parseTypeName();
-    TypeQualifierListNode      *parseTypeQualifierList();
+    DeclarationSpecifiersNode      *parseTypeQualifierList();
     PointerNode                *parsePointer();
     StatementNode              *parseStatement();
     ExprStatmentNode           *parseExprStatement();
@@ -114,9 +114,9 @@ private:
     StructSpecifierNode        *parseStructSpecifier();
     StructDeclarationListNode  *parseStructDeclarationList();
     StructDeclarationNode      *parseStructDeclaration();
-    StructDeclaratorNode       *parseStructDeclarator();
-    StructDeclaratorListNode   *parseStructDeclaratorList();
-    SpecifierQualifierListNode *parseSpecifierQualifierList();
+    StructDeclaratorNode       *parseStructDeclarator(Type *baseType);
+    StructDeclaratorListNode   *parseStructDeclaratorList(Type *baseType);
+    DeclarationSpecifiersNode *parseSpecifierQualifierList();
     InitializerListNode        *parseInitializerList();
     DesignationNode            *parseDesignation();
     DesignatorListNode         *parseDesignatorList();

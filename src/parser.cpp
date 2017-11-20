@@ -319,8 +319,8 @@ TypeNameNode *Parser::parseTypeName()
 {
     auto tnn = parseSpecifierQualifierList();
     if (tnn->Size() == 0) throw NoDeclarationSpecifiers(scanner->Current());
-    DeclaratorNode *abstractDeclarator = new DeclaratorNode();
-    // TODO TypeBuilder::Build(tnn);
+    auto abstractDeclarator = new DeclaratorNode();
+    abstractDeclarator->SetType(TypeBuilder::Build(tnn));
     parseDeclarator(DeclaratorKind::ABSTRACT, abstractDeclarator);
     return new TypeNameNode(tnn, abstractDeclarator);
 }
@@ -364,9 +364,9 @@ ExprNode *Parser::parseConstantExpr()
 
 //type-qualifier-list ::= type-qualifier | type-qualifier-list type-qualifier
 
-TypeQualifierListNode *Parser::parseTypeQualifierList()
+DeclarationSpecifiersNode *Parser::parseTypeQualifierList()
 {
-    auto tql = new TypeQualifierListNode();
+    auto tql = new DeclarationSpecifiersNode();
     auto t = scanner->Current();
     while (isTypeQualifier(t))
     {
@@ -808,16 +808,16 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList(DeclarationSpecifiersNod
 
 InitDeclaratorNode *Parser::parseInitDeclarator(DeclarationSpecifiersNode *declarationSpecifiers)
 {
-    auto dcltr = new DeclaratorNode();
-    dcltr->SetType(TypeBuilder::Build(declarationSpecifiers));
-    parseDeclarator(DeclaratorKind::NORMAL, dcltr);
+    auto declarator = new DeclaratorNode();
+    declarator->SetType(TypeBuilder::Build(declarationSpecifiers));
+    parseDeclarator(DeclaratorKind::NORMAL, declarator);
     InitializerNode *initializer = nullptr;
     if (scanner->Current()->type == TokenType::ASSIGNMENT)
     {
         scanner->Next();
         initializer = parseInitializer();
     }
-    return new InitDeclaratorNode(dcltr, initializer);
+    return new InitDeclaratorNode(declarator, initializer);
 }
 
 //initializer ::= assignment-expr | {initializer-list} | {initializer-list , }
@@ -973,7 +973,8 @@ StructDeclarationListNode *Parser::parseStructDeclarationList()
 
 StructDeclarationNode *Parser::parseStructDeclaration()
 {
-    auto structDecl = new StructDeclarationNode(parseSpecifierQualifierList(), parseStructDeclaratorList());
+    auto structDecl = new StructDeclarationNode(
+            parseStructDeclaratorList(TypeBuilder::Build(parseSpecifierQualifierList())));
     require(TokenType::SEMICOLON);
     scanner->Next();
     return structDecl;
@@ -981,12 +982,12 @@ StructDeclarationNode *Parser::parseStructDeclaration()
 
 //struct-declarator ::= declarator | `declarator : constant-expr
 
-StructDeclaratorNode *Parser::parseStructDeclarator()
+StructDeclaratorNode *Parser::parseStructDeclarator(Type *baseType)
 {
     if (scanner->Current()->type == TokenType::COLON && scanner->Next())
         return new StructDeclaratorNode(nullptr, (ExprNode *)parseConstantExpr());
-    auto declarator = new DeclaratorNode;
-    // TODO lots of work on struct
+    auto declarator = new DeclaratorNode();
+    declarator->SetType(baseType);
     parseDeclarator(DeclaratorKind::NORMAL, declarator);
     if (scanner->Current()->type == TokenType::COLON && scanner->Next())
         return new StructDeclaratorNode(declarator, (ExprNode *)parseConstantExpr());
@@ -995,12 +996,12 @@ StructDeclaratorNode *Parser::parseStructDeclarator()
 
 //struct-declarator-list ::= struct-declarator | struct-declarator-list , struct-declarator
 
-StructDeclaratorListNode *Parser::parseStructDeclaratorList()
+StructDeclaratorListNode *Parser::parseStructDeclaratorList(Type *baseType)
 {
     auto sdl = new StructDeclaratorListNode();
     do
     {
-        sdl->Add(parseStructDeclarator());
+        sdl->Add(parseStructDeclarator(baseType));
     } while (scanner->Current()->type == TokenType::COMMA && scanner->Next());
     return sdl;
 }
@@ -1008,9 +1009,9 @@ StructDeclaratorListNode *Parser::parseStructDeclaratorList()
 //specifier-qualifier-list ::= type-specifier `specifier-qualifier-list
 //| type-qualifier `specifier-qualifier-list
 
-SpecifierQualifierListNode *Parser::parseSpecifierQualifierList()
+DeclarationSpecifiersNode *Parser::parseSpecifierQualifierList()
 {
-    auto tnn = new SpecifierQualifierListNode();
+    auto tnn = new DeclarationSpecifiersNode();
     auto t = scanner->Current();
     bool spec;
     while ((spec = isTypeSpecifier(t)) || isTypeQualifier(t))

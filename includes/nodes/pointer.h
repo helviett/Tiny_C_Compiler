@@ -11,11 +11,11 @@
 class PointerNode: public Node
 {
 public:
-    PointerNode(TypeQualifierListNode *typeQualifierList, PointerNode *pointer):
+    PointerNode(DeclarationSpecifiersNode *typeQualifierList, PointerNode *pointer):
             typeQualifierList(typeQualifierList), pointer(pointer) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    TypeQualifierListNode *typeQualifierList;
+    DeclarationSpecifiersNode *typeQualifierList;
     PointerNode *pointer;
 };
 

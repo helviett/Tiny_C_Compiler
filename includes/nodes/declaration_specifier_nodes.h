@@ -72,26 +72,6 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
-class SpecifierQualifierListNode: public Node
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override;
-    void Add(TypeSpecifierQualifierNode *typeSpecifierQualifier);
-    uint64_t Size();
-private:
-    std::list<TypeSpecifierQualifierNode *> list;
-};
-
-class TypeQualifierListNode: public Node
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override;
-    void Add(TypeQualifierNode *typeSpecifierQualifier);
-    uint64_t Size();
-private:
-    std::list<TypeQualifierNode *> list;
-};
-
 class DeclarationSpecifiersNode: public Node
 {
 public:
