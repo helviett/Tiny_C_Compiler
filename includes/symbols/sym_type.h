@@ -9,6 +9,7 @@
 #include <nodes/expressions.h>
 #include <iostream>
 #include "symbol.h"
+#include <unordered_map>
 
 enum class BuiltInTypeKind
 {
@@ -24,6 +25,16 @@ enum class TypeKind
 enum class TypeQualifier
 {
     CONST = 1, RESTRICT = 2, VOLATILE = 4
+};
+
+static std::unordered_map<BuiltInTypeKind, std::string> BuiltInTypeKindToString
+{
+        {BuiltInTypeKind::VOID, "VOID"},     {BuiltInTypeKind::INT8, "INT8"},
+        {BuiltInTypeKind::UINT8, "UINT8"},   {BuiltInTypeKind::INT32, "INT32"},
+        {BuiltInTypeKind::UINT32, "UINT32"}, {BuiltInTypeKind::INT64, "INT64"},
+        {BuiltInTypeKind::UINT64, "UINT64"}, {BuiltInTypeKind::FLOAT, "FLOAT"},
+        {BuiltInTypeKind::DOUBLE, "DOUBLE"}, {BuiltInTypeKind::INT16, "INT16"},
+        {BuiltInTypeKind::UINT16, "INT16"}
 };
 
 class SymType: public Symbol

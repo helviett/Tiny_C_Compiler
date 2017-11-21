@@ -28,7 +28,7 @@ SymBuiltInType::SymBuiltInType(BuiltInTypeKind builtInTypeKind): SymType(), buil
 void SymBuiltInType::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
-    os << (int)builtInTypeKind << std::endl;
+    os << BuiltInTypeKindToString[builtInTypeKind] << std::endl;
 }
 
 PointerType::PointerType(SymType *target) : SymType(), target(target)
