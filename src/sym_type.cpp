@@ -34,12 +34,17 @@ void SymBuiltInType::Print(std::ostream &os, std::string indent, bool isTail)
     os << BuiltInTypeKindToString[builtInTypeKind] << std::endl;
 }
 
-PointerType::PointerType(SymType *target) : SymType(), target(target)
+bool SymBuiltInType::Equal(SymType *other)
+{
+    return kind == other->GetTypeKind() && builtInTypeKind == ((SymBuiltInType *)other)->GetBuiltIntTypeKind();
+}
+
+SymPointer::SymPointer(SymType *target) : SymType(), target(target)
 {
     kind = TypeKind::POINTER;
 }
 
-void PointerType::Print(std::ostream &os, std::string indent, bool isTail)
+void SymPointer::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << "Pointer to" << std::endl;
@@ -47,14 +52,19 @@ void PointerType::Print(std::ostream &os, std::string indent, bool isTail)
     (target)->Print(os, indent, true);
 }
 
-SymType *PointerType::GetTarget() const
+SymType *SymPointer::GetTarget() const
 {
     return target;
 }
 
-void PointerType::SetTarget(SymType *target)
+void SymPointer::SetTarget(SymType *target)
 {
     this->target = target;
+}
+
+bool SymPointer::Equal(SymType *other)
+{
+    return kind == other->GetTypeKind() && target == ((SymPointer *)other)->GetTarget();
 }
 
 SymArray::SymArray(SymType *valueType, ExprNode *size): SymType(), valueType(valueType), size(size)
@@ -79,6 +89,11 @@ SymType *SymArray::GetValueType() const
 void SymArray::SetValueType(SymType *valueType)
 {
     this->valueType = valueType;
+}
+
+bool SymArray::Equal(SymType *other)
+{
+    return kind == other->GetTypeKind() && valueType == ((SymArray *)other)->GetValueType();
 }
 
 SymFunction::SymFunction(SymType *returnType): SymType(), returnType(returnType)
@@ -106,16 +121,41 @@ SymType *SymFunction::GetReturnType() const
 
 void SymFunction::SetReturnType(SymType *returnType)
 {
+    kind = TypeKind::FUNCTION;
     this->returnType = returnType;
 }
 
 SymFunction::SymFunction(SymType *returnType, SymbolTable *params, const std::vector<std::string> &orderedParamTypes):
-    returnType(returnType), params(params), orderedParamNames(orderedParamTypes) {}
+    returnType(returnType), params(params), orderedParamNames(orderedParamTypes)
+{
+    kind = TypeKind::FUNCTION;
+}
 
 SymFunction::SymFunction(SymType *returnType, SymbolTable *params, const std::vector<std::string> &orderedParamTypes,
                          SymbolTable *body): SymFunction(returnType, params, orderedParamTypes)
 {
     this->body = body;
+}
+
+SymbolTable *SymFunction::GetParamsTable() const
+{
+    return params;
+}
+
+bool SymFunction::Equal(SymType *other)
+{
+    auto f = (SymFunction *)other;
+    if (kind == other->GetTypeKind() && (f->GetReturnType()->Equal(returnType)))
+    {
+        for (int i = 0;i < orderedParamNames.size(); ++i)
+        {
+            auto selfparam = (SymVariable *)params->Find(orderedParamNames[i]),
+                    otherparam = (SymVariable *)f->params->Find(f->orderedParamNames[i]);
+            if (!selfparam->GetType()->Equal(otherparam->GetType())) return false;
+        }
+        return true;
+    }
+    return false;
 }
 
 SymAlias::SymAlias(std::string name, SymType *type): type(type)

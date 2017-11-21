@@ -548,8 +548,8 @@ void Parser::parsePointer(DeclaratorNode *declarator)
 {
     if (scanner->Current()->type != TokenType::ASTERIX) return;
     scanner->Next();
-    auto tql = parseTypeQualifierList(); // TODO that's what PointerType gonna store
-    declarator->SetType(new PointerType(declarator->GetType()));
+    auto tql = parseTypeQualifierList(); // TODO that's what SymPointer gonna store
+    declarator->SetType(new SymPointer(declarator->GetType()));
     parsePointer(declarator);
 }
 
@@ -583,7 +583,7 @@ void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarat
             {
                 case TypeKind::POINTER:
                     lastType = type;
-                    type = ((PointerType *)type)->GetTarget();
+                    type = ((SymPointer *)type)->GetTarget();
                     break;
                 case TypeKind::ARRAY:
                     lastType = type;
@@ -619,7 +619,7 @@ void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarat
         switch (lastType->GetTypeKind())
         {
             case TypeKind::POINTER:
-                ((PointerType *)lastType)->SetTarget(declarator->GetType());
+                ((SymPointer *)lastType)->SetTarget(declarator->GetType());
                 break;
             case TypeKind::ARRAY:
                 ((SymArray *)lastType)->SetValueType(declarator->GetType());
@@ -647,7 +647,7 @@ void Parser::parseFunctionDeclarator(DeclaratorNode *declarator)
         orderedParamTypes.push_back(name);
         table->Insert(name, new SymVariable(name, (*it).GetType()));
     }
-    table->SetParent(scopeTree.ActiveScope());
+    table->SetParent(scopeTree.GetActiveScope());
     require(TokenType::RBRACKET);
     declarator->SetType(new SymFunction(declarator->GetType(), table, orderedParamTypes));
     scanner->Next();
@@ -829,7 +829,12 @@ InitDeclaratorNode *Parser::parseInitDeclarator(DeclarationSpecifiersNode *decla
         scanner->Next();
         initializer = parseInitializer();
     }
-    scopeTree.ActiveScope()->Insert(declarator->GetId()->GetName(),
+    auto t = declarator->GetType();
+    if (scopeTree.Find(t->GetName())) throw "";
+    if (t->GetTypeKind() == TypeKind::FUNCTION)
+        scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(), t);
+    else
+        scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(),
                                     new SymVariable(declarator->GetId()->GetName(), declarator->GetType()));
     return new InitDeclaratorNode(declarator, initializer);
 }
@@ -870,7 +875,7 @@ CompoundStatement *Parser::parseCompoundStatement()
     if (scanner->Next()->type == TokenType::RCURLY_BRACKET && scanner->Next()) return new CompoundStatement(nullptr);
     auto blockItemList = parseBlockItemList();
     require(TokenType::RCURLY_BRACKET);
-    // TODO EndScope
+    scopeTree.EndScope();
     scanner->Next();
     return new CompoundStatement(blockItemList);
 }
@@ -1133,7 +1138,20 @@ ExternalDeclarationNode *Parser::parseExternalDeclaration()
     parseDeclarator(DeclaratorKind::NORMAL, declarator);
     if (scanner->Current()->type == TokenType::LCURLY_BRACKET)
     {
-        return (ExternalDeclarationNode *)new FunctionDefinitionNode(declarator, parseCompoundStatement());
+        if (declarator->GetType()->GetTypeKind() != TypeKind::FUNCTION) throw "";
+        auto f = (SymFunction *)declarator->GetType();
+        auto fdeclaration = (SymFunction *)scopeTree.Find(declarator->GetId()->GetName());
+        if (fdeclaration)
+        {
+            if (fdeclaration->GetTypeKind() != TypeKind::FUNCTION) throw "";
+            if (!(fdeclaration->Equal(f))) throw "";
+            // TODO check body existence
+        }
+        scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(), f);
+        scopeTree.SetActiveScope(f->GetParamsTable());
+        auto res = (ExternalDeclarationNode *)new FunctionDefinitionNode(declarator, parseCompoundStatement());
+        scopeTree.EndScope();
+        return res;
     }
     if (scanner->Current()->type == TokenType::ASSIGNMENT)
     {
@@ -1152,4 +1170,9 @@ void Parser::requierKeyword(Keyword expectedKeyword)
 {
     if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != expectedKeyword)
         throw UnexpectedKeywordError(scanner->Current(), expectedKeyword);
+}
+
+bool Parser::isProperFunctionDeclaration(SymFunction *definition, SymFunction *declaration)
+{
+    return definition == declaration;
 }

@@ -44,6 +44,7 @@ public:
     TypeKind GetTypeKind() const;
     void SetTypeKind(TypeKind typeKind);
     virtual void Print(std::ostream &os, std::string indent, bool isTail) = 0;
+    virtual bool Equal(SymType *other) = 0;
 protected:
     TypeKind kind;
 };
@@ -55,6 +56,7 @@ public:
     BuiltInTypeKind GetBuiltIntTypeKind() const;
     void SetBuiltIntTypeKind(BuiltInTypeKind typeKind);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
+    bool Equal(SymType *other) override;
 private:
     BuiltInTypeKind builtInTypeKind;
 };
@@ -62,6 +64,7 @@ private:
 class RecordType: public SymType
 {
 public:
+
 private:
 //    vector<Declaration *> decls;
 //    SymbolTable fields;
@@ -76,6 +79,7 @@ public:
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     SymType *GetValueType() const;
     void SetValueType(SymType *valueType);
+    bool Equal(SymType *other) override;
 private:
     SymType *valueType;
     ExprNode *size;
@@ -93,19 +97,22 @@ public:
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     SymType *GetReturnType() const;
     void SetReturnType(SymType *returnType);
+    SymbolTable *GetParamsTable() const;
+    bool Equal(SymType *other) override;
 private:
     SymType *returnType{nullptr};
     SymbolTable *params{nullptr}, *body{nullptr};
     std::vector<std::string> orderedParamNames;
 };
 
-class PointerType: public SymType
+class SymPointer: public SymType
 {
 public:
-    explicit PointerType(SymType *target);
+    explicit SymPointer(SymType *target);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     SymType *GetTarget() const;
     void SetTarget(SymType *target);
+    bool Equal(SymType *other) override;
 private:
     SymType *target;
     // TODO TypeQualifiers or so;

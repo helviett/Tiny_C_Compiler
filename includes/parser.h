@@ -136,6 +136,7 @@ private:
     bool isFunctionSpecifier(std::shared_ptr<Token> token);
     bool isDeclarationSpecifier(std::shared_ptr<Token> token);
     bool isSimpleSpecifier(std::shared_ptr<Token> token);
+    bool isProperFunctionDeclaration(SymFunction *definition, SymFunction *declaration);
     void require(TokenType typeExpectation);
     void requierKeyword(Keyword expectedKeyword);
 

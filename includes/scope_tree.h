@@ -11,7 +11,8 @@ class ScopeTree
 {
 public:
     ScopeTree();
-    SymbolTable *ActiveScope() const;
+    SymbolTable *GetActiveScope() const;
+    void SetActiveScope(SymbolTable *table);
     SymbolTable *StartScope();
     void EndScope();
     Symbol *Find(const std::string &name);

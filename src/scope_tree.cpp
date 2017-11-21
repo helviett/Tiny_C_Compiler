@@ -5,7 +5,7 @@ ScopeTree::ScopeTree()
     root = activeScope = new SymbolTable();
 }
 
-SymbolTable *ScopeTree::ActiveScope() const
+SymbolTable *ScopeTree::GetActiveScope() const
 {
     return activeScope;
 }
@@ -13,6 +13,7 @@ SymbolTable *ScopeTree::ActiveScope() const
 SymbolTable *ScopeTree::StartScope()
 {
     auto inner = new SymbolTable();
+    inner->SetParent(activeScope);
     activeScope->AddChild(inner);
     activeScope = inner;
 }
@@ -25,10 +26,15 @@ Symbol *ScopeTree::Find(const std::string &name)
     {
         if ((res = currentScope->Find(name))) return res;
     } while ((currentScope = activeScope->GetParent()));
-    throw "";
+    return nullptr;
 }
 
 void ScopeTree::EndScope()
 {
     activeScope = activeScope->GetParent();
+}
+
+void ScopeTree::SetActiveScope(SymbolTable *table)
+{
+    activeScope = table;
 }
