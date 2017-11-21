@@ -12,7 +12,7 @@ set(SOURCE_FILES
         includes/nodes/expressions.h includes/nodes/node.h includes/nodes/statements.h includes/nodes/declaration_specifier_nodes.h includes/nodes/pointer.h includes/nodes/decls.h
         includes/nodes/enum.h includes/nodes/struct.h includes/nodes/initializer.h includes/nodes/type_name_cast.h includes/nodes/function_definition.h includes/nodes/translation_unit.h
         includes/symbols.h includes/symbol_table.h includes/symbols/sym_type.h includes/nodes/declaration_specifier_nodes.h
-        includes/type_builder.h src/type_builder.cpp src/sym_type.cpp includes/symbols/sym_type.h includes/symbols/symbol.h src/symbol_table.cpp includes/scope_tree.h src/scope_tree.cpp includes/symbols/sym_variable.h src/sym_variable.cpp)
+        includes/type_builder.h src/type_builder.cpp src/sym_type.cpp includes/symbols/sym_type.h includes/symbols/symbol.h src/symbol_table.cpp includes/scope_tree.h src/scope_tree.cpp includes/symbols/sym_variable.h src/sym_variable.cpp src/symbol.cpp)
 
 include_directories(includes src)
 

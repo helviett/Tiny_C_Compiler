@@ -38,7 +38,7 @@ ExprNode *Parser::parsePrimaryExpr()
             return new FloatConstNode(t);
         case TokenType::ID:
             scanner->Next();
-            if (!scopeTree.ActiveScope()->Find(t->stringValue)) throw "";
+            scopeTree.Find(t->stringValue);
             return new IdNode(t);
         case TokenType::STRING:
             scanner->Next();
@@ -323,7 +323,7 @@ TypeNameNode *Parser::parseTypeName()
     auto abstractDeclarator = new DeclaratorNode();
     abstractDeclarator->SetType(TypeBuilder::Build(tnn));
     parseDeclarator(DeclaratorKind::ABSTRACT, abstractDeclarator);
-    return new TypeNameNode(tnn, abstractDeclarator);
+    return new TypeNameNode(abstractDeclarator->GetType());
 }
 
 //type-specifier ::= void | char | short | int | long | float | double | singed
@@ -591,7 +591,7 @@ void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarat
                     break;
                 case TypeKind::FUNCTION:
                     lastType = type;
-                    type = ((FunctionType *)type)->GetReturnType();
+                    type = ((SymFunction *)type)->GetReturnType();
                     break;
             }
         }
@@ -625,7 +625,7 @@ void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarat
                 ((SymArray *)lastType)->SetValueType(declarator->GetType());
                 break;
             case TypeKind::FUNCTION:
-                ((FunctionType *)lastType)->SetReturnType(declarator->GetType());
+                ((SymFunction *)lastType)->SetReturnType(declarator->GetType());
                 break;
         }
         declarator->SetType(newDecl->GetType());
@@ -637,9 +637,19 @@ void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarat
 void Parser::parseFunctionDeclarator(DeclaratorNode *declarator)
 {
     scanner->Next();
-    auto ptl = parseParameterTypeList(); // TODO FunctionType must store a SymTable of this
+    auto ptl = parseParameterTypeList(); // TODO SymFunction must store a SymTable of this
+    std::vector<std::string> orderedParamTypes;
+    orderedParamTypes.reserve(ptl->List().size());
+    auto table = new SymbolTable();
+    for (auto it: ptl->List())
+    {
+        std::string name = (*it).GetId() ? (*it).GetId()->GetName() : "#" + std::to_string(orderedParamTypes.size());
+        orderedParamTypes.push_back(name);
+        table->Insert(name, new SymVariable(name, (*it).GetType()));
+    }
+    table->SetParent(scopeTree.ActiveScope());
     require(TokenType::RBRACKET);
-    declarator->SetType(new FunctionType(declarator->GetType()));
+    declarator->SetType(new SymFunction(declarator->GetType(), table, orderedParamTypes));
     scanner->Next();
 }
 
@@ -753,7 +763,7 @@ ParameterList *Parser::parseParameterList()
 
 //parameter-type-list ::= parameter-list
 
-ParameterTypeList *Parser::parseParameterTypeList()
+ParameterList *Parser::parseParameterTypeList()
 {
     return parseParameterList();
 }
@@ -795,8 +805,6 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList(DeclarationSpecifiersNod
     if (declarator)
     {
         idl->Add(declarator);
-        scopeTree.ActiveScope()->Insert(declarator->GetId()->GetName(),
-                                        new SymVariable(declarator->GetId()->GetName(), declarator->GetType()));
         if (scanner->Current()->type != TokenType::COMMA) return idl;
         scanner->Next();
     }
@@ -856,10 +864,13 @@ LabelStatementNode *Parser::parseLabelStatement()
 
 CompoundStatement *Parser::parseCompoundStatement()
 {
+
     require(TokenType::LCURLY_BRACKET);
+    scopeTree.StartScope();
     if (scanner->Next()->type == TokenType::RCURLY_BRACKET && scanner->Next()) return new CompoundStatement(nullptr);
     auto blockItemList = parseBlockItemList();
     require(TokenType::RCURLY_BRACKET);
+    // TODO EndScope
     scanner->Next();
     return new CompoundStatement(blockItemList);
 }
@@ -1120,9 +1131,10 @@ ExternalDeclarationNode *Parser::parseExternalDeclaration()
     auto declarator = new DeclaratorNode();
     declarator->SetType(type);
     parseDeclarator(DeclaratorKind::NORMAL, declarator);
-
     if (scanner->Current()->type == TokenType::LCURLY_BRACKET)
-        return (ExternalDeclarationNode *)new FunctionDefinitionNode(ds, declarator, parseCompoundStatement());
+    {
+        return (ExternalDeclarationNode *)new FunctionDefinitionNode(declarator, parseCompoundStatement());
+    }
     if (scanner->Current()->type == TokenType::ASSIGNMENT)
     {
         scanner->Next();

@@ -15,6 +15,7 @@ class InitDeclaratorNode: public DeclaratorNode
 public:
     InitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    InitializerNode *GetInitializer() const;
 private:
     InitializerNode *initializer;
 };

@@ -10,6 +10,7 @@
 #include <iostream>
 #include "symbol.h"
 #include <unordered_map>
+#include <vector>
 
 enum class BuiltInTypeKind
 {
@@ -80,16 +81,22 @@ private:
     ExprNode *size;
 };
 
-class FunctionType: public SymType
+class SymbolTable;
+
+class SymFunction: public SymType
 {
 public:
-    explicit FunctionType(SymType *returnType);
+    explicit SymFunction(SymType *returnType);
+    SymFunction(SymType *returnType, SymbolTable *params, const std::vector<std::string> &orderedParamTypes);
+    SymFunction(SymType *returnType, SymbolTable *params,  const std::vector<std::string> &orderedParamTypes,
+                SymbolTable *body);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     SymType *GetReturnType() const;
     void SetReturnType(SymType *returnType);
 private:
-    SymType *returnType;
-    // TODO SymTable *params;
+    SymType *returnType{nullptr};
+    SymbolTable *params{nullptr}, *body{nullptr};
+    std::vector<std::string> orderedParamNames;
 };
 
 class PointerType: public SymType
@@ -102,6 +109,14 @@ public:
 private:
     SymType *target;
     // TODO TypeQualifiers or so;
+};
+
+class SymAlias: public SymType
+{
+public:
+    SymAlias(std::string name, SymType *type);
+private:
+    SymType *type;
 };
 
 #endif //TINY_C_COMPILER_TYPE_H

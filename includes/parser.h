@@ -99,10 +99,11 @@ private:
     ParameterDeclarationNode   *parseParameterDeclaration();
     DeclarationSpecifiersNode  *parseDeclarationSpecifiers();
     ParameterList              *parseParameterList();
-    ParameterTypeList          *parseParameterTypeList();
+    ParameterList               *parseParameterTypeList();
     DeclarationNode            *parseDeclaration(DeclarationSpecifiersNode *declarationSpecifiers = nullptr,
                                                  InitDeclaratorNode *declarator = nullptr);
-    InitDeclaratorListNode     *parseInitDeclaratorList(DeclarationSpecifiersNode *declarationSpecifiers, InitDeclaratorNode *declarator = nullptr);
+    InitDeclaratorListNode     *parseInitDeclaratorList(DeclarationSpecifiersNode *declarationSpecifiers,
+                                                        InitDeclaratorNode *declarator = nullptr);
     InitDeclaratorNode         *parseInitDeclarator(DeclarationSpecifiersNode *declarationSpecifiers);
     InitializerNode            *parseInitializer();
     LabelStatementNode         *parseLabelStatement();
@@ -117,7 +118,7 @@ private:
     StructDeclarationNode      *parseStructDeclaration();
     StructDeclaratorNode       *parseStructDeclarator(SymType *baseType);
     StructDeclaratorListNode   *parseStructDeclaratorList(SymType *baseType);
-    DeclarationSpecifiersNode *parseSpecifierQualifierList();
+    DeclarationSpecifiersNode  *parseSpecifierQualifierList();
     InitializerListNode        *parseInitializerList();
     DesignationNode            *parseDesignation();
     DesignatorListNode         *parseDesignatorList();

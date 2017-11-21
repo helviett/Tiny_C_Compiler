@@ -14,6 +14,9 @@ class SymbolTable
 public:
     Symbol *Find(std::string name) const;
     void Insert(std::string name, Symbol *symbol);
+    SymbolTable *GetParent() const;
+    void SetParent(SymbolTable *parent);
+    void AddChild(SymbolTable *child);
 private:
     std::unordered_map<std::string, Symbol *> table;
     SymbolTable *parent = nullptr;

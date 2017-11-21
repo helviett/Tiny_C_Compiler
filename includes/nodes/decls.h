@@ -56,13 +56,12 @@ private:
     ParameterTypeList    *params;
 };
 
-class ParameterDeclarationNode: public Node
+class ParameterDeclarationNode: public DeclaratorNode
 {
 public:
-    ParameterDeclarationNode(DeclaratorNode *declarator): declarator(declarator) {}
+    ParameterDeclarationNode(DeclaratorNode *declarator);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    DeclaratorNode *declarator;
 };
 
 class ParameterTypeList: public Node
@@ -77,6 +76,7 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(ParameterDeclarationNode *specifier);
     uint64_t Size();
+    std::list<ParameterDeclarationNode *> &List();
 protected:
     std::list<ParameterDeclarationNode *> list;
 };

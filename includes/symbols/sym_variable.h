@@ -12,6 +12,9 @@ class SymVariable: public Symbol
 {
 public:
     SymVariable(std::string name, SymType *type);
+    void Print(std::ostream &os, std::string indent, bool isTail) override;
+    SymType *GetType() const;
+    void SetType(SymType *type);
 private:
     SymType *type;
 };

@@ -13,12 +13,10 @@
 class FunctionDefinitionNode: public Node
 {
 public:
-    FunctionDefinitionNode(DeclarationSpecifiersNode *declarationSpecifiers,
-                           DeclaratorNode *declarator, CompoundStatement *compoundStatement):
-            declarationSpecifiers{declarationSpecifiers}, declarator(declarator), compoundStatement(compoundStatement) {}
+    FunctionDefinitionNode(DeclaratorNode *declarator, CompoundStatement *compoundStatement):
+            declarator(declarator), compoundStatement(compoundStatement) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    DeclarationSpecifiersNode *declarationSpecifiers;
     DeclaratorNode *declarator;
     CompoundStatement *compoundStatement;
 };

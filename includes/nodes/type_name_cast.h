@@ -12,12 +12,10 @@
 class TypeNameNode: public Node
 {
 public:
-    TypeNameNode(DeclarationSpecifiersNode *specifierQualifierList, DeclaratorNode *abstractDeclarator):
-            specifierQualifierList(specifierQualifierList), abstractDeclarator(abstractDeclarator) {}
+    TypeNameNode(SymType *type): type(type) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    DeclarationSpecifiersNode *specifierQualifierList;
-    DeclaratorNode *abstractDeclarator;
+    SymType *type;
 };
 
 class TypeCastNode: public ExprNode

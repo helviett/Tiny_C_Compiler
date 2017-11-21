@@ -1,4 +1,7 @@
+#include <utility>
+
 #include "symbols/sym_type.h"
+#include "symbol_table.h"
 
 TypeKind SymType::GetTypeKind() const
 {
@@ -78,25 +81,44 @@ void SymArray::SetValueType(SymType *valueType)
     this->valueType = valueType;
 }
 
-FunctionType::FunctionType(SymType *returnType): SymType(), returnType(returnType)
+SymFunction::SymFunction(SymType *returnType): SymType(), returnType(returnType)
 {
     kind = TypeKind::FUNCTION;
 }
 
-void FunctionType::Print(std::ostream &os, std::string indent, bool isTail)
+void SymFunction::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << "Function returning" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    (returnType)->Print(os, indent, true);
+
+    (returnType)->Print(os, indent, orderedParamNames.empty());
+    os << indent << ("└── ") << "Params" << std::endl;
+    for (size_t i = 0; i < orderedParamNames.size() - 1; ++i)
+        params->Find(orderedParamNames[i])->Print(os, indent + "    ", false);
+    params->Find(orderedParamNames.back())->Print(os, indent + "    ", true);
 }
 
-SymType *FunctionType::GetReturnType() const
+SymType *SymFunction::GetReturnType() const
 {
     return returnType;
 }
 
-void FunctionType::SetReturnType(SymType *returnType)
+void SymFunction::SetReturnType(SymType *returnType)
 {
     this->returnType = returnType;
+}
+
+SymFunction::SymFunction(SymType *returnType, SymbolTable *params, const std::vector<std::string> &orderedParamTypes):
+    returnType(returnType), params(params), orderedParamNames(orderedParamTypes) {}
+
+SymFunction::SymFunction(SymType *returnType, SymbolTable *params, const std::vector<std::string> &orderedParamTypes,
+                         SymbolTable *body): SymFunction(returnType, params, orderedParamTypes)
+{
+    this->body = body;
+}
+
+SymAlias::SymAlias(std::string name, SymType *type): type(type)
+{
+    this->name = std::move(name);
 }

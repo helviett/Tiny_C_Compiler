@@ -300,13 +300,7 @@ void TypeNameNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << indent << (isTail ? "└── " : "├── ");
     os << "TypeName" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    if (abstractDeclarator)
-    {
-        specifierQualifierList->Print(os, indent, false);
-        abstractDeclarator->Print(os, indent, true);
-    }
-    else
-        specifierQualifierList->Print(os, indent, true);
+    type->Print(os, indent, true);
 }
 
 void DeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -454,12 +448,24 @@ uint64_t ParameterList::Size()
     return list.size();
 }
 
+std::list<ParameterDeclarationNode *> &ParameterList::List()
+{
+    return list;
+}
+
 void ParameterDeclarationNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << "param" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    declarator->Print(os, indent, true);
+    if (GetId()) GetId()->Print(os, indent, false);
+    GetType()->Print(os, indent, true);
+}
+
+ParameterDeclarationNode::ParameterDeclarationNode(DeclaratorNode *declarator)
+{
+    SetId(declarator->GetId());
+    SetType(declarator->GetType());
 }
 
 void FunctionDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -516,6 +522,11 @@ InitDeclaratorNode::InitDeclaratorNode(DeclaratorNode *declarator, InitializerNo
 {
     SetType(declarator->GetType());
     SetId(declarator->GetId());
+}
+
+InitializerNode *InitDeclaratorNode::GetInitializer() const
+{
+    return initializer;
 }
 
 void CompoundStatement::Print(std::ostream &os, std::string indent, bool isTail)
@@ -830,7 +841,6 @@ void FunctionDefinitionNode::Print(std::ostream &os, std::string indent, bool is
     os << indent << (isTail ? "└── " : "├── ");
     os << "FuncDef" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    declarationSpecifiers->Print(os, indent, false);
     declarator->Print(os, indent, false);
     compoundStatement->Print(os, indent, true);
 }
