@@ -11,8 +11,13 @@
 
 class SymbolTable
 {
+public:
+    Symbol *Find(std::string name) const;
+    void Insert(std::string name, Symbol *symbol);
 private:
-//    std::vector<std::set<Symbol *>> table;
+    std::unordered_map<std::string, Symbol *> table;
+    SymbolTable *parent = nullptr;
+    std::list<SymbolTable *> children;
 };
 
 #endif //TINY_C_COMPILER_SYMBOL_TABLE_H

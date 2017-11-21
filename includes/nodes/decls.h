@@ -19,8 +19,8 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void SetType(SymType *type);
     SymType *GetType() const;
-    void SetName(IdNode *name);
-    IdNode *GetName() const;
+    void SetId(IdNode *name);
+    IdNode *GetId() const;
 private:
     SymType *type;
     IdNode *id;

@@ -37,6 +37,11 @@ IdNode::IdNode(std::shared_ptr<Token> token): token(token)
     if (token->type != TokenType::ID) throw "";
 }
 
+std::string IdNode::GetName() const
+{
+    return token->stringValue;
+}
+
 void StringLiteralNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -323,12 +328,12 @@ SymType *DeclaratorNode::GetType() const
     return type;
 }
 
-void DeclaratorNode::SetName(IdNode *name)
+void DeclaratorNode::SetId(IdNode *name)
 {
     this->id = name;
 }
 
-IdNode *DeclaratorNode::GetName() const
+IdNode *DeclaratorNode::GetId() const
 {
     return id;
 }
@@ -471,13 +476,7 @@ void DeclarationNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << indent << (isTail ? "└── " : "├── ");
     os << "Decl" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    if (list)
-    {
-        declarationSpecifiers->Print(os, indent, false);
-        list->Print(os, indent, true);
-    }
-    else
-        declarationSpecifiers->Print(os, indent, true);
+    list->Print(os, indent, true);
 }
 
 uint64_t InitDeclaratorListNode::Size()
@@ -508,13 +507,15 @@ void InitDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail
     os << indent << (isTail ? "└── " : "├── ");
     os << "InitDeclarator" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    if (initializer)
-    {
-        declarator->Print(os, indent, false);
-        initializer->Print(os, indent, true);
-    }
-    else
-        declarator->Print(os, indent, true);
+    GetId()->Print(os, indent, false);
+    GetType()->Print(os, indent, !initializer);
+    if (initializer) initializer->Print(os, indent, true);
+}
+
+InitDeclaratorNode::InitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer): initializer(initializer)
+{
+    SetType(declarator->GetType());
+    SetId(declarator->GetId());
 }
 
 void CompoundStatement::Print(std::ostream &os, std::string indent, bool isTail)

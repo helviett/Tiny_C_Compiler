@@ -9,6 +9,7 @@
 #include "syntax_tree.h"
 #include "symbols.h"
 #include "type_builder.h"
+#include "scope_tree.h"
 #include <functional>
 #include <stack>
 #include <map>
@@ -140,6 +141,7 @@ private:
     std::vector<std::map<std::string, Symbol *>> tablesOfSymbols;
     Tokenizer *scanner;
     SyntaxTree tree;
+    ScopeTree scopeTree;
 };
 
 #endif //TINY_C_COMPILER_PARSER_H

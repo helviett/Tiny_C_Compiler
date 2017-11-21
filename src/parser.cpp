@@ -38,6 +38,7 @@ ExprNode *Parser::parsePrimaryExpr()
             return new FloatConstNode(t);
         case TokenType::ID:
             scanner->Next();
+            if (!scopeTree.ActiveScope()->Find(t->stringValue)) throw "";
             return new IdNode(t);
         case TokenType::STRING:
             scanner->Next();
@@ -552,12 +553,17 @@ void Parser::parsePointer(DeclaratorNode *declarator)
     parsePointer(declarator);
 }
 
+//declarator ::= `pointer direct-declarator
 
 void Parser::parseDeclarator(DeclaratorKind kind, DeclaratorNode *declarator)
 {
     parsePointer(declarator);
     parseDirectDeclarator(kind, declarator);
 }
+
+//direct-declarator ::= id | (declarator)
+//                      | direct-declarator [constant-expr]
+//                      | direct-declarator (`parameter-type-list)
 
 void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarator)
 {
@@ -590,7 +596,7 @@ void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarat
             }
         }
         gotId = true;
-        if (newDecl) declarator->SetName(newDecl->GetName());
+        if (newDecl) declarator->SetId(newDecl->GetId());
         require(TokenType::RBRACKET);
         scanner->Next();
     }
@@ -598,7 +604,7 @@ void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarat
     if (kind == DeclaratorKind::NORMAL && !gotId) require(TokenType::ID);
     if (kind != DeclaratorKind::ABSTRACT && scanner->Current()->type == TokenType::ID)
     {
-        declarator->SetName(new IdNode(scanner->Current()));
+        declarator->SetId(new IdNode(scanner->Current()));
         scanner->Next();
     }
     while (scanner->Current()->type == TokenType::LSQUARE_BRACKET || scanner->Current()->type == TokenType::LBRACKET)
@@ -661,13 +667,6 @@ PointerNode *Parser::parsePointer()
     scanner->Next();
     return new PointerNode(parseTypeQualifierList(), parsePointer());
 }
-
-//declarator ::= `pointer direct-declarator
-
-//direct-declarator ::= id | (declarator)
-//                      | direct-declarator [constant-expr]
-//                      | direct-declarator (`parameter-type-list)
-
 
 //argument-expr-list ::= argument-expr | argument-expr-list, argument-expr
 
@@ -796,6 +795,8 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList(DeclarationSpecifiersNod
     if (declarator)
     {
         idl->Add(declarator);
+        scopeTree.ActiveScope()->Insert(declarator->GetId()->GetName(),
+                                        new SymVariable(declarator->GetId()->GetName(), declarator->GetType()));
         if (scanner->Current()->type != TokenType::COMMA) return idl;
         scanner->Next();
     }
@@ -810,6 +811,7 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList(DeclarationSpecifiersNod
 
 InitDeclaratorNode *Parser::parseInitDeclarator(DeclarationSpecifiersNode *declarationSpecifiers)
 {
+    // TODO pass built type instead of building every time
     auto declarator = new DeclaratorNode();
     declarator->SetType(TypeBuilder::Build(declarationSpecifiers));
     parseDeclarator(DeclaratorKind::NORMAL, declarator);
@@ -819,6 +821,8 @@ InitDeclaratorNode *Parser::parseInitDeclarator(DeclarationSpecifiersNode *decla
         scanner->Next();
         initializer = parseInitializer();
     }
+    scopeTree.ActiveScope()->Insert(declarator->GetId()->GetName(),
+                                    new SymVariable(declarator->GetId()->GetName(), declarator->GetType()));
     return new InitDeclaratorNode(declarator, initializer);
 }
 

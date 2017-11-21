@@ -190,6 +190,7 @@ class IdNode: public ExprNode
 public:
     explicit IdNode(std::shared_ptr<Token> token);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    std::string GetName() const;
 private:
     std::shared_ptr<Token> token;
 };
