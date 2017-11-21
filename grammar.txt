@@ -2,16 +2,16 @@ primary-expr ::= id | constant | string-literal | (expr)
 
 postfix-expr ::= primary-expr | postifx-expr [expr] | postfix-expr (`argument-expr-list)
 				| postfix-expr . id | postfix-expr -> id | postfix-expr ++ | postfix-expr -- 
-				| (type-name) {initializer-list} | (type-name) {initializer-list, } 
+				| (type-id) {initializer-list} | (type-id) {initializer-list, }
 
 argument-expr-list ::= argument-expr | argument-expr-list, argument-expr
 
 unary-expr ::= postfix-expr | ++ unary-expr | -- unary-expr | unary-op cast-expr 
-			  | sizeof unary-expr | sizeof (type-name)  
+			  | sizeof unary-expr | sizeof (type-id)
 
 unary-op  ::= & | * | + | - | ~ | !  
 
-cast-expr ::= unary-expr | (type-name) cast-expr  
+cast-expr ::= unary-expr | (type-id) cast-expr
 
 multiplicative-expr ::= cast-expr | multiplicative-expr * cast-expr
 					   | multiplicative-expr / cast-expr 
@@ -65,7 +65,7 @@ storage-class-specifier ::= typedef | extern | static | auto | register
 
 type-specifier ::= void | char | short | int | long | float | double | singed
 					 | unsigned | struct-specifier | enum-specifier |
-					 | typedef-name
+					 | typedef-id
 
 struct-specifier ::= struct `id {struct-declaration-list}
 							 | struct id
@@ -109,7 +109,7 @@ parameter-list ::= parameter-declaration | parameter-list , parameter-declaratio
 
 parameter-declaration ::= declaration-specifiers declarator | declaration-specifiers `abstract-declarator
 
-type-name ::= specifier-qualifier-list `abstract-declarator
+type-id ::= specifier-qualifier-list `abstract-declarator
 
 abstract-declarator ::= pointer | `pointer direct-abstract-declarator
 

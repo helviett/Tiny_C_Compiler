@@ -1,3 +1,3 @@
-Position		Type			Value			Text
+Position		SymType			Value			Text
 
 (1, 1)			NUM_INT			123				  123

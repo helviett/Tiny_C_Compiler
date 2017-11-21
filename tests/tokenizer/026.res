@@ -1,4 +1,4 @@
-Position		Type			Value			Text
+Position		SymType			Value			Text
 
 (1, 3)			CHARACTER			32				  ' '
 (2, 1)			CHARACTER			39				  '\\'

@@ -7,7 +7,7 @@ args::ArgumentParser argParser("This is tcc - Tiny C Compiler", "");
 args::HelpFlag help(argParser, "help", "Display this menu", {'h', "help"});
 args::Flag parseOnly(argParser, "parse-only", "Parse only", {'p', "parse-only"});
 args::Flag tokenizeOnly(argParser, "tokenize-only", "Tokenize only", {'t', "tokenize-only"});
-args::Positional<std::string> sourceFile(argParser, "source file(s)", "The name(s) of source file(s)");
+args::Positional<std::string> sourceFile(argParser, "source file(s)", "The id(s) of source file(s)");
 
 void TokenizeOnly()
 {

@@ -1,2 +1,2 @@
-Position		Type			Value			Text
+Position		SymType			Value			Text
 

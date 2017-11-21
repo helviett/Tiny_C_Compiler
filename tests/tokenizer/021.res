@@ -1,4 +1,4 @@
-Position		Type			Value			Text
+Position		SymType			Value			Text
 
 (1, 1)			RELOP_EQ			==				  ==
 (1, 4)			RELOP_GE			>=				  >=

@@ -6,7 +6,9 @@
 #define TINY_C_COMPILER_TYPE_H
 
 #include <nodes/declaration_specifier_nodes.h>
+#include <nodes/expressions.h>
 #include <iostream>
+#include "symbol.h"
 
 enum class BuiltInTypeKind
 {
@@ -24,7 +26,7 @@ enum class TypeQualifier
     CONST = 1, RESTRICT = 2, VOLATILE = 4
 };
 
-class Type
+class SymType: public Symbol
 {
 public:
     TypeKind GetTypeKind() const;
@@ -34,10 +36,10 @@ protected:
     TypeKind kind;
 };
 
-class BuiltInType: public Type
+class SymBuiltInType: public SymType
 {
 public:
-    explicit BuiltInType (BuiltInTypeKind builtInTypeKind);
+    explicit SymBuiltInType (BuiltInTypeKind builtInTypeKind);
     BuiltInTypeKind GetBuiltIntTypeKind() const;
     void SetBuiltIntTypeKind(BuiltInTypeKind typeKind);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
@@ -45,7 +47,7 @@ private:
     BuiltInTypeKind builtInTypeKind;
 };
 
-class RecordType: public Type
+class RecordType: public SymType
 {
 public:
 private:
@@ -55,40 +57,39 @@ private:
 
 class ExprNode;
 
-class ArrayType: public Type
+class SymArray: public SymType
 {
 public:
-    explicit ArrayType(Type *valueType, ExprNode *size);
+    explicit SymArray(SymType *valueType, ExprNode *size);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
-    Type *GetValueType() const;
-    void SetValueType(Type *valueType);
+    SymType *GetValueType() const;
+    void SetValueType(SymType *valueType);
 private:
-    Type *valueType;
+    SymType *valueType;
     ExprNode *size;
 };
 
-class FunctionType: public Type
+class FunctionType: public SymType
 {
 public:
-    explicit FunctionType(Type *returnType);
+    explicit FunctionType(SymType *returnType);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
-    Type *GetReturnType() const;
-    void SetReturnType(Type *returnType);
+    SymType *GetReturnType() const;
+    void SetReturnType(SymType *returnType);
 private:
-    Type *returnType;
+    SymType *returnType;
     // TODO SymTable *params;
 };
 
-class PointerType: public Type
+class PointerType: public SymType
 {
 public:
-    // double pointer mean that target of a pointer may be unconstructed yet e.g. in complex decls
-    explicit PointerType(Type *target);
+    explicit PointerType(SymType *target);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
-    Type *GetTarget() const;
-    void SetTarget(Type *target);
+    SymType *GetTarget() const;
+    void SetTarget(SymType *target);
 private:
-    Type *target;
+    SymType *target;
     // TODO TypeQualifiers or so;
 };
 

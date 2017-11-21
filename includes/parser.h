@@ -114,8 +114,8 @@ private:
     StructSpecifierNode        *parseStructSpecifier();
     StructDeclarationListNode  *parseStructDeclarationList();
     StructDeclarationNode      *parseStructDeclaration();
-    StructDeclaratorNode       *parseStructDeclarator(Type *baseType);
-    StructDeclaratorListNode   *parseStructDeclaratorList(Type *baseType);
+    StructDeclaratorNode       *parseStructDeclarator(SymType *baseType);
+    StructDeclaratorListNode   *parseStructDeclaratorList(SymType *baseType);
     DeclarationSpecifiersNode *parseSpecifierQualifierList();
     InitializerListNode        *parseInitializerList();
     DesignationNode            *parseDesignation();

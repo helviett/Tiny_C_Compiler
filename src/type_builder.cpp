@@ -1,6 +1,6 @@
 #include "../includes/type_builder.h"
 
-Type *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
+SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
 {
     enum {SINGED, UNSIGNED, DEFAULT} isSinged = DEFAULT;
     enum {SCALAR, STRUCT, ENUM, NONE, VOID} kind = NONE;
@@ -83,48 +83,48 @@ Type *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
                     switch (isSinged)
                     {
                         case SINGED:
-                            if (longTimes) return new BuiltInType(BuiltInTypeKind::INT64);
-                            return new BuiltInType(BuiltInTypeKind::INT32);
+                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::INT64);
+                            return new SymBuiltInType(BuiltInTypeKind::INT32);
                         case UNSIGNED:
-                            if (longTimes) return new BuiltInType(BuiltInTypeKind::UINT64);
-                            return new BuiltInType(BuiltInTypeKind::UINT32);
+                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::UINT64);
+                            return new SymBuiltInType(BuiltInTypeKind::UINT32);
                         case DEFAULT:
-                            if (longTimes) return new BuiltInType(BuiltInTypeKind::INT64);
-                            return new BuiltInType(BuiltInTypeKind::INT32);
+                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::INT64);
+                            return new SymBuiltInType(BuiltInTypeKind::INT32);
                     }
                     break;
                 case DOUBLE:
-                    return new BuiltInType(BuiltInTypeKind::DOUBLE);
+                    return new SymBuiltInType(BuiltInTypeKind::DOUBLE);
                 case FLOAT:
-                    return new BuiltInType(BuiltInTypeKind::FLOAT);
+                    return new SymBuiltInType(BuiltInTypeKind::FLOAT);
                 case CHAR:
                     switch (isSinged)
                     {
                         case SINGED:
-                            return new BuiltInType(BuiltInTypeKind::INT8);
+                            return new SymBuiltInType(BuiltInTypeKind::INT8);
                         case UNSIGNED:
-                            return new BuiltInType(BuiltInTypeKind::UINT8);
+                            return new SymBuiltInType(BuiltInTypeKind::UINT8);
                         case DEFAULT:
-                            return new BuiltInType(BuiltInTypeKind::INT8);
+                            return new SymBuiltInType(BuiltInTypeKind::INT8);
                     }
                     break;
                 case UNKNOWN:
                     switch (isSinged)
                     {
                         case SINGED:
-                            if (longTimes) return new BuiltInType(BuiltInTypeKind::INT64);
+                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::INT64);
                             throw "";
                         case UNSIGNED:
-                            if (longTimes) return new BuiltInType(BuiltInTypeKind::UINT64);
+                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::UINT64);
                             throw "";
                         case DEFAULT:
-                            if (longTimes) return new BuiltInType(BuiltInTypeKind::INT64);
+                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::INT64);
                             throw "";
                     }
             }
             break;
         case VOID:
-            return new BuiltInType(BuiltInTypeKind::VOID);
+            return new SymBuiltInType(BuiltInTypeKind::VOID);
     }
     return nullptr;
 }

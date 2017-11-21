@@ -1,4 +1,4 @@
-Position		Type			Value			Text
+Position		SymType			Value			Text
 
 (1, 3)			NUM_INT			678594				  678594
 (2, 1)			KEYWORD			15				  int

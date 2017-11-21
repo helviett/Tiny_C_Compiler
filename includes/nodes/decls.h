@@ -5,7 +5,7 @@
 #ifndef TINY_C_COMPILER_DECLS_H
 #define TINY_C_COMPILER_DECLS_H
 
-#include <data_type.h>
+#include <symbols/sym_type.h>
 #include "node.h"
 #include "pointer.h"
 #include "expressions.h"
@@ -17,13 +17,13 @@ class DeclaratorNode: public Node
 public:
     DeclaratorNode () { type = nullptr; }
     void Print(std::ostream &os, std::string ident, bool isTail) override;
-    void SetType(Type *type);
-    Type *GetType() const;
+    void SetType(SymType *type);
+    SymType *GetType() const;
     void SetName(IdNode *name);
     IdNode *GetName() const;
 private:
-    Type *type;
-    IdNode *name;
+    SymType *type;
+    IdNode *id;
 };
 
 class DirectDeclaratorNode: public DeclaratorNode

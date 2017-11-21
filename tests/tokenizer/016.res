@@ -1,4 +1,4 @@
-Position		Type			Value			Text
+Position		SymType			Value			Text
 
 (1, 1)			NUM_FLOAT			255.980000				  255.98
 (2, 1)			NUM_FLOAT			768.296000				  768.296

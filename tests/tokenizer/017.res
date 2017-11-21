@@ -1,4 +1,4 @@
-Position		Type			Value			Text
+Position		SymType			Value			Text
 
 (1, 3)			NUM_FLOAT			28.530000				  28.53
 (2, 4)			ID			abc				  abc

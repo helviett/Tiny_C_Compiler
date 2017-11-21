@@ -54,7 +54,7 @@ ExprNode *Parser::parsePrimaryExpr()
 
 //postfix-expr ::= primary-expr | postifx-expr [expr] | postfix-expr (`argument-expr-list)
 //| postfix-expr . id | postfix-expr -> id | postfix-expr ++ | postfix-expr --
-//| (type-name) {initializer-list} | (type-name) {initializer-list, }
+//| (type-id) {initializer-list} | (type-id) {initializer-list, }
 
 ExprNode *Parser::parsePostfixExpr()
 {
@@ -104,7 +104,7 @@ ExprNode *Parser::parsePostfixExpr()
 }
 
 //unary-expr ::= postfix-expr | ++ unary-expr | -- unary-expr | unary-op cast-expr
-//| sizeof unary-expr | sizeof (type-name)
+//| sizeof unary-expr | sizeof (type-id)
 
 ExprNode *Parser::parseUnaryExpr()
 {
@@ -148,7 +148,7 @@ ExprNode *Parser::parseUnaryExpr()
     return ue;
 }
 
-//cast-expr ::= unary-expr | (type-name) cast-expr
+//cast-expr ::= unary-expr | (type-id) cast-expr
 
 ExprNode *Parser::parseCastExpr()
 {
@@ -313,7 +313,7 @@ ExprNode *Parser::parseExpr()
     return ae;
 }
 
-//type-name ::= specifier-qualifier-list `abstract-declarator
+//type-id ::= specifier-qualifier-list `abstract-declarator
 
 TypeNameNode *Parser::parseTypeName()
 {
@@ -327,7 +327,7 @@ TypeNameNode *Parser::parseTypeName()
 
 //type-specifier ::= void | char | short | int | long | float | double | singed
 //                   | unsigned | struct-specifier | enum-specifier |
-//                   | typedef-name
+//                   | typedef-id
 
 bool Parser::isTypeSpecifier(std::shared_ptr<Token> token)
 {
@@ -562,7 +562,7 @@ void Parser::parseDeclarator(DeclaratorKind kind, DeclaratorNode *declarator)
 void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarator)
 {
     bool gotId = false;
-    Type *lastType = nullptr;
+    SymType *lastType = nullptr;
     DeclaratorNode *newDecl = nullptr;
     if (scanner->Current()->type == TokenType::LBRACKET)
     {
@@ -581,7 +581,7 @@ void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarat
                     break;
                 case TypeKind::ARRAY:
                     lastType = type;
-                    type = ((ArrayType *)type)->GetValueType();
+                    type = ((SymArray *)type)->GetValueType();
                     break;
                 case TypeKind::FUNCTION:
                     lastType = type;
@@ -590,6 +590,7 @@ void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarat
             }
         }
         gotId = true;
+        if (newDecl) declarator->SetName(newDecl->GetName());
         require(TokenType::RBRACKET);
         scanner->Next();
     }
@@ -615,7 +616,7 @@ void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarat
                 ((PointerType *)lastType)->SetTarget(declarator->GetType());
                 break;
             case TypeKind::ARRAY:
-                ((ArrayType *)lastType)->SetValueType(declarator->GetType());
+                ((SymArray *)lastType)->SetValueType(declarator->GetType());
                 break;
             case TypeKind::FUNCTION:
                 ((FunctionType *)lastType)->SetReturnType(declarator->GetType());
@@ -623,6 +624,7 @@ void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarat
         }
         declarator->SetType(newDecl->GetType());
     }
+
 }
 
 
@@ -642,13 +644,13 @@ void Parser::parseArrayDeclarator(DeclaratorNode *declarator)
     if (scanner->Current()->type == TokenType::RSQUARE_BRACKET)
     {
         scanner->Next();
-        declarator->SetType(new ArrayType(declarator->GetType(), nullptr));
+        declarator->SetType(new SymArray(declarator->GetType(), nullptr));
         return;
     }
     auto ce = parseConstantExpr();
     require(TokenType::RSQUARE_BRACKET);
     scanner->Next();
-    declarator->SetType(new ArrayType(declarator->GetType(), ce));
+    declarator->SetType(new SymArray(declarator->GetType(), ce));
 }
 
 //pointer ::= * `type-qualifier-list | * `type-qualifier-list pointer
@@ -982,7 +984,7 @@ StructDeclarationNode *Parser::parseStructDeclaration()
 
 //struct-declarator ::= declarator | `declarator : constant-expr
 
-StructDeclaratorNode *Parser::parseStructDeclarator(Type *baseType)
+StructDeclaratorNode *Parser::parseStructDeclarator(SymType *baseType)
 {
     if (scanner->Current()->type == TokenType::COLON && scanner->Next())
         return new StructDeclaratorNode(nullptr, (ExprNode *)parseConstantExpr());
@@ -996,7 +998,7 @@ StructDeclaratorNode *Parser::parseStructDeclarator(Type *baseType)
 
 //struct-declarator-list ::= struct-declarator | struct-declarator-list , struct-declarator
 
-StructDeclaratorListNode *Parser::parseStructDeclaratorList(Type *baseType)
+StructDeclaratorListNode *Parser::parseStructDeclaratorList(SymType *baseType)
 {
     auto sdl = new StructDeclaratorListNode();
     do

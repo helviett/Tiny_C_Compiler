@@ -1,4 +1,4 @@
-Position		Type			Value			Text
+Position		SymType			Value			Text
 
 (1, 3)			KEYWORD			0				  break
 (1, 9)			KEYWORD			1				  case

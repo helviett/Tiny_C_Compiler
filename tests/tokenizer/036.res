@@ -1,4 +1,4 @@
-Position		Type			Value			Text
+Position		SymType			Value			Text
 
 (1, 1)			KEYWORD			11				  float
 (1, 7)			ID			hh				  hh

@@ -1,3 +1,3 @@
-Position		Type			Value			Text
+Position		SymType			Value			Text
 
 WrongStringLiteral at (1, 4). Text:

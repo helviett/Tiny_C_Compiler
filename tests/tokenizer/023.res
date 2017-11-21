@@ -1,4 +1,4 @@
-Position		Type			Value			Text
+Position		SymType			Value			Text
 
 (1, 1)			KEYWORD			15				  int
 (1, 5)			ID			hex				  hex

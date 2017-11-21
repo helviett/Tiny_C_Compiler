@@ -1,4 +1,4 @@
-Position		Type			Value			Text
+Position		SymType			Value			Text
 
 (1, 3)			ID			_a				  _a
 (1, 6)			NUM_INT			123				  123

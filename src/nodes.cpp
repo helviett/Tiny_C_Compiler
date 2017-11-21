@@ -309,28 +309,28 @@ void DeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << indent << (isTail ? "└── " : "├── ");
     os << "Declarator" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    if (name) name->Print(os, indent, false);
+    if (id) id->Print(os, indent, false);
     type->Print(os, indent, true);
 }
 
-void DeclaratorNode::SetType(Type *type)
+void DeclaratorNode::SetType(SymType *type)
 {
     this->type = type;
 }
 
-Type *DeclaratorNode::GetType() const
+SymType *DeclaratorNode::GetType() const
 {
     return type;
 }
 
 void DeclaratorNode::SetName(IdNode *name)
 {
-    this->name = name;
+    this->id = name;
 }
 
 IdNode *DeclaratorNode::GetName() const
 {
-    return name;
+    return id;
 }
 
 void ArrayDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)

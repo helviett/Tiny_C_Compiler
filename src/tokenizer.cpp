@@ -198,7 +198,7 @@ char Tokenizer::toChar()
 
 char *Tokenizer::toString()
 {
-    char *res = new char[buffer.length()];
+    char *res = new char[buffer.length() + 1];
     int i = 0;
     bool isEscape = false;
     for (char j : buffer)

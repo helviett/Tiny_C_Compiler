@@ -1,4 +1,4 @@
-Position		Type			Value			Text
+Position		SymType			Value			Text
 
 (1, 1)			KEYWORD			7				  double
 (1, 8)			ID			c				  c

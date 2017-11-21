@@ -1,4 +1,4 @@
-Position		Type			Value			Text
+Position		SymType			Value			Text
 
 (1, 1)			KEYWORD			22				  static
 (1, 8)			ID			more				  more
