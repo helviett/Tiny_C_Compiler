@@ -57,11 +57,11 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void SetId(IdNode *id);
     IdNode *GetId() const;
-    RecordType *GetRecordType() const;
-    void SetRecordType(RecordType *type);
+    SymRecord *GetRecordType() const;
+    void SetRecordType(SymRecord *type);
 private:
     IdNode *id{nullptr};
-    RecordType *type{nullptr};
+    SymRecord *type{nullptr};
 };
 
 #endif //TINY_C_COMPILER_STRUCT_H

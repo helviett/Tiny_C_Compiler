@@ -42,6 +42,11 @@ std::string IdNode::GetName() const
     return token->stringValue;
 }
 
+IdNode::IdNode(std::shared_ptr<Token> token, SymType *type): IdNode(token)
+{
+    this->type = type;
+}
+
 void StringLiteralNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -751,12 +756,12 @@ IdNode *StructSpecifierNode::GetId() const
     return id;
 }
 
-RecordType *StructSpecifierNode::GetRecordType() const
+SymRecord *StructSpecifierNode::GetRecordType() const
 {
     return type;
 }
 
-void StructSpecifierNode::SetRecordType(RecordType *type)
+void StructSpecifierNode::SetRecordType(SymRecord *type)
 {
     this->type = type;
 }
@@ -891,4 +896,14 @@ uint64_t TranslationUnitNode::Size()
 SpecifierKind DeclarationSpecifierNode::Kind()
 {
     return kind;
+}
+
+SymType *ExprNode::GetType() const
+{
+    return type;
+}
+
+void ExprNode::SetType(SymType *type)
+{
+    this->type = type;
 }

@@ -11,3 +11,8 @@ void Symbol::SetName(std::string name)
 {
     this->name = std::move(name);
 }
+
+SymbolClass Symbol::GetSymbolClass() const
+{
+    return symbolClass;
+}

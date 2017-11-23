@@ -5,6 +5,7 @@
 #ifndef TINY_C_COMPILER_PARSER_H
 #define TINY_C_COMPILER_PARSER_H
 
+#include "semantic_analyzer.h"
 #include "tokenizer.h"
 #include "syntax_tree.h"
 #include "symbols.h"
@@ -143,10 +144,11 @@ private:
     void requireKeywordNext(Keyword expectedKeyword);
     bool maybe(TokenType typeExpectation);
     bool maybeNext(TokenType typeExpectation);
-    std::vector<std::map<std::string, Symbol *>> tablesOfSymbols;
+
     Tokenizer *scanner;
     SyntaxTree tree;
     ScopeTree scopeTree;
+    SemanticAnalyzer sematicAnalyzer;
 };
 
 #endif //TINY_C_COMPILER_PARSER_H

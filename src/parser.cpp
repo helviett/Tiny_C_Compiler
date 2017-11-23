@@ -38,8 +38,7 @@ ExprNode *Parser::parsePrimaryExpr()
             return new FloatConstNode(t);
         case TokenType::ID:
             scanner->Next();
-            scopeTree.Find(t->stringValue);
-            return new IdNode(t);
+            return sematicAnalyzer.BuildIdNode(t, scopeTree.Find(t->stringValue));
         case TokenType::STRING:
             scanner->Next();
             return new StringLiteralNode(t);
@@ -808,6 +807,13 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList(DeclarationSpecifiersNod
     if (declarator)
     {
         idl->Add(declarator);
+        auto t = declarator->GetType();
+        if (scopeTree.GetActiveScope()->Find(declarator->GetId()->GetName())) throw "";
+        if (t->GetTypeKind() == TypeKind::FUNCTION)
+            scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(), t);
+        else
+            scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(),
+                                               new SymVariable(declarator->GetId()->GetName(), declarator->GetType()));
         if (scanner->Current()->type != TokenType::COMMA) return idl;
         scanner->Next();
     }
@@ -833,7 +839,7 @@ InitDeclaratorNode *Parser::parseInitDeclarator(DeclarationSpecifiersNode *decla
         initializer = parseInitializer();
     }
     auto t = declarator->GetType();
-    if (scopeTree.Find(t->GetName())) throw "";
+    if (scopeTree.GetActiveScope()->Find(declarator->GetId()->GetName())) throw "";
     if (t->GetTypeKind() == TypeKind::FUNCTION)
         scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(), t);
     else
@@ -1148,7 +1154,7 @@ ExternalDeclarationNode *Parser::parseExternalDeclaration()
         auto fdeclaration = (SymFunction *)scopeTree.Find(declarator->GetId()->GetName());
         if (fdeclaration)
         {
-//            if (fdeclaration->GetTypeKind() != TypeKind::FUNCTION) throw "";
+            if (fdeclaration->GetTypeKind() != TypeKind::FUNCTION) throw "";
             if (!(fdeclaration->Equal(f))) throw "";
             // TODO check body existence
         }

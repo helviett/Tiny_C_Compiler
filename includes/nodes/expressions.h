@@ -9,10 +9,16 @@
 #include "../token.h"
 #include <list>
 
+class SymType;
+
 class ExprNode: public Node
 {
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
+    SymType *GetType() const;
+    void SetType(SymType *type);
+protected:
+    SymType *type{nullptr};
 };
 
 class PostfixIncrementNode: public ExprNode
@@ -189,6 +195,7 @@ class IdNode: public ExprNode
 {
 public:
     explicit IdNode(std::shared_ptr<Token> token);
+    IdNode(std::shared_ptr<Token> token, SymType *type);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     std::string GetName() const;
 private:

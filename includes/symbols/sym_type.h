@@ -119,14 +119,15 @@ private:
     SymType *type;
 };
 
-class RecordType: public SymType
+class SymRecord: public SymType
 {
 public:
-    RecordType();
-    RecordType(SymbolTable *fields,  std::vector<SymVariable *> orderedFields);
+    SymRecord();
+    SymRecord(SymbolTable *fields,  std::vector<SymVariable *> orderedFields);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     SymbolTable *GetFieldsTable() const;
     bool Equal(SymType *other) override;
+    std::vector<SymVariable *> &GetOrderedFields();
 private:
     SymbolTable *fields;
     std::vector<SymVariable *> orderedFields;

@@ -27,6 +27,7 @@ void SymBuiltInType::SetBuiltIntTypeKind(BuiltInTypeKind typeKind)
 SymBuiltInType::SymBuiltInType(BuiltInTypeKind builtInTypeKind): SymType(), builtInTypeKind(builtInTypeKind)
 {
     this->kind = TypeKind::BUILTIN;
+    symbolClass = SymbolClass::TYPE;
 }
 
 void SymBuiltInType::Print(std::ostream &os, std::string indent, bool isTail)
@@ -65,12 +66,13 @@ void SymPointer::SetTarget(SymType *target)
 
 bool SymPointer::Equal(SymType *other)
 {
-    return kind == other->GetTypeKind() && target == ((SymPointer *)other)->GetTarget();
+    return kind == other->GetTypeKind() && target->Equal(((SymPointer *)other)->GetTarget());
 }
 
 SymArray::SymArray(SymType *valueType, ExprNode *size): SymType(), valueType(valueType), size(size)
 {
     kind = TypeKind::ARRAY;
+    symbolClass = SymbolClass::TYPE;
 }
 
 void SymArray::Print(std::ostream &os, std::string indent, bool isTail)
@@ -94,7 +96,7 @@ void SymArray::SetValueType(SymType *valueType)
 
 bool SymArray::Equal(SymType *other)
 {
-    return kind == other->GetTypeKind() && valueType == ((SymArray *)other)->GetValueType();
+    return kind == other->GetTypeKind() && valueType->Equal(((SymArray *)other)->GetValueType());
 }
 
 SymFunction::SymFunction(SymType *returnType): SymType(), returnType(returnType)
@@ -129,6 +131,7 @@ void SymFunction::SetReturnType(SymType *returnType)
 SymFunction::SymFunction(SymType *returnType, SymbolTable *params, const std::vector<SymVariable *> &orderedParamTypes):
     returnType(returnType), params(params), orderedParams(orderedParamTypes)
 {
+    symbolClass = SymbolClass::TYPE;
     kind = TypeKind::FUNCTION;
 }
 
@@ -150,6 +153,7 @@ bool SymFunction::Equal(SymType *other)
     {
         for (int i = 0;i < orderedParams.size(); ++i)
         {
+            // TODO bad comparison.
             auto selfparam = (SymVariable *)params->Find(orderedParams[i]->GetName()),
                     otherparam = (SymVariable *)f->params->Find(f->orderedParams[i]->GetName());
             if (!selfparam->GetType()->Equal(otherparam->GetType())) return false;
@@ -164,7 +168,7 @@ SymAlias::SymAlias(std::string name, SymType *type): type(type)
     this->name = std::move(name);
 }
 
-void RecordType::Print(std::ostream &os, std::string indent, bool isTail)
+void SymRecord::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << "Struct: " << std::endl;
@@ -174,24 +178,42 @@ void RecordType::Print(std::ostream &os, std::string indent, bool isTail)
     orderedFields.back()->Print(os, indent, true);
 }
 
-bool RecordType::Equal(SymType *other)
+bool SymRecord::Equal(SymType *other)
 {
+    auto r = (SymRecord *)other;
+    if (kind == other->GetTypeKind())
+    {
+        for (int i = 0;i < orderedFields.size(); ++i)
+        {
+            auto s1 = orderedFields[i];
+            SymVariable *s2 = r->GetOrderedFields()[i];
+            if (s1->GetName() != s2->GetName()) return false;
+            if (!s1->GetType()->Equal(s2->GetType())) return false;
+        }
+        return true;
+    }
     return false;
 }
 
-SymbolTable *RecordType::GetFieldsTable() const
+SymbolTable *SymRecord::GetFieldsTable() const
 {
     return fields;
 }
 
-RecordType::RecordType()
+SymRecord::SymRecord()
 {
     kind = TypeKind::STRUCT;
     fields = nullptr;
 }
 
-RecordType::RecordType(SymbolTable *fields, std::vector<SymVariable *> orderedFields):
+SymRecord::SymRecord(SymbolTable *fields, std::vector<SymVariable *> orderedFields):
         fields(fields), orderedFields(std::move(orderedFields))
 {
     kind = TypeKind::STRUCT;
+    symbolClass = SymbolClass::TYPE;
+}
+
+std::vector<SymVariable *> &SymRecord::GetOrderedFields()
+{
+    return orderedFields;
 }

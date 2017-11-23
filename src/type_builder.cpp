@@ -141,7 +141,7 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
     return nullptr;
 }
 
-RecordType *TypeBuilder::Build(StructDeclarationListNode *structDeclarationList)
+SymRecord *TypeBuilder::Build(StructDeclarationListNode *structDeclarationList)
 {
     std::vector<SymVariable *> orderedFields;
     auto fields = new SymbolTable();
@@ -157,5 +157,5 @@ RecordType *TypeBuilder::Build(StructDeclarationListNode *structDeclarationList)
             fields->Insert(name, var);
         }
     }
-    return new RecordType(fields, orderedFields);
+    return new SymRecord(fields, orderedFields);
 }

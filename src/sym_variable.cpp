@@ -4,6 +4,7 @@
 SymVariable::SymVariable(std::string name, SymType *type): type(type)
 {
     this->name = std::move(name);
+    symbolClass = SymbolClass::VARIABLE;
 }
 
 void SymVariable::SetType(SymType *type)

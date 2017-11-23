@@ -15,6 +15,6 @@ class TypeBuilder
 {
 public:
     static SymType *Build(DeclarationSpecifiersNode *declarationSpecifiers);
-    static RecordType *Build(StructDeclarationListNode *structDeclarationList);
+    static SymRecord *Build(StructDeclarationListNode *structDeclarationList);
 };
 #endif //TINY_C_COMPILER_TYPE_BUILDER_H
