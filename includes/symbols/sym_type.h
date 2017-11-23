@@ -11,6 +11,7 @@
 #include "symbol.h"
 #include <unordered_map>
 #include <vector>
+#include <symbols.h>
 
 enum class BuiltInTypeKind
 {
@@ -61,15 +62,6 @@ private:
     BuiltInTypeKind builtInTypeKind;
 };
 
-class RecordType: public SymType
-{
-public:
-
-private:
-//    vector<Declaration *> decls;
-//    SymbolTable fields;
-};
-
 class ExprNode;
 
 class SymArray: public SymType
@@ -86,13 +78,14 @@ private:
 };
 
 class SymbolTable;
+class SymVariable;
 
 class SymFunction: public SymType
 {
 public:
     explicit SymFunction(SymType *returnType);
-    SymFunction(SymType *returnType, SymbolTable *params, const std::vector<std::string> &orderedParamTypes);
-    SymFunction(SymType *returnType, SymbolTable *params,  const std::vector<std::string> &orderedParamTypes,
+    SymFunction(SymType *returnType, SymbolTable *params, const std::vector<SymVariable *> &orderedParamTypes);
+    SymFunction(SymType *returnType, SymbolTable *params,  const std::vector<SymVariable *> &orderedParamTypes,
                 SymbolTable *body);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     SymType *GetReturnType() const;
@@ -102,7 +95,7 @@ public:
 private:
     SymType *returnType{nullptr};
     SymbolTable *params{nullptr}, *body{nullptr};
-    std::vector<std::string> orderedParamNames;
+    std::vector<SymVariable *> orderedParams;
 };
 
 class SymPointer: public SymType
@@ -124,6 +117,14 @@ public:
     SymAlias(std::string name, SymType *type);
 private:
     SymType *type;
+};
+
+class RecordType: public SymType
+{
+public:
+
+private:
+    std::vector<std::string> orderedFieldNames;
 };
 
 #endif //TINY_C_COMPILER_TYPE_H

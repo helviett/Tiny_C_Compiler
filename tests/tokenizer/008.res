@@ -1,4 +1,4 @@
-Position		SymType			Value			Text
+Position		Type			Value			Text
 
 (1, 1)			ID			abcdefg				  abcdefg
 (2, 9)			ID			i				  i

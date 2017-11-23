@@ -1,65 +1,49 @@
 └── Unit
     └── FuncDef
-        ├── DeclarationSpecifiers
-        │   └── int
         ├── Declarator
-        │   └── Func Decl
-        │       ├── main
-        │       └── ParameterList
-        │           └── param
-        │               ├── DeclarationSpecifiers
-        │               │   └── void
-        │               └── Declarator
+        │   ├── main
+        │   └── Function returning
+        │       ├── INT32
+        │       └── Params
+        │           └── #0
+        │               └── VOID
         └── {}
             └── BlockItemList
                 ├── Decl
-                │   ├── DeclarationSpecifiers
-                │   │   └── int
                 │   └── InitDeclaratorList
                 │       └── InitDeclarator
-                │           ├── Declarator
-                │           │   └── b
+                │           ├── b
+                │           ├── INT32
                 │           └── 10
                 ├── Decl
-                │   ├── DeclarationSpecifiers
-                │   │   └── int
                 │   └── InitDeclaratorList
                 │       └── InitDeclarator
-                │           ├── Declarator
-                │           │   ├── *
-                │           │   └── a
+                │           ├── a
+                │           ├── Pointer to
+                │           │   └── INT32
                 │           └── &
                 │               └── b
                 ├── ;
                 │   └── typcast
                 │       ├── TypeName
-                │       │   ├── SpecQualList
-                │       │   │   └── int
-                │       │   └── Declarator
-                │       │       └── *
+                │       │   └── Pointer to
+                │       │       └── INT32
                 │       └── 10
                 ├── ;
                 │   └── typcast
                 │       ├── TypeName
-                │       │   ├── SpecQualList
-                │       │   │   └── void
-                │       │   └── Declarator
-                │       │       └── *
+                │       │   └── Pointer to
+                │       │       └── VOID
                 │       └── a
                 ├── ;
                 │   └── typcast
                 │       ├── TypeName
-                │       │   ├── SpecQualList
-                │       │   │   └── int
-                │       │   └── Declarator
-                │       │       └── Func Decl
-                │       │           ├── Declarator
-                │       │           │   └── *
-                │       │           └── ParameterList
-                │       │               └── param
-                │       │                   ├── DeclarationSpecifiers
-                │       │                   │   └── void
-                │       │                   └── Declarator
+                │       │   └── Pointer to
+                │       │       └── Function returning
+                │       │           ├── INT32
+                │       │           └── Params
+                │       │               └── #0
+                │       │                   └── VOID
                 │       └── a
                 └── return
                     └── 0

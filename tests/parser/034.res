@@ -1,81 +1,65 @@
 └── Unit
     ├── Decl
-    │   ├── DeclarationSpecifiers
-    │   │   └── int
     │   └── InitDeclaratorList
     │       └── InitDeclarator
-    │           └── Declarator
-    │               └── a
+    │           ├── a
+    │           └── INT32
     ├── Decl
-    │   ├── DeclarationSpecifiers
-    │   │   └── int
     │   └── InitDeclaratorList
     │       ├── InitDeclarator
-    │       │   └── Declarator
-    │       │       └── b
+    │       │   ├── b
+    │       │   └── INT32
     │       └── InitDeclarator
-    │           └── Declarator
-    │               └── c
+    │           ├── c
+    │           └── INT32
     ├── Decl
-    │   ├── DeclarationSpecifiers
-    │   │   └── int
     │   └── InitDeclaratorList
     │       └── InitDeclarator
-    │           ├── Declarator
-    │           │   └── d
+    │           ├── d
+    │           ├── INT32
     │           └── 10
     ├── Decl
-    │   ├── DeclarationSpecifiers
-    │   │   └── int
     │   └── InitDeclaratorList
     │       ├── InitDeclarator
-    │       │   ├── Declarator
-    │       │   │   └── e
+    │       │   ├── e
+    │       │   ├── INT32
     │       │   └── typcast
     │       │       ├── TypeName
-    │       │       │   ├── SpecQualList
-    │       │       │   │   └── int
-    │       │       │   └── Declarator
+    │       │       │   └── INT32
     │       │       └── 40
     │       └── InitDeclarator
-    │           ├── Declarator
-    │           │   └── f
+    │           ├── f
+    │           ├── INT32
     │           └── -
     │               ├── =
     │               │   ├── b
     │               │   └── 17
     │               └── 12
     ├── Decl
-    │   ├── DeclarationSpecifiers
-    │   │   └── float
     │   └── InitDeclaratorList
     │       └── InitDeclarator
-    │           └── Declarator
-    │               └── []
-    │                   ├── []
-    │                   │   ├── []
-    │                   │   │   ├── array
-    │                   │   │   └── 50
-    │                   │   └── 60
-    │                   └── 70
+    │           ├── array
+    │           └── Array of
+    │               ├── Array of
+    │               │   ├── Array of
+    │               │   │   ├── FLOAT
+    │               │   │   └── 50
+    │               │   └── 60
+    │               └── 70
     ├── Decl
-    │   ├── DeclarationSpecifiers
-    │   │   └── int
     │   └── InitDeclaratorList
     │       └── InitDeclarator
-    │           └── Declarator
-    │               ├── *
-    │               │   └── *
-    │               └── array2
+    │           ├── array2
+    │           └── Pointer to
+    │               └── Pointer to
+    │                   └── INT32
     ├── Decl
-    │   ├── DeclarationSpecifiers
-    │   │   └── int
     │   └── InitDeclaratorList
     │       └── InitDeclarator
-    │           ├── Declarator
-    │           │   └── []
-    │           │       ├── array3
-    │           │       └── 3
+    │           ├── array3
+    │           ├── Array of
+    │           │   ├── INT32
+    │           │   └── 3
     │           └── InitializerList
     │               ├── DesignatedInitializer
     │               │   └── 1
@@ -88,14 +72,12 @@
     │                   │           └── 2
     │                   └── 3
     └── Decl
-        ├── DeclarationSpecifiers
-        │   └── int
         └── InitDeclaratorList
             └── InitDeclarator
-                ├── Declarator
-                │   └── []
-                │       ├── array4
-                │       └── 4
+                ├── array4
+                ├── Array of
+                │   ├── INT32
+                │   └── 4
                 └── InitializerList
                     ├── DesignatedInitializer
                     │   └── 1

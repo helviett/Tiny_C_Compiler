@@ -1,41 +1,29 @@
 └── Unit
     ├── Decl
-    │   ├── DeclarationSpecifiers
-    │   │   └── int
     │   └── InitDeclaratorList
     │       └── InitDeclarator
-    │           └── Declarator
-    │               └── a
+    │           ├── a
+    │           └── INT32
     ├── Decl
-    │   ├── DeclarationSpecifiers
-    │   │   └── int
     │   └── InitDeclaratorList
     │       ├── InitDeclarator
-    │       │   └── Declarator
-    │       │       └── b
+    │       │   ├── b
+    │       │   └── INT32
     │       └── InitDeclarator
-    │           └── Declarator
-    │               └── c
+    │           ├── c
+    │           └── INT32
     ├── Decl
-    │   ├── DeclarationSpecifiers
-    │   │   ├── const
-    │   │   └── int
     │   └── InitDeclaratorList
     │       └── InitDeclarator
-    │           ├── Declarator
-    │           │   └── N
+    │           ├── N
+    │           ├── INT32
     │           └── 10
     └── Decl
-        ├── DeclarationSpecifiers
-        │   ├── int
-        │   └── const
         └── InitDeclaratorList
             └── InitDeclarator
-                ├── Declarator
-                │   ├── *
-                │   │   ├── TypeQualList
-                │   │   │   └── const
-                │   │   └── *
-                │   └── d
+                ├── d
+                ├── Pointer to
+                │   └── Pointer to
+                │       └── INT32
                 └── 0
 

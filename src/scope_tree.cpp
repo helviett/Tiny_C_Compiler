@@ -20,13 +20,14 @@ SymbolTable *ScopeTree::StartScope()
 
 Symbol *ScopeTree::Find(const std::string &name)
 {
-    Symbol *res;
+    Symbol *res = nullptr;
     auto currentScope = activeScope;
     do
     {
         if ((res = currentScope->Find(name))) return res;
-    } while ((currentScope = activeScope->GetParent()));
-    return nullptr;
+        currentScope = currentScope->GetParent();
+    } while (currentScope);
+    return res;
 }
 
 void ScopeTree::EndScope()

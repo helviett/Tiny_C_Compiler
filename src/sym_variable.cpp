@@ -1,4 +1,5 @@
 #include "../includes/symbols/sym_variable.h"
+#include "../includes/symbols/sym_type.h"
 
 SymVariable::SymVariable(std::string name, SymType *type): type(type)
 {

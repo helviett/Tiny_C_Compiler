@@ -1,15 +1,12 @@
 └── Unit
     └── FuncDef
-        ├── DeclarationSpecifiers
-        │   └── void
         ├── Declarator
-        │   └── Func Decl
-        │       ├── dowhile
-        │       └── ParameterList
-        │           └── param
-        │               ├── DeclarationSpecifiers
-        │               │   └── void
-        │               └── Declarator
+        │   ├── dowhile
+        │   └── Function returning
+        │       ├── VOID
+        │       └── Params
+        │           └── #0
+        │               └── VOID
         └── {}
             └── BlockItemList
                 └── do

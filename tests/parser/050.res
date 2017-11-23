@@ -1,37 +1,28 @@
 └── Unit
     ├── FuncDef
-    │   ├── DeclarationSpecifiers
-    │   │   └── int
     │   ├── Declarator
-    │   │   └── Func Decl
-    │   │       ├── gcd
-    │   │       └── ParameterList
-    │   │           ├── param
-    │   │           │   ├── DeclarationSpecifiers
-    │   │           │   │   └── int
-    │   │           │   └── Declarator
-    │   │           │       └── x
-    │   │           └── param
-    │   │               ├── DeclarationSpecifiers
-    │   │               │   └── int
-    │   │               └── Declarator
-    │   │                   └── y
+    │   │   ├── gcd
+    │   │   └── Function returning
+    │   │       ├── INT32
+    │   │       └── Params
+    │   │           ├── x
+    │   │           │   └── INT32
+    │   │           └── y
+    │   │               └── INT32
     │   └── {}
     │       └── BlockItemList
     │           ├── Decl
-    │           │   ├── DeclarationSpecifiers
-    │           │   │   └── int
     │           │   └── InitDeclaratorList
     │           │       ├── InitDeclarator
-    │           │       │   ├── Declarator
-    │           │       │   │   └── r
+    │           │       │   ├── r
+    │           │       │   ├── INT32
     │           │       │   └── 0
     │           │       ├── InitDeclarator
-    │           │       │   └── Declarator
-    │           │       │       └── a
+    │           │       │   ├── a
+    │           │       │   └── INT32
     │           │       └── InitDeclarator
-    │           │           └── Declarator
-    │           │               └── b
+    │           │           ├── b
+    │           │           └── INT32
     │           ├── ;
     │           │   └── =
     │           │       ├── a
@@ -79,31 +70,22 @@
     │           └── return
     │               └── r
     └── FuncDef
-        ├── DeclarationSpecifiers
-        │   └── int
         ├── Declarator
-        │   └── Func Decl
-        │       ├── lcm
-        │       └── ParameterList
-        │           ├── param
-        │           │   ├── DeclarationSpecifiers
-        │           │   │   └── int
-        │           │   └── Declarator
-        │           │       └── x
-        │           └── param
-        │               ├── DeclarationSpecifiers
-        │               │   └── int
-        │               └── Declarator
-        │                   └── y
+        │   ├── lcm
+        │   └── Function returning
+        │       ├── INT32
+        │       └── Params
+        │           ├── x
+        │           │   └── INT32
+        │           └── y
+        │               └── INT32
         └── {}
             └── BlockItemList
                 ├── Decl
-                │   ├── DeclarationSpecifiers
-                │   │   └── int
                 │   └── InitDeclaratorList
                 │       └── InitDeclarator
-                │           └── Declarator
-                │               └── a
+                │           ├── a
+                │           └── INT32
                 ├── ;
                 │   └── =
                 │       ├── a

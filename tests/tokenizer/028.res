@@ -1,4 +1,4 @@
-Position		SymType			Value			Text
+Position		Type			Value			Text
 
 (1, 3)			STRING							  ""
 (2, 1)			STRING			abcsd 12334 

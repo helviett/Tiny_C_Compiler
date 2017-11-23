@@ -1,3 +1,3 @@
-Position		SymType			Value			Text
+Position		Type			Value			Text
 
 WrongNumberLiteral at (1, 6). Text:

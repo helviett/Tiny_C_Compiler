@@ -1,36 +1,31 @@
 └── Unit
     └── FuncDef
-        ├── DeclarationSpecifiers
-        │   └── int
         ├── Declarator
-        │   └── Func Decl
-        │       ├── main
-        │       └── ParameterList
-        │           └── param
-        │               ├── DeclarationSpecifiers
-        │               │   └── void
-        │               └── Declarator
+        │   ├── main
+        │   └── Function returning
+        │       ├── INT32
+        │       └── Params
+        │           └── #0
+        │               └── VOID
         └── {}
             └── BlockItemList
                 ├── Decl
-                │   ├── DeclarationSpecifiers
-                │   │   └── float
                 │   └── InitDeclaratorList
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── a
+                │       │   ├── a
+                │       │   └── FLOAT
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── b
+                │       │   ├── b
+                │       │   └── FLOAT
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── c
+                │       │   ├── c
+                │       │   └── FLOAT
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── y2
+                │       │   ├── y2
+                │       │   └── FLOAT
                 │       └── InitDeclarator
-                │           └── Declarator
-                │               └── l
+                │           ├── l
+                │           └── FLOAT
                 ├── ;
                 │   └── /
                 │       ├── *

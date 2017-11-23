@@ -1,3 +1,3 @@
-Position		SymType			Value			Text
+Position		Type			Value			Text
 
 (1, 1)			ID			a				  a

@@ -1,44 +1,39 @@
 └── Unit
     └── FuncDef
-        ├── DeclarationSpecifiers
-        │   └── int
         ├── Declarator
-        │   └── Func Decl
-        │       ├── main
-        │       └── ParameterList
-        │           └── param
-        │               ├── DeclarationSpecifiers
-        │               │   └── void
-        │               └── Declarator
+        │   ├── main
+        │   └── Function returning
+        │       ├── INT32
+        │       └── Params
+        │           └── #0
+        │               └── VOID
         └── {}
             └── BlockItemList
                 ├── Decl
-                │   ├── DeclarationSpecifiers
-                │   │   └── int
                 │   └── InitDeclaratorList
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── a
+                │       │   ├── a
+                │       │   └── INT32
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── b
+                │       │   ├── b
+                │       │   └── INT32
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── c
+                │       │   ├── c
+                │       │   └── INT32
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── d
+                │       │   ├── d
+                │       │   └── INT32
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── e
+                │       │   ├── e
+                │       │   └── INT32
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── f
+                │       │   ├── f
+                │       │   └── INT32
                 │       └── InitDeclarator
-                │           └── Declarator
-                │               └── []
-                │                   ├── g
-                │                   └── 5
+                │           ├── g
+                │           └── Array of
+                │               ├── INT32
+                │               └── 5
                 ├── ;
                 │   └── ||
                 │       ├── ^

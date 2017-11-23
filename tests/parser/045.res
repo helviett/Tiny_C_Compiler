@@ -1,30 +1,21 @@
 └── Unit
     └── FuncDef
-        ├── DeclarationSpecifiers
-        │   └── int
         ├── Declarator
-        │   └── Func Decl
-        │       ├── binpow
-        │       └── ParameterList
-        │           ├── param
-        │           │   ├── DeclarationSpecifiers
-        │           │   │   └── int
-        │           │   └── Declarator
-        │           │       └── a
-        │           └── param
-        │               ├── DeclarationSpecifiers
-        │               │   └── int
-        │               └── Declarator
-        │                   └── n
+        │   ├── binpow
+        │   └── Function returning
+        │       ├── INT32
+        │       └── Params
+        │           ├── a
+        │           │   └── INT32
+        │           └── n
+        │               └── INT32
         └── {}
             └── BlockItemList
                 ├── Decl
-                │   ├── DeclarationSpecifiers
-                │   │   └── int
                 │   └── InitDeclaratorList
                 │       └── InitDeclarator
-                │           ├── Declarator
-                │           │   └── res
+                │           ├── res
+                │           ├── INT32
                 │           └── 1
                 ├── while
                 │   ├── n

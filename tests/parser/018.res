@@ -1,34 +1,29 @@
 └── Unit
     └── FuncDef
-        ├── DeclarationSpecifiers
-        │   └── int
         ├── Declarator
-        │   └── Func Decl
-        │       ├── main
-        │       └── ParameterList
-        │           └── param
-        │               ├── DeclarationSpecifiers
-        │               │   └── void
-        │               └── Declarator
+        │   ├── main
+        │   └── Function returning
+        │       ├── INT32
+        │       └── Params
+        │           └── #0
+        │               └── VOID
         └── {}
             └── BlockItemList
                 ├── Decl
-                │   ├── DeclarationSpecifiers
-                │   │   └── int
                 │   └── InitDeclaratorList
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── a
+                │       │   ├── a
+                │       │   └── INT32
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── b
+                │       │   ├── b
+                │       │   └── INT32
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── longername
+                │       │   ├── longername
+                │       │   └── INT32
                 │       └── InitDeclarator
-                │           └── Declarator
-                │               ├── *
-                │               └── pointer
+                │           ├── pointer
+                │           └── Pointer to
+                │               └── INT32
                 ├── ;
                 │   └── -
                 │       └── a
@@ -76,26 +71,18 @@
                 ├── ;
                 │   └── sizeof()
                 │       └── TypeName
-                │           ├── SpecQualList
-                │           │   └── int
-                │           └── Declarator
+                │           └── INT32
                 ├── ;
                 │   └── sizeof()
                 │       └── TypeName
-                │           ├── SpecQualList
-                │           │   └── int
-                │           └── Declarator
-                │               └── *
-                │                   └── *
+                │           └── Pointer to
+                │               └── Pointer to
+                │                   └── INT32
                 ├── ;
                 │   └── sizeof()
                 │       └── TypeName
-                │           ├── SpecQualList
-                │           │   └── int
-                │           └── Declarator
-                │               └── *
-                │                   └── TypeQualList
-                │                       └── const
+                │           └── Pointer to
+                │               └── INT32
                 └── return
                     └── 0
 

@@ -1,4 +1,4 @@
-Position		SymType			Value			Text
+Position		Type			Value			Text
 
 (1, 1)			ID			A_B_C				  A_B_C
 (2, 1)			ID			_123_				  _123_

@@ -2,6 +2,7 @@
 
 #include "symbols/sym_type.h"
 #include "symbol_table.h"
+#include "../includes/symbols/sym_variable.h"
 
 TypeKind SymType::GetTypeKind() const
 {
@@ -107,11 +108,11 @@ void SymFunction::Print(std::ostream &os, std::string indent, bool isTail)
     os << "Function returning" << std::endl;
     indent.append(isTail ? "    " : "│   ");
 
-    (returnType)->Print(os, indent, orderedParamNames.empty());
+    (returnType)->Print(os, indent, orderedParams.empty());
     os << indent << ("└── ") << "Params" << std::endl;
-    for (size_t i = 0; i < orderedParamNames.size() - 1; ++i)
-        params->Find(orderedParamNames[i])->Print(os, indent + "    ", false);
-    params->Find(orderedParamNames.back())->Print(os, indent + "    ", true);
+    for (size_t i = 0; i < orderedParams.size() - 1; ++i)
+        params->Find(orderedParams[i]->GetName())->Print(os, indent + "    ", false);
+    params->Find(orderedParams.back()->GetName())->Print(os, indent + "    ", true);
 }
 
 SymType *SymFunction::GetReturnType() const
@@ -125,13 +126,13 @@ void SymFunction::SetReturnType(SymType *returnType)
     this->returnType = returnType;
 }
 
-SymFunction::SymFunction(SymType *returnType, SymbolTable *params, const std::vector<std::string> &orderedParamTypes):
-    returnType(returnType), params(params), orderedParamNames(orderedParamTypes)
+SymFunction::SymFunction(SymType *returnType, SymbolTable *params, const std::vector<SymVariable *> &orderedParamTypes):
+    returnType(returnType), params(params), orderedParams(orderedParamTypes)
 {
     kind = TypeKind::FUNCTION;
 }
 
-SymFunction::SymFunction(SymType *returnType, SymbolTable *params, const std::vector<std::string> &orderedParamTypes,
+SymFunction::SymFunction(SymType *returnType, SymbolTable *params, const std::vector<SymVariable *> &orderedParamTypes,
                          SymbolTable *body): SymFunction(returnType, params, orderedParamTypes)
 {
     this->body = body;
@@ -147,10 +148,10 @@ bool SymFunction::Equal(SymType *other)
     auto f = (SymFunction *)other;
     if (kind == other->GetTypeKind() && (f->GetReturnType()->Equal(returnType)))
     {
-        for (int i = 0;i < orderedParamNames.size(); ++i)
+        for (int i = 0;i < orderedParams.size(); ++i)
         {
-            auto selfparam = (SymVariable *)params->Find(orderedParamNames[i]),
-                    otherparam = (SymVariable *)f->params->Find(f->orderedParamNames[i]);
+            auto selfparam = (SymVariable *)params->Find(orderedParams[i]->GetName()),
+                    otherparam = (SymVariable *)f->params->Find(f->orderedParams[i]->GetName());
             if (!selfparam->GetType()->Equal(otherparam->GetType())) return false;
         }
         return true;

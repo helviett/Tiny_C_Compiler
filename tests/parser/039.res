@@ -1,51 +1,37 @@
 └── Unit
     ├── Decl
-    │   ├── DeclarationSpecifiers
-    │   │   └── char
     │   └── InitDeclaratorList
     │       └── InitDeclarator
-    │           └── Declarator
-    │               ├── *
-    │               └── []
-    │                   └── Declarator
-    │                       ├── *
-    │                       └── Func Decl
-    │                           ├── Declarator
-    │                           │   ├── *
-    │                           │   └── []
-    │                           │       ├── foo
-    │                           │       └── 5
-    │                           └── ParameterList
-    │                               ├── param
-    │                               │   ├── DeclarationSpecifiers
-    │                               │   │   └── char
-    │                               │   └── Declarator
-    │                               │       └── *
-    │                               └── param
-    │                                   ├── DeclarationSpecifiers
-    │                                   │   └── int
-    │                                   └── Declarator
+    │           ├── foo
+    │           └── Array of
+    │               ├── Pointer to
+    │               │   └── Function returning
+    │               │       ├── Pointer to
+    │               │       │   └── Array of
+    │               │       │       └── Pointer to
+    │               │       │           └── INT8
+    │               │       └── Params
+    │               │           ├── #0
+    │               │           │   └── Pointer to
+    │               │           │       └── INT8
+    │               │           └── #1
+    │               │               └── INT32
+    │               └── 5
     └── Decl
-        ├── DeclarationSpecifiers
-        │   └── char
         └── InitDeclaratorList
             └── InitDeclarator
-                └── Declarator
-                    ├── *
-                    └── []
-                        └── Declarator
-                            ├── *
-                            └── Func Decl
-                                ├── Declarator
-                                │   ├── *
-                                │   │   └── *
-                                │   └── []
-                                │       ├── []
-                                │       │   └── foo
-                                │       └── 8
-                                └── ParameterList
-                                    └── param
-                                        ├── DeclarationSpecifiers
-                                        │   └── void
-                                        └── Declarator
+                ├── foo
+                └── Array of
+                    ├── Array of
+                    │   └── Pointer to
+                    │       └── Pointer to
+                    │           └── Function returning
+                    │               ├── Pointer to
+                    │               │   └── Array of
+                    │               │       └── Pointer to
+                    │               │           └── INT8
+                    │               └── Params
+                    │                   └── #0
+                    │                       └── VOID
+                    └── 8
 

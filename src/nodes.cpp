@@ -482,7 +482,7 @@ void DeclarationNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << indent << (isTail ? "└── " : "├── ");
     os << "Decl" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    list->Print(os, indent, true);
+    if (list) list->Print(os, indent, true);
 }
 
 uint64_t InitDeclaratorListNode::Size()

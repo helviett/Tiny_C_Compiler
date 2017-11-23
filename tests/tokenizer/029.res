@@ -1,4 +1,4 @@
-Position		SymType			Value			Text
+Position		Type			Value			Text
 
 (1, 1)			KEYWORD			27				  void
 (1, 6)			ID			error				  error

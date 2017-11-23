@@ -1,4 +1,4 @@
-Position		SymType			Value			Text
+Position		Type			Value			Text
 
 (1, 1)			KEYWORD			15				  int
 (1, 5)			ID			binpow				  binpow

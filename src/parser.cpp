@@ -638,14 +638,17 @@ void Parser::parseFunctionDeclarator(DeclaratorNode *declarator)
 {
     scanner->Next();
     auto ptl = parseParameterTypeList(); // TODO SymFunction must store a SymTable of this
-    std::vector<std::string> orderedParamTypes;
+    std::vector<SymVariable *> orderedParamTypes;
     orderedParamTypes.reserve(ptl->List().size());
     auto table = new SymbolTable();
     for (auto it: ptl->List())
     {
-        std::string name = (*it).GetId() ? (*it).GetId()->GetName() : "#" + std::to_string(orderedParamTypes.size());
-        orderedParamTypes.push_back(name);
-        table->Insert(name, new SymVariable(name, (*it).GetType()));
+        std::string name = it->GetId() ? it->GetId()->GetName() : "#" + std::to_string(orderedParamTypes.size());
+
+        auto var = new SymVariable(name, (*it).GetType());
+        var->SetName(name);
+        orderedParamTypes.push_back(var);
+        table->Insert(name, var);
     }
     table->SetParent(scopeTree.GetActiveScope());
     require(TokenType::RBRACKET);
@@ -1143,7 +1146,7 @@ ExternalDeclarationNode *Parser::parseExternalDeclaration()
         auto fdeclaration = (SymFunction *)scopeTree.Find(declarator->GetId()->GetName());
         if (fdeclaration)
         {
-            if (fdeclaration->GetTypeKind() != TypeKind::FUNCTION) throw "";
+//            if (fdeclaration->GetTypeKind() != TypeKind::FUNCTION) throw "";
             if (!(fdeclaration->Equal(f))) throw "";
             // TODO check body existence
         }

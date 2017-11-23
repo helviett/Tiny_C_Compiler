@@ -1,25 +1,19 @@
 └── Unit
     └── FuncDef
-        ├── DeclarationSpecifiers
-        │   └── void
         ├── Declarator
-        │   └── Func Decl
-        │       ├── forloop
-        │       └── ParameterList
-        │           └── param
-        │               ├── DeclarationSpecifiers
-        │               │   └── int
-        │               └── Declarator
-        │                   └── n
+        │   ├── forloop
+        │   └── Function returning
+        │       ├── VOID
+        │       └── Params
+        │           └── n
+        │               └── INT32
         └── {}
             └── BlockItemList
                 ├── Decl
-                │   ├── DeclarationSpecifiers
-                │   │   └── int
                 │   └── InitDeclaratorList
                 │       └── InitDeclarator
-                │           └── Declarator
-                │               └── i
+                │           ├── i
+                │           └── INT32
                 └── for
                     ├── ;
                     │   └── =

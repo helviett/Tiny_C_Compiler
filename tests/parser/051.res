@@ -1,32 +1,23 @@
 └── Unit
     ├── FuncDef
-    │   ├── DeclarationSpecifiers
-    │   │   └── void
     │   ├── Declarator
-    │   │   └── Func Decl
-    │   │       ├── swap
-    │   │       └── ParameterList
-    │   │           ├── param
-    │   │           │   ├── DeclarationSpecifiers
-    │   │           │   │   └── int
-    │   │           │   └── Declarator
-    │   │           │       ├── *
-    │   │           │       └── x
-    │   │           └── param
-    │   │               ├── DeclarationSpecifiers
-    │   │               │   └── int
-    │   │               └── Declarator
-    │   │                   ├── *
-    │   │                   └── y
+    │   │   ├── swap
+    │   │   └── Function returning
+    │   │       ├── VOID
+    │   │       └── Params
+    │   │           ├── x
+    │   │           │   └── Pointer to
+    │   │           │       └── INT32
+    │   │           └── y
+    │   │               └── Pointer to
+    │   │                   └── INT32
     │   └── {}
     │       └── BlockItemList
     │           ├── Decl
-    │           │   ├── DeclarationSpecifiers
-    │           │   │   └── int
     │           │   └── InitDeclaratorList
     │           │       └── InitDeclarator
-    │           │           └── Declarator
-    │           │               └── temp
+    │           │           ├── temp
+    │           │           └── INT32
     │           ├── ;
     │           │   └── =
     │           │       ├── temp
@@ -44,22 +35,15 @@
     │                   │   └── y
     │                   └── temp
     ├── FuncDef
-    │   ├── DeclarationSpecifiers
-    │   │   └── int
     │   ├── Declarator
-    │   │   └── Func Decl
-    │   │       ├── choose_pivot
-    │   │       └── ParameterList
-    │   │           ├── param
-    │   │           │   ├── DeclarationSpecifiers
-    │   │           │   │   └── int
-    │   │           │   └── Declarator
-    │   │           │       └── i
-    │   │           └── param
-    │   │               ├── DeclarationSpecifiers
-    │   │               │   └── int
-    │   │               └── Declarator
-    │   │                   └── j
+    │   │   ├── choose_pivot
+    │   │   └── Function returning
+    │   │       ├── INT32
+    │   │       └── Params
+    │   │           ├── i
+    │   │           │   └── INT32
+    │   │           └── j
+    │   │               └── INT32
     │   └── {}
     │       └── BlockItemList
     │           └── return
@@ -69,46 +53,34 @@
     │                   │   └── j
     │                   └── 2
     └── FuncDef
-        ├── DeclarationSpecifiers
-        │   └── void
         ├── Declarator
-        │   └── Func Decl
-        │       ├── quicksort
-        │       └── ParameterList
-        │           ├── param
-        │           │   ├── DeclarationSpecifiers
-        │           │   │   └── int
-        │           │   └── Declarator
-        │           │       └── []
-        │           │           └── list
-        │           ├── param
-        │           │   ├── DeclarationSpecifiers
-        │           │   │   └── int
-        │           │   └── Declarator
-        │           │       └── m
-        │           └── param
-        │               ├── DeclarationSpecifiers
-        │               │   └── int
-        │               └── Declarator
-        │                   └── n
+        │   ├── quicksort
+        │   └── Function returning
+        │       ├── VOID
+        │       └── Params
+        │           ├── list
+        │           │   └── Array of
+        │           │       └── INT32
+        │           ├── m
+        │           │   └── INT32
+        │           └── n
+        │               └── INT32
         └── {}
             └── BlockItemList
                 ├── Decl
-                │   ├── DeclarationSpecifiers
-                │   │   └── int
                 │   └── InitDeclaratorList
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── key
+                │       │   ├── key
+                │       │   └── INT32
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── i
+                │       │   ├── i
+                │       │   └── INT32
                 │       ├── InitDeclarator
-                │       │   └── Declarator
-                │       │       └── j
+                │       │   ├── j
+                │       │   └── INT32
                 │       └── InitDeclarator
-                │           └── Declarator
-                │               └── k
+                │           ├── k
+                │           └── INT32
                 └── if
                     ├── <
                     │   ├── m

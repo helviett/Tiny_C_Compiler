@@ -5,8 +5,10 @@
 #ifndef TINY_C_COMPILER_SYM_VARIABLE_H
 #define TINY_C_COMPILER_SYM_VARIABLE_H
 
-#include "sym_type.h"
+#include "symbol.h"
 #include <utility>
+
+class SymType;
 
 class SymVariable: public Symbol
 {
