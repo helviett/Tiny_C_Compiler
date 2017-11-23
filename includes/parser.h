@@ -139,7 +139,10 @@ private:
     bool isProperFunctionDeclaration(SymFunction *definition, SymFunction *declaration);
     void require(TokenType typeExpectation);
     void requierKeyword(Keyword expectedKeyword);
-
+    void requireNext(TokenType typeExpectation);
+    void requireKeywordNext(Keyword expectedKeyword);
+    bool maybe(TokenType typeExpectation);
+    bool maybeNext(TokenType typeExpectation);
     std::vector<std::map<std::string, Symbol *>> tablesOfSymbols;
     Tokenizer *scanner;
     SyntaxTree tree;

@@ -637,7 +637,7 @@ void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarat
 void Parser::parseFunctionDeclarator(DeclaratorNode *declarator)
 {
     scanner->Next();
-    auto ptl = parseParameterTypeList(); // TODO SymFunction must store a SymTable of this
+    auto ptl = parseParameterTypeList();
     std::vector<SymVariable *> orderedParamTypes;
     orderedParamTypes.reserve(ptl->List().size());
     auto table = new SymbolTable();
@@ -1178,4 +1178,26 @@ void Parser::requierKeyword(Keyword expectedKeyword)
 bool Parser::isProperFunctionDeclaration(SymFunction *definition, SymFunction *declaration)
 {
     return definition == declaration;
+}
+
+void Parser::requireNext(TokenType typeExpectation)
+{
+    require(typeExpectation);
+    scanner->Next();
+}
+
+void Parser::requireKeywordNext(Keyword expectedKeyword)
+{
+    requierKeyword(expectedKeyword);
+    scanner->Next();
+}
+
+bool Parser::maybe(TokenType typeExpectation)
+{
+    return scanner->Current()->type == typeExpectation;
+}
+
+bool Parser::maybeNext(TokenType typeExpectation)
+{
+    return maybe(typeExpectation) && scanner->Next();
 }
