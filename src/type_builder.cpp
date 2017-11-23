@@ -1,15 +1,21 @@
 #include "../includes/type_builder.h"
+#include "../includes/nodes/struct.h"
+#include "../includes/symbol_table.h"
 
 SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
 {
     enum {SINGED, UNSIGNED, DEFAULT} isSinged = DEFAULT;
     enum {SCALAR, STRUCT, ENUM, NONE, VOID} kind = NONE;
     enum {INTEGER, FLOAT, DOUBLE, UNKNOWN, CHAR} scalarKind = UNKNOWN;
+    SpecifierKind  specifierKind = SpecifierKind::UNDEFINED;
     int longTimes = 0;
+    SymType *type = nullptr;
     for (auto it: declarationSpecifiers->List())
     {
         if (it->Kind() == SpecifierKind::SIMPLE)
         {
+            if (specifierKind == SpecifierKind::COMPLEX) throw "";
+            specifierKind = SpecifierKind::SIMPLE;
             auto simple = (SimpleSpecifier *)it;
             switch (simple->Value()->keyword)
             {
@@ -70,6 +76,10 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
         }
         else
         {
+            if (specifierKind != SpecifierKind::UNDEFINED) throw "";
+            specifierKind = SpecifierKind::COMPLEX;
+            kind = STRUCT;
+            type = ((StructSpecifierNode *)it)->GetRecordType();
             // TODO struct and enum
         }
     }
@@ -125,6 +135,27 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
             break;
         case VOID:
             return new SymBuiltInType(BuiltInTypeKind::VOID);
+        case STRUCT:
+            return type;
     }
     return nullptr;
+}
+
+RecordType *TypeBuilder::Build(StructDeclarationListNode *structDeclarationList)
+{
+    std::vector<SymVariable *> orderedFields;
+    auto fields = new SymbolTable();
+    for (auto declarationList: structDeclarationList->List())
+    {
+        for (auto declarator: declarationList->List())
+        {
+            std::string name = declarator->GetId() ? declarator->GetId()->GetName() :
+                               "#" + std::to_string(orderedFields.size());
+            if (fields->Find(name)) throw "FUCK YOU BITCH";
+            auto var = new SymVariable(name, (*declarator).GetType());
+            orderedFields.push_back(var);
+            fields->Insert(name, var);
+        }
+    }
+    return new RecordType(fields, orderedFields);
 }

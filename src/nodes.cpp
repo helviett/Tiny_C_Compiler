@@ -688,12 +688,22 @@ uint64_t StructDeclaratorListNode::Size()
     return list.size();
 }
 
+std::list<StructDeclaratorNode *> &StructDeclaratorListNode::List()
+{
+    return list;
+}
+
 void StructDeclarationNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << "StructDeclaratorList" << std::endl;
     indent.append(isTail ? "    " : "│   ");
     structDeclaratorList->Print(os, indent, true);
+}
+
+std::list<StructDeclaratorNode *> & StructDeclarationNode::List() const
+{
+    return structDeclaratorList->List();
 }
 
 uint64_t StructDeclarationListNode::Size()
@@ -719,23 +729,36 @@ void StructDeclarationListNode::Print(std::ostream &os, std::string indent, bool
     (*it)->Print(os, indent, true);
 }
 
+std::list<StructDeclarationNode *> &StructDeclarationListNode::List()
+{
+    return list;
+}
+
 void StructSpecifierNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << "struct" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    if (id)
-    {
-        if (structDeclaratorList)
-        {
-            id->Print(os, indent, false);
-            structDeclaratorList->Print(os, indent, true);
-            return;
-        }
-        id->Print(os, indent, true);
-        return;
-    }
-    structDeclaratorList->Print(os, indent, true);
+}
+
+void StructSpecifierNode::SetId(IdNode *id)
+{
+    this->id = id;
+}
+
+IdNode *StructSpecifierNode::GetId() const
+{
+    return id;
+}
+
+RecordType *StructSpecifierNode::GetRecordType() const
+{
+    return type;
+}
+
+void StructSpecifierNode::SetRecordType(RecordType *type)
+{
+    this->type = type;
 }
 
 void StructDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -743,18 +766,15 @@ void StructDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTa
     os << indent << (isTail ? "└── " : "├── ");
     os << "StructDeclarator" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    if (declarator)
-    {
-        if (constantExpr)
-        {
-            declarator->Print(os, indent, false);
-            constantExpr->Print(os, indent, true);
-            return;
-        }
-        declarator->Print(os, indent, true);
-        return;
-    }
-    constantExpr->Print(os, indent, true);
+    if (GetId()) GetId()->Print(os, indent, false);
+    GetType()->Print(os, indent, constantExpr);
+    if (constantExpr) constantExpr->Print(os, indent, true);
+}
+
+StructDeclaratorNode::StructDeclaratorNode(DeclaratorNode *declarator, ExprNode *constantExpr): constantExpr(constantExpr)
+{
+    SetId(declarator->GetId());
+    SetType(declarator->GetType());
 }
 
 uint64_t InitializerListNode::Size()

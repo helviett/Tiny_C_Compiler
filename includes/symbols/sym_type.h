@@ -122,9 +122,14 @@ private:
 class RecordType: public SymType
 {
 public:
-
+    RecordType();
+    RecordType(SymbolTable *fields,  std::vector<SymVariable *> orderedFields);
+    void Print(std::ostream &os, std::string indent, bool isTail) override;
+    SymbolTable *GetFieldsTable() const;
+    bool Equal(SymType *other) override;
 private:
-    std::vector<std::string> orderedFieldNames;
+    SymbolTable *fields;
+    std::vector<SymVariable *> orderedFields;
 };
 
 #endif //TINY_C_COMPILER_TYPE_H

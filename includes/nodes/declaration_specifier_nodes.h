@@ -11,7 +11,7 @@
 
 enum class SpecifierKind
 {
-    SIMPLE, COMPLEX
+    SIMPLE, COMPLEX, UNDEFINED
 };
 
 class TypeSpecifiers;

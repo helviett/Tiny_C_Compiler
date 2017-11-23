@@ -969,16 +969,19 @@ StructSpecifierNode *Parser::parseStructSpecifier()
     requierKeyword(Keyword::STRUCT);
     scanner->Next();
     IdNode *id = scanner->Current()->type == TokenType::ID ? new IdNode(scanner->Current()) : nullptr;
+    auto structS = new StructSpecifierNode(id);
     if (!id)
     {
-        require(TokenType::LCURLY_BRACKET);
-        scanner->Next();
-        return new StructSpecifierNode(id, parseStructDeclarationList());
+        requireNext(TokenType::LCURLY_BRACKET);
+        structS->SetRecordType(TypeBuilder::Build(parseStructDeclarationList()));
+        return structS;
     }
     scanner->Next();
-    if (scanner->Current()->type == TokenType::LCURLY_BRACKET && scanner->Next())
-        return new StructSpecifierNode(id, parseStructDeclarationList());
-    return new StructSpecifierNode(id, nullptr);
+    if (maybeNext(TokenType::LCURLY_BRACKET))
+    {
+        structS->SetRecordType(TypeBuilder::Build(parseStructDeclarationList()));
+    }
+    return structS;
 }
 
 //struct-declaration-list ::= struct-declaration | struct-declaration-list struct-declaration
@@ -989,7 +992,7 @@ StructDeclarationListNode *Parser::parseStructDeclarationList()
     do
     {
         sdl->Add(parseStructDeclaration());
-    } while (scanner->Current()->type != TokenType::RCURLY_BRACKET);
+    } while (!maybe(TokenType::RCURLY_BRACKET));
     scanner->Next();
     return sdl;
 }
@@ -1000,8 +1003,7 @@ StructDeclarationNode *Parser::parseStructDeclaration()
 {
     auto structDecl = new StructDeclarationNode(
             parseStructDeclaratorList(TypeBuilder::Build(parseSpecifierQualifierList())));
-    require(TokenType::SEMICOLON);
-    scanner->Next();
+    requireNext(TokenType::SEMICOLON);
     return structDecl;
 }
 
@@ -1009,7 +1011,7 @@ StructDeclarationNode *Parser::parseStructDeclaration()
 
 StructDeclaratorNode *Parser::parseStructDeclarator(SymType *baseType)
 {
-    if (scanner->Current()->type == TokenType::COLON && scanner->Next())
+    if (maybeNext(TokenType::COLON))
         return new StructDeclaratorNode(nullptr, (ExprNode *)parseConstantExpr());
     auto declarator = new DeclaratorNode();
     declarator->SetType(baseType);

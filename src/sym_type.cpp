@@ -163,3 +163,35 @@ SymAlias::SymAlias(std::string name, SymType *type): type(type)
 {
     this->name = std::move(name);
 }
+
+void RecordType::Print(std::ostream &os, std::string indent, bool isTail)
+{
+    os << indent << (isTail ? "└── " : "├── ");
+    os << "Struct: " << std::endl;
+    indent.append(isTail ? "    " : "│   ");
+    for (size_t i = 0; i < orderedFields.size() - 1; ++i)
+        orderedFields[i]->Print(os, indent, false);
+    orderedFields.back()->Print(os, indent, true);
+}
+
+bool RecordType::Equal(SymType *other)
+{
+    return false;
+}
+
+SymbolTable *RecordType::GetFieldsTable() const
+{
+    return fields;
+}
+
+RecordType::RecordType()
+{
+    kind = TypeKind::STRUCT;
+    fields = nullptr;
+}
+
+RecordType::RecordType(SymbolTable *fields, std::vector<SymVariable *> orderedFields):
+        fields(fields), orderedFields(std::move(orderedFields))
+{
+    kind = TypeKind::STRUCT;
+}
