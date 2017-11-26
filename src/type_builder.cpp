@@ -141,7 +141,7 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
     return nullptr;
 }
 
-SymRecord *TypeBuilder::Build(StructDeclarationListNode *structDeclarationList)
+SymRecord *TypeBuilder::Build(StructDeclarationListNode *structDeclarationList, IdNode *tag = nullptr)
 {
     std::vector<SymVariable *> orderedFields;
     auto fields = new SymbolTable();
@@ -151,11 +151,11 @@ SymRecord *TypeBuilder::Build(StructDeclarationListNode *structDeclarationList)
         {
             std::string name = declarator->GetId() ? declarator->GetId()->GetName() :
                                "#" + std::to_string(orderedFields.size());
-            if (fields->Find(name)) throw "FUCK YOU BITCH";
+            if (fields->Find(name)) throw "";
             auto var = new SymVariable(name, (*declarator).GetType());
             orderedFields.push_back(var);
             fields->Insert(name, var);
         }
     }
-    return new SymRecord(fields, orderedFields);
+    return new SymRecord(fields, orderedFields, tag);
 }

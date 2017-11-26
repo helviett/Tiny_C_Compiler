@@ -66,6 +66,8 @@ void PostfixIncrementNode::Print(std::ostream &os, std::string indent, bool isTa
     node->Print(os, indent, true);
 }
 
+PostfixIncrementNode::PostfixIncrementNode(ExprNode *node) : node(node) {}
+
 void PostfixDecrementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -73,6 +75,8 @@ void PostfixDecrementNode::Print(std::ostream &os, std::string indent, bool isTa
     indent.append(isTail ? "    " : "│   ");
     node->Print(os, indent, true);
 }
+
+PostfixDecrementNode::PostfixDecrementNode(ExprNode *node) : node(node) {}
 
 void StructureOrUnionMemberAccessNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -83,6 +87,9 @@ void StructureOrUnionMemberAccessNode::Print(std::ostream &os, std::string inden
     member->Print(os, indent, true);
 }
 
+StructureOrUnionMemberAccessNode::StructureOrUnionMemberAccessNode(ExprNode *structureOrUnion, IdNode *member) : member(member),
+                                                                                                                 structureOrUnion(structureOrUnion) {}
+
 void StructureOrUnionMemberAccessByPointerNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -92,6 +99,10 @@ void StructureOrUnionMemberAccessByPointerNode::Print(std::ostream &os, std::str
     member->Print(os, indent, true);
 }
 
+StructureOrUnionMemberAccessByPointerNode::StructureOrUnionMemberAccessByPointerNode(ExprNode *structureOrUnion,
+                                                                                     IdNode *member) : member(member),
+                                                                                                       structureOrUnion(structureOrUnion) {}
+
 void PrefixIncrementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -100,6 +111,8 @@ void PrefixIncrementNode::Print(std::ostream &os, std::string indent, bool isTai
     node->Print(os, indent, true);
 }
 
+PrefixIncrementNode::PrefixIncrementNode(ExprNode *node) : node(node){}
+
 void PrefixDecrementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -107,6 +120,8 @@ void PrefixDecrementNode::Print(std::ostream &os, std::string indent, bool isTai
     indent.append(isTail ? "    " : "│   ");
     node->Print(os, indent, true);
 }
+
+PrefixDecrementNode::PrefixDecrementNode(ExprNode *node) : node(node){}
 
 void BinOpNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -117,6 +132,8 @@ void BinOpNode::Print(std::ostream &os, std::string indent, bool isTail)
     right->Print(os, indent, true);
 }
 
+BinOpNode::BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op) : left(left), right(right), op(op) {}
+
 void ArrayAccess::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -125,6 +142,8 @@ void ArrayAccess::Print(std::ostream &os, std::string indent, bool isTail)
     left->Print(os, indent, false);
     inBrackets->Print(os, indent, true);
 }
+
+ArrayAccess::ArrayAccess(ExprNode *left, ExprNode *inBrackets) : left(left), inBrackets(inBrackets) {}
 
 void TernaryOperatorNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -136,6 +155,9 @@ void TernaryOperatorNode::Print(std::ostream &os, std::string indent, bool isTai
     iffalse->Print(os, indent, true);
 }
 
+TernaryOperatorNode::TernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, ExprNode *iffalse) :
+        condition(condition), iftrue(iftrue), iffalse(iffalse) {}
+
 
 void AssignmentNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -145,6 +167,9 @@ void AssignmentNode::Print(std::ostream &os, std::string indent, bool isTail)
     left->Print(os, indent, false);
     right->Print(os, indent, true);
 }
+
+AssignmentNode::AssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp) : left(left), right(right),
+                                                                                                       assignmentOp(assignmentOp) {}
 
 void TypeCastNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -163,6 +188,8 @@ void UnaryOpNode::Print(std::ostream &os, std::string indent, bool isTail)
     expr->Print(os, indent, true);
 }
 
+UnaryOpNode::UnaryOpNode(std::shared_ptr<Token> unaryOp, ExprNode *expr) : unaryOp(unaryOp), expr(expr) {}
+
 void SizeofExprNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -170,6 +197,8 @@ void SizeofExprNode::Print(std::ostream &os, std::string indent, bool isTail)
     indent.append(isTail ? "    " : "│   ");
     expr->Print(os, indent, true);
 }
+
+SizeofExprNode::SizeofExprNode(ExprNode *expr) : expr(expr) {}
 
 void SizeofTypeNameNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -179,6 +208,8 @@ void SizeofTypeNameNode::Print(std::ostream &os, std::string indent, bool isTail
     typeName->Print(os, indent, true);
 }
 
+SizeofTypeNameNode::SizeofTypeNameNode(TypeNameNode *typeName) : typeName(typeName) {}
+
 void CommaSeparatedExprs::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -187,6 +218,8 @@ void CommaSeparatedExprs::Print(std::ostream &os, std::string indent, bool isTai
     left->Print(os, indent, false);
     right->Print(os, indent, true);
 }
+
+CommaSeparatedExprs::CommaSeparatedExprs(ExprNode *left, ExprNode *right) : left(left), right(right) {}
 
 void PointerNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -337,29 +370,6 @@ IdNode *DeclaratorNode::GetId() const
     return id;
 }
 
-void ArrayDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
-{
-    os << indent << (isTail ? "└── " : "├── ");
-    os << "[]" << std::endl;
-    indent.append(isTail ? "    " : "│   ");
-    if (directDeclarator)
-    {
-        if (size)
-        {
-            directDeclarator->Print(os, indent, false);
-            size->Print(os, indent, true);
-            return;
-        }
-        directDeclarator->Print(os, indent, true);
-        return;
-    }
-    else
-    {
-        if (size)
-            size->Print(os, indent, true);
-    }
-}
-
 void ArgumentExprListNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     if (list.empty()) return;
@@ -396,6 +406,9 @@ void FunctionCallNode::Print(std::ostream &os, std::string indent, bool isTail)
     }
     functionName->Print(os, indent, true);
 }
+
+FunctionCallNode::FunctionCallNode(ExprNode *functionName, ArgumentExprListNode *arguments) :
+        functionName(functionName), arguments(arguments) {}
 
 void DeclarationSpecifiersNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -471,15 +484,6 @@ ParameterDeclarationNode::ParameterDeclarationNode(DeclaratorNode *declarator)
 {
     SetId(declarator->GetId());
     SetType(declarator->GetType());
-}
-
-void FunctionDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
-{
-    os << indent << (isTail ? "└── " : "├── ");
-    os << "Func Decl" << std::endl;
-    indent.append(isTail ? "    " : "│   ");
-    if (directDeclarator) directDeclarator->Print(os, indent, false);
-    params->Print(os, indent, true);
 }
 
 void DeclarationNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -635,11 +639,15 @@ void TypeSpecifierQualifierNode::Print(std::ostream &os, std::string indent, boo
     os << value->text << std::endl;
 }
 
+TypeSpecifierQualifierNode::TypeSpecifierQualifierNode(std::shared_ptr<Token> value) : SimpleSpecifier(value) {}
+
 void TypeSpecifierNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << value->text << std::endl;
 }
+
+TypeSpecifierNode::TypeSpecifierNode(std::shared_ptr<Token> specifier) : TypeSpecifierQualifierNode(specifier) {}
 
 void TypeQualifierNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -647,17 +655,23 @@ void TypeQualifierNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << value->text << std::endl;
 }
 
+TypeQualifierNode::TypeQualifierNode(std::shared_ptr<Token> qualifier) : TypeSpecifierQualifierNode(qualifier) {}
+
 void StorageClassSpecifierNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << value->text << std::endl;
 }
 
+StorageClassSpecifierNode::StorageClassSpecifierNode(std::shared_ptr<Token> specifier) : SimpleSpecifier(specifier) {}
+
 void FunctionSpecifierNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << value->text << std::endl;
 }
+
+FunctionSpecifierNode::FunctionSpecifierNode(std::shared_ptr<Token> specifier) : SimpleSpecifier(specifier) {}
 
 void SimpleSpecifier::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -669,6 +683,8 @@ std::shared_ptr<Token> SimpleSpecifier::Value()
 {
     return value;
 }
+
+SimpleSpecifier::SimpleSpecifier(std::shared_ptr<Token> specifier) : value(specifier) { kind = SpecifierKind::SIMPLE; }
 
 void StructDeclaratorListNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -748,12 +764,12 @@ void StructSpecifierNode::Print(std::ostream &os, std::string indent, bool isTai
 
 void StructSpecifierNode::SetId(IdNode *id)
 {
-    this->id = id;
+    this->type->SetTag(id);
 }
 
 IdNode *StructSpecifierNode::GetId() const
 {
-    return id;
+    return this->type->GetTag();
 }
 
 SymRecord *StructSpecifierNode::GetRecordType() const
@@ -765,6 +781,8 @@ void StructSpecifierNode::SetRecordType(SymRecord *type)
 {
     this->type = type;
 }
+
+StructSpecifierNode::StructSpecifierNode(SymRecord *type) : type(type) { kind = SpecifierKind::COMPLEX; }
 
 void StructDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -907,3 +925,5 @@ void ExprNode::SetType(SymType *type)
 {
     this->type = type;
 }
+
+ConstNode::ConstNode(std::shared_ptr<Token> token) : token(token) {}

@@ -147,7 +147,6 @@ private:
 
     Tokenizer *scanner;
     SyntaxTree tree;
-    ScopeTree scopeTree;
     SemanticAnalyzer sematicAnalyzer;
 };
 

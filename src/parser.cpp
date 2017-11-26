@@ -38,7 +38,7 @@ ExprNode *Parser::parsePrimaryExpr()
             return new FloatConstNode(t);
         case TokenType::ID:
             scanner->Next();
-            return sematicAnalyzer.BuildIdNode(t, scopeTree.Find(t->stringValue));
+            return sematicAnalyzer.BuildIdNode(t, sematicAnalyzer.GetScopeTree()->Find(t->stringValue));
         case TokenType::STRING:
             scanner->Next();
             return new StringLiteralNode(t);
@@ -649,7 +649,7 @@ void Parser::parseFunctionDeclarator(DeclaratorNode *declarator)
         orderedParamTypes.push_back(var);
         table->Insert(name, var);
     }
-    table->SetParent(scopeTree.GetActiveScope());
+    table->SetParent(sematicAnalyzer.GetScopeTree()->GetActiveScope());
     require(TokenType::RBRACKET);
     declarator->SetType(new SymFunction(declarator->GetType(), table, orderedParamTypes));
     scanner->Next();
@@ -808,11 +808,11 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList(DeclarationSpecifiersNod
     {
         idl->Add(declarator);
         auto t = declarator->GetType();
-        if (scopeTree.GetActiveScope()->Find(declarator->GetId()->GetName())) throw "";
+        if (sematicAnalyzer.GetScopeTree()->GetActiveScope()->Find(declarator->GetId()->GetName())) throw ""; // TODO going to be changed like in parseStructSpecifiers
         if (t->GetTypeKind() == TypeKind::FUNCTION)
-            scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(), t);
+            sematicAnalyzer.GetScopeTree()->GetActiveScope()->Insert(declarator->GetId()->GetName(), t);
         else
-            scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(),
+            sematicAnalyzer.GetScopeTree()->GetActiveScope()->Insert(declarator->GetId()->GetName(),
                                                new SymVariable(declarator->GetId()->GetName(), declarator->GetType()));
         if (scanner->Current()->type != TokenType::COMMA) return idl;
         scanner->Next();
@@ -839,11 +839,11 @@ InitDeclaratorNode *Parser::parseInitDeclarator(DeclarationSpecifiersNode *decla
         initializer = parseInitializer();
     }
     auto t = declarator->GetType();
-    if (scopeTree.GetActiveScope()->Find(declarator->GetId()->GetName())) throw "";
+    if (sematicAnalyzer.GetScopeTree()->GetActiveScope()->Find(declarator->GetId()->GetName())) throw ""; // TODO going to be changed like in parseStructSpecifiers
     if (t->GetTypeKind() == TypeKind::FUNCTION)
-        scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(), t);
+        sematicAnalyzer.GetScopeTree()->GetActiveScope()->Insert(declarator->GetId()->GetName(), t);
     else
-        scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(),
+        sematicAnalyzer.GetScopeTree()->GetActiveScope()->Insert(declarator->GetId()->GetName(),
                                     new SymVariable(declarator->GetId()->GetName(), declarator->GetType()));
     return new InitDeclaratorNode(declarator, initializer);
 }
@@ -880,11 +880,11 @@ CompoundStatement *Parser::parseCompoundStatement()
 {
 
     require(TokenType::LCURLY_BRACKET);
-    scopeTree.StartScope();
+    sematicAnalyzer.GetScopeTree()->StartScope();
     if (scanner->Next()->type == TokenType::RCURLY_BRACKET && scanner->Next()) return new CompoundStatement(nullptr);
     auto blockItemList = parseBlockItemList();
     require(TokenType::RCURLY_BRACKET);
-    scopeTree.EndScope();
+    sematicAnalyzer.GetScopeTree()->EndScope();
     scanner->Next();
     return new CompoundStatement(blockItemList);
 }
@@ -974,20 +974,16 @@ StructSpecifierNode *Parser::parseStructSpecifier()
 {
     requierKeyword(Keyword::STRUCT);
     scanner->Next();
-    IdNode *id = scanner->Current()->type == TokenType::ID ? new IdNode(scanner->Current()) : nullptr;
-    auto structS = new StructSpecifierNode(id);
+    IdNode *id = maybe(TokenType::ID) ? new IdNode(scanner->Current()) : nullptr;
     if (!id)
     {
         requireNext(TokenType::LCURLY_BRACKET);
-        structS->SetRecordType(TypeBuilder::Build(parseStructDeclarationList()));
-        return structS;
+        return sematicAnalyzer.BuildStructSpecifierNode(id, parseStructDeclarationList());
     }
     scanner->Next();
     if (maybeNext(TokenType::LCURLY_BRACKET))
-    {
-        structS->SetRecordType(TypeBuilder::Build(parseStructDeclarationList()));
-    }
-    return structS;
+        return sematicAnalyzer.BuildStructSpecifierNode(id, parseStructDeclarationList());
+    return new StructSpecifierNode(new SymRecord(id));
 }
 
 //struct-declaration-list ::= struct-declaration | struct-declaration-list struct-declaration
@@ -1035,7 +1031,7 @@ StructDeclaratorListNode *Parser::parseStructDeclaratorList(SymType *baseType)
     do
     {
         sdl->Add(parseStructDeclarator(baseType));
-    } while (scanner->Current()->type == TokenType::COMMA && scanner->Next());
+    } while (maybeNext(TokenType::COMMA));
     return sdl;
 }
 
@@ -1049,7 +1045,6 @@ DeclarationSpecifiersNode *Parser::parseSpecifierQualifierList()
     bool spec;
     while ((spec = isTypeSpecifier(t)) || isTypeQualifier(t))
     {
-
         tnn->Add(spec ? (TypeSpecifierQualifierNode *)new TypeSpecifierNode(t) :
                  (TypeSpecifierQualifierNode *)new TypeQualifierNode(t)) ;
         t = scanner->Next();
@@ -1151,17 +1146,17 @@ ExternalDeclarationNode *Parser::parseExternalDeclaration()
     {
         if (declarator->GetType()->GetTypeKind() != TypeKind::FUNCTION) throw "";
         auto f = (SymFunction *)declarator->GetType();
-        auto fdeclaration = (SymFunction *)scopeTree.Find(declarator->GetId()->GetName());
+        auto fdeclaration = (SymFunction *)sematicAnalyzer.GetScopeTree()->Find(declarator->GetId()->GetName());
         if (fdeclaration)
         {
             if (fdeclaration->GetTypeKind() != TypeKind::FUNCTION) throw "";
             if (!(fdeclaration->Equal(f))) throw "";
             // TODO check body existence
         }
-        scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(), f);
-        scopeTree.SetActiveScope(f->GetParamsTable());
+        sematicAnalyzer.GetScopeTree()->GetActiveScope()->Insert(declarator->GetId()->GetName(), f);
+        sematicAnalyzer.GetScopeTree()->SetActiveScope(f->GetParamsTable());
         auto res = (ExternalDeclarationNode *)new FunctionDefinitionNode(declarator, parseCompoundStatement());
-        scopeTree.EndScope();
+        sematicAnalyzer.GetScopeTree()->EndScope();
         return res;
     }
     if (scanner->Current()->type == TokenType::ASSIGNMENT)

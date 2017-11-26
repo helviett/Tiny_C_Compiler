@@ -123,13 +123,18 @@ class SymRecord: public SymType
 {
 public:
     SymRecord();
+    SymRecord(IdNode *tag);
     SymRecord(SymbolTable *fields,  std::vector<SymVariable *> orderedFields);
+    SymRecord(SymbolTable *fields,  std::vector<SymVariable *> orderedFields, IdNode *tag);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     SymbolTable *GetFieldsTable() const;
     bool Equal(SymType *other) override;
     std::vector<SymVariable *> &GetOrderedFields();
+    IdNode *GetTag() const;
+    void SetTag(IdNode *tag);
 private:
-    SymbolTable *fields;
+    IdNode *tag{nullptr};
+    SymbolTable *fields{nullptr};
     std::vector<SymVariable *> orderedFields;
 };
 

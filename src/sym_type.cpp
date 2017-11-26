@@ -171,11 +171,14 @@ SymAlias::SymAlias(std::string name, SymType *type): type(type)
 void SymRecord::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
-    os << "Struct: " << std::endl;
+    os << "struct " + (tag ? tag->GetName() : "") << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    for (size_t i = 0; i < orderedFields.size() - 1; ++i)
-        orderedFields[i]->Print(os, indent, false);
-    orderedFields.back()->Print(os, indent, true);
+    if (!orderedFields.empty())
+    {
+        for (size_t i = 0; i < orderedFields.size() - 1; ++i)
+            orderedFields[i]->Print(os, indent, false);
+        orderedFields.back()->Print(os, indent, true);
+    }
 }
 
 bool SymRecord::Equal(SymType *other)
@@ -216,4 +219,25 @@ SymRecord::SymRecord(SymbolTable *fields, std::vector<SymVariable *> orderedFiel
 std::vector<SymVariable *> &SymRecord::GetOrderedFields()
 {
     return orderedFields;
+}
+
+void SymRecord::SetTag(IdNode *tag)
+{
+    this->tag = tag;
+}
+
+IdNode *SymRecord::GetTag() const
+{
+    return tag;
+}
+
+SymRecord::SymRecord(SymbolTable *fields, std::vector<SymVariable *> orderedFields, IdNode *tag):
+        SymRecord(fields, std::move(orderedFields))
+{
+    this->tag = tag;
+}
+
+SymRecord::SymRecord(IdNode *tag): tag(tag)
+{
+    name = "struct " + tag->GetName();
 }

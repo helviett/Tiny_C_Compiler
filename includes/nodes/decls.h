@@ -32,29 +32,7 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 };
 
-class ArrayDeclaratorNode: public DirectDeclaratorNode
-{
-public:
-    ArrayDeclaratorNode(DirectDeclaratorNode *directDeclarator, ExprNode *size):
-            directDeclarator(directDeclarator), size(size) {}
-    void Print(std::ostream &os, std::string ident, bool isTail) override;
-private:
-    DirectDeclaratorNode *directDeclarator;
-    ExprNode  *size;
-};
-
 class ParameterTypeList;
-
-class FunctionDeclaratorNode: public DirectDeclaratorNode
-{
-public:
-    FunctionDeclaratorNode(DirectDeclaratorNode *directDeclarator, ParameterTypeList *params):
-            params(params), directDeclarator(directDeclarator) {}
-    void Print(std::ostream &os, std::string ident, bool isTail) override;
-private:
-    DirectDeclaratorNode *directDeclarator;
-    ParameterTypeList    *params;
-};
 
 class ParameterDeclarationNode: public DeclaratorNode
 {

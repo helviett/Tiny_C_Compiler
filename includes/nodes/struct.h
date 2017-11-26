@@ -53,14 +53,13 @@ protected:
 class StructSpecifierNode: public DeclarationSpecifierNode
 {
 public:
-    explicit StructSpecifierNode(IdNode *id): id(id) { kind = SpecifierKind::COMPLEX; }
+    explicit StructSpecifierNode(SymRecord *type);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void SetId(IdNode *id);
     IdNode *GetId() const;
     SymRecord *GetRecordType() const;
     void SetRecordType(SymRecord *type);
 private:
-    IdNode *id{nullptr};
     SymRecord *type{nullptr};
 };
 

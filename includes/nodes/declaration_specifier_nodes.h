@@ -29,7 +29,7 @@ protected:
 class SimpleSpecifier: public DeclarationSpecifierNode
 {
 public:
-    explicit SimpleSpecifier(std::shared_ptr<Token> specifier): value(specifier) { kind = SpecifierKind::SIMPLE; }
+    explicit SimpleSpecifier(std::shared_ptr<Token> specifier);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     std::shared_ptr<Token> Value();
 protected:
@@ -40,35 +40,35 @@ class TypeSpecifierQualifierNode: public SimpleSpecifier
 {
 public:
     TypeSpecifierQualifierNode() = default;
-    explicit TypeSpecifierQualifierNode(std::shared_ptr<Token> value): SimpleSpecifier(value) {}
+    explicit TypeSpecifierQualifierNode(std::shared_ptr<Token> value);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class TypeSpecifierNode: public TypeSpecifierQualifierNode
 {
 public:
-    explicit TypeSpecifierNode(std::shared_ptr<Token> specifier): TypeSpecifierQualifierNode(specifier) {}
+    explicit TypeSpecifierNode(std::shared_ptr<Token> specifier);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class TypeQualifierNode: public TypeSpecifierQualifierNode
 {
 public:
-    explicit TypeQualifierNode(std::shared_ptr<Token> qualifier): TypeSpecifierQualifierNode(qualifier) {}
+    explicit TypeQualifierNode(std::shared_ptr<Token> qualifier);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class StorageClassSpecifierNode: public SimpleSpecifier
 {
 public:
-    explicit StorageClassSpecifierNode(std::shared_ptr<Token> specifier): SimpleSpecifier(specifier) {}
+    explicit StorageClassSpecifierNode(std::shared_ptr<Token> specifier);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 
 class FunctionSpecifierNode: public SimpleSpecifier
 {
 public:
-    explicit FunctionSpecifierNode(std::shared_ptr<Token> specifier): SimpleSpecifier(specifier) {}
+    explicit FunctionSpecifierNode(std::shared_ptr<Token> specifier);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 };
 

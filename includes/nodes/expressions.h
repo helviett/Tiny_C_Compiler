@@ -24,7 +24,7 @@ protected:
 class PostfixIncrementNode: public ExprNode
 {
 public:
-    explicit PostfixIncrementNode(ExprNode *node): node(node) {}
+    explicit PostfixIncrementNode(ExprNode *node);
     virtual void Print(std::ostream &os, std::string ident, bool isTail);
 private:
     ExprNode *node;
@@ -33,7 +33,7 @@ private:
 class PostfixDecrementNode: public ExprNode
 {
 public:
-    explicit PostfixDecrementNode(ExprNode *node): node(node) {}
+    explicit PostfixDecrementNode(ExprNode *node);
     virtual void Print(std::ostream &os, std::string ident, bool isTail);
 private:
     ExprNode *node;
@@ -44,8 +44,7 @@ class IdNode;
 class StructureOrUnionMemberAccessNode: public ExprNode
 {
 public:
-    StructureOrUnionMemberAccessNode(ExprNode *structureOrUnion, IdNode *member): member(member),
-                                                                                         structureOrUnion(structureOrUnion) {}
+    StructureOrUnionMemberAccessNode(ExprNode *structureOrUnion, IdNode *member);
 
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
@@ -56,8 +55,7 @@ private:
 class StructureOrUnionMemberAccessByPointerNode: public ExprNode
 {
 public:
-    StructureOrUnionMemberAccessByPointerNode(ExprNode *structureOrUnion, IdNode *member): member(member),
-                                                                                                  structureOrUnion(structureOrUnion) {}
+    StructureOrUnionMemberAccessByPointerNode(ExprNode *structureOrUnion, IdNode *member);
 
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
@@ -68,7 +66,7 @@ private:
 class ArrayAccess: public ExprNode
 {
 public:
-    ArrayAccess(ExprNode *left, ExprNode *inBrackets): left(left), inBrackets(inBrackets) {}
+    ArrayAccess(ExprNode *left, ExprNode *inBrackets);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     ExprNode *left, *inBrackets;
@@ -89,8 +87,7 @@ private:
 class FunctionCallNode: public ExprNode
 {
 public:
-    FunctionCallNode(ExprNode *functionName, ArgumentExprListNode *arguments):
-            functionName(functionName), arguments(arguments) {}
+    FunctionCallNode(ExprNode *functionName, ArgumentExprListNode *arguments);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     ExprNode *functionName;
@@ -100,7 +97,7 @@ private:
 class SizeofExprNode: public  ExprNode
 {
 public:
-    SizeofExprNode(ExprNode *expr): expr(expr) {}
+    SizeofExprNode(ExprNode *expr);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     ExprNode *expr;
@@ -111,7 +108,7 @@ class TypeNameNode;
 class SizeofTypeNameNode: public ExprNode
 {
 public:
-    SizeofTypeNameNode(TypeNameNode *typeName): typeName(typeName) {}
+    SizeofTypeNameNode(TypeNameNode *typeName);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     TypeNameNode *typeName;
@@ -120,7 +117,7 @@ private:
 class UnaryOpNode: public ExprNode
 {
 public:
-    UnaryOpNode (std::shared_ptr<Token> unaryOp, ExprNode *expr): unaryOp(unaryOp), expr(expr) {}
+    UnaryOpNode (std::shared_ptr<Token> unaryOp, ExprNode *expr);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     std::shared_ptr<Token> unaryOp;
@@ -130,7 +127,7 @@ private:
 class PrefixIncrementNode: public ExprNode
 {
 public:
-    explicit PrefixIncrementNode(ExprNode *node): node(node){}
+    explicit PrefixIncrementNode(ExprNode *node);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     ExprNode *node;
@@ -139,7 +136,7 @@ private:
 class PrefixDecrementNode: public ExprNode
 {
 public:
-    explicit PrefixDecrementNode(ExprNode *node): node(node){}
+    explicit PrefixDecrementNode(ExprNode *node);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     ExprNode *node;
@@ -148,7 +145,7 @@ private:
 class BinOpNode: public ExprNode
 {
 public:
-    BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op): left(left), right(right), op(op) {}
+    BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     ExprNode *left, *right;
@@ -158,8 +155,7 @@ private:
 class TernaryOperatorNode: public ExprNode
 {
 public:
-    TernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, ExprNode *iffalse):
-            condition(condition), iftrue(iftrue), iffalse(iffalse) {}
+    TernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, ExprNode *iffalse);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     ExprNode *condition, *iftrue, *iffalse;
@@ -174,8 +170,7 @@ public:
 class AssignmentNode: public AssignmentExprNode
 {
 public:
-    AssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp): left(left), right(right),
-                                                                                        assignmentOp(assignmentOp) {}
+    AssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     ExprNode *left, *right;
@@ -185,7 +180,7 @@ private:
 class CommaSeparatedExprs: public ExprNode
 {
 public:
-    CommaSeparatedExprs(ExprNode *left, ExprNode *right): left(left), right(right) {}
+    CommaSeparatedExprs(ExprNode *left, ExprNode *right);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     ExprNode *left, *right;
@@ -205,7 +200,7 @@ private:
 class ConstNode: public ExprNode
 {
 public:
-    explicit ConstNode(std::shared_ptr<Token> token): token(token) {}
+    explicit ConstNode(std::shared_ptr<Token> token);
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
 protected:
     std::shared_ptr<Token> token;
