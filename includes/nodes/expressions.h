@@ -8,6 +8,7 @@
 #include "node.h"
 #include "../token.h"
 #include <list>
+#include <value_category.h>
 
 class SymType;
 
@@ -17,8 +18,11 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
     SymType *GetType() const;
     void SetType(SymType *type);
+    ValueCategory  GetValueCategory() const;
+    void SetValueCategory(ValueCategory category);
 protected:
     SymType *type{nullptr};
+    ValueCategory  category{ValueCategory::RVALUE};
 };
 
 class PostfixIncrementNode: public ExprNode

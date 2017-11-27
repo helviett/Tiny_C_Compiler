@@ -931,4 +931,14 @@ void ExprNode::SetType(SymType *type)
     this->type = type;
 }
 
-ConstNode::ConstNode(std::shared_ptr<Token> token) : token(token) {}
+void ExprNode::SetValueCategory(ValueCategory category)
+{
+    this->category = category;
+}
+
+ValueCategory ExprNode::GetValueCategory() const
+{
+    return category;
+}
+
+ConstNode::ConstNode(std::shared_ptr<Token> token) : token(std::move(token)) {}
