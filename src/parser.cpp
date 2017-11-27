@@ -36,13 +36,12 @@ ExprNode *Parser::parsePrimaryExpr()
         case TokenType::NUM_FLOAT:
             return new FloatConstNode(t);
         case TokenType::ID:
-            return sematicAnalyzer.BuildIdNode(t, sematicAnalyzer.GetScopeTree()->Find(t->stringValue));
+            return sematicAnalyzer.BuildIdNode(t);
         case TokenType::STRING:
             return new StringLiteralNode(t);
         case TokenType::LBRACKET:
             ExprNode *e = parseExpr();
-            require(TokenType::RBRACKET);
-            scanner->Next();
+            requireNext(TokenType::RBRACKET);
             return e;
     }
     throw InvalidExpression(scanner->Current());

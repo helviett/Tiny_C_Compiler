@@ -12,7 +12,7 @@
 class SemanticAnalyzer
 {
 public:
-    IdNode *BuildIdNode(std::shared_ptr<Token> token, Symbol *symbol);
+    IdNode *BuildIdNode(std::shared_ptr<Token> token);
     StructSpecifierNode *BuildStructSpecifierNode(IdNode *tag, StructDeclarationListNode *structDeclarationList);
     ScopeTree *GetScopeTree();
     void Declare(InitDeclaratorListNode *initDeclaratorList);
