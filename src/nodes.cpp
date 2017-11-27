@@ -517,6 +517,11 @@ void InitDeclaratorListNode::Print(std::ostream &os, std::string indent, bool is
     (*it)->Print(os, indent, true);
 }
 
+std::list<InitDeclaratorNode *> &InitDeclaratorListNode::List()
+{
+    return list;
+}
+
 void InitDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");

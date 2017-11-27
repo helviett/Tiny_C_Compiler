@@ -15,6 +15,7 @@ public:
     IdNode *BuildIdNode(std::shared_ptr<Token> token, Symbol *symbol);
     StructSpecifierNode *BuildStructSpecifierNode(IdNode *tag, StructDeclarationListNode *structDeclarationList);
     ScopeTree *GetScopeTree();
+    void Declare(InitDeclaratorListNode *initDeclaratorList);
 private:
     ScopeTree scopeTree;
 };

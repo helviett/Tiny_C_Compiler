@@ -25,6 +25,7 @@ class InitDeclaratorListNode: public Node
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(InitDeclaratorNode *initDeclarator);
+    std::list<InitDeclaratorNode *> &List();
     uint64_t Size();
 protected:
     std::list<InitDeclaratorNode *> list;

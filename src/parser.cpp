@@ -28,22 +28,18 @@ std::ostream &operator<<(std::ostream &os, Parser &parser)
 ExprNode *Parser::parsePrimaryExpr()
 {
     auto t = scanner->Current();
+    scanner->Next();
     switch (t->type)
     {
         case TokenType::NUM_INT:
-            scanner->Next();
             return new IntConstNode(t);
         case TokenType::NUM_FLOAT:
-            scanner->Next();
             return new FloatConstNode(t);
         case TokenType::ID:
-            scanner->Next();
             return sematicAnalyzer.BuildIdNode(t, sematicAnalyzer.GetScopeTree()->Find(t->stringValue));
         case TokenType::STRING:
-            scanner->Next();
             return new StringLiteralNode(t);
         case TokenType::LBRACKET:
-            scanner->Next();
             ExprNode *e = parseExpr();
             require(TokenType::RBRACKET);
             scanner->Next();
@@ -796,6 +792,7 @@ DeclarationNode * Parser::parseDeclaration(DeclarationSpecifiersNode *declaratio
     auto idl = parseInitDeclaratorList(ds, declarator);
     require(TokenType::SEMICOLON);
     scanner->Next();
+    sematicAnalyzer.Declare(idl);
     return new DeclarationNode(ds, idl);
 }
 
@@ -807,13 +804,6 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList(DeclarationSpecifiersNod
     if (declarator)
     {
         idl->Add(declarator);
-        auto t = declarator->GetType();
-        if (sematicAnalyzer.GetScopeTree()->GetActiveScope()->Find(declarator->GetId()->GetName())) throw ""; // TODO going to be changed like in parseStructSpecifiers
-        if (t->GetTypeKind() == TypeKind::FUNCTION)
-            sematicAnalyzer.GetScopeTree()->GetActiveScope()->Insert(declarator->GetId()->GetName(), t);
-        else
-            sematicAnalyzer.GetScopeTree()->GetActiveScope()->Insert(declarator->GetId()->GetName(),
-                                               new SymVariable(declarator->GetId()->GetName(), declarator->GetType()));
         if (scanner->Current()->type != TokenType::COMMA) return idl;
         scanner->Next();
     }
@@ -838,13 +828,6 @@ InitDeclaratorNode *Parser::parseInitDeclarator(DeclarationSpecifiersNode *decla
         scanner->Next();
         initializer = parseInitializer();
     }
-    auto t = declarator->GetType();
-    if (sematicAnalyzer.GetScopeTree()->GetActiveScope()->Find(declarator->GetId()->GetName())) throw ""; // TODO going to be changed like in parseStructSpecifiers
-    if (t->GetTypeKind() == TypeKind::FUNCTION)
-        sematicAnalyzer.GetScopeTree()->GetActiveScope()->Insert(declarator->GetId()->GetName(), t);
-    else
-        sematicAnalyzer.GetScopeTree()->GetActiveScope()->Insert(declarator->GetId()->GetName(),
-                                    new SymVariable(declarator->GetId()->GetName(), declarator->GetType()));
     return new InitDeclaratorNode(declarator, initializer);
 }
 

@@ -1,5 +1,6 @@
 
 #include "../includes/semantic_analyzer.h"
+#include "../includes/nodes/initializer.h"
 
 IdNode *SemanticAnalyzer::BuildIdNode(std::shared_ptr<Token> token, Symbol *symbol)
 {
@@ -36,4 +37,18 @@ StructSpecifierNode *SemanticAnalyzer::BuildStructSpecifierNode(IdNode *tag,
 ScopeTree *SemanticAnalyzer::GetScopeTree()
 {
     return &scopeTree;
+}
+
+void SemanticAnalyzer::Declare(InitDeclaratorListNode *initDeclaratorList)
+{
+    for (auto it: initDeclaratorList->List())
+    {
+        if (scopeTree.GetActiveScope()->Find(it->GetId()->GetName())) throw ""; // TODO going to be changed like in parseStructSpecifiers
+        auto t = it->GetType();
+        if (t->GetTypeKind() == TypeKind::FUNCTION)
+            scopeTree.GetActiveScope()->Insert(it->GetId()->GetName(), t);
+        else
+            scopeTree.GetActiveScope()->Insert(it->GetId()->GetName(),
+                                                                     new SymVariable(it->GetId()->GetName(), it->GetType()));
+    }
 }
