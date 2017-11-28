@@ -62,22 +62,22 @@ ExprNode *Parser::parsePostfixExpr()
         {
             case TokenType::DOUBLE_PLUS:
                 t = scanner->Next();
-                pe = new PostfixIncrementNode(pe);
+                pe = sematicAnalyzer.BuildPostfixIncrementNode(pe);
                 break;
             case TokenType::DOUBLE_MINUS:
                 t = scanner->Next();
-                pe = new PostfixDecrementNode(pe);
+                pe = sematicAnalyzer.BuildPostfixDecrementNode(pe);
                 break;
             case TokenType::DOT:
                 t = scanner->Next();
                 require(TokenType::ID);
-                pe = new StructureOrUnionMemberAccessNode(pe, new IdNode(t));
+                pe = sematicAnalyzer.BuildStructureOrUnionMemberAccessNode(pe, new IdNode(t));
                 t = scanner->Next();
                 break;
             case TokenType::ARROW:
                 t = scanner->Next();
                 require(TokenType::ID);
-                pe = new StructureOrUnionMemberAccessByPointerNode(pe, new IdNode(t));
+                pe = sematicAnalyzer.BuildStructureOrUnionMemberAccessByPointerNode(pe, new IdNode(t));
                 t = scanner->Next();
                 break;
             case TokenType::LSQUARE_BRACKET:

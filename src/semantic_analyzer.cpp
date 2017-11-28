@@ -51,15 +51,16 @@ ScopeTree *SemanticAnalyzer::GetScopeTree()
     return &scopeTree;
 }
 
-PostfixIncrementNode *SemanticAnalyzer::BuildPostfixDecrementNode(ExprNode *expr)
+PostfixDecrementNode *SemanticAnalyzer::BuildPostfixDecrementNode(ExprNode *expr)
 {
     CheckPostfixIncDecRules(expr);
-    return nullptr;
+    return new PostfixDecrementNode(expr);
 }
 
-PostfixIncrementNode *SemanticAnalyzer::BuildPostfixIncrementNode(ExprNode *node)
+PostfixIncrementNode *SemanticAnalyzer::BuildPostfixIncrementNode(ExprNode *expr)
 {
-    return nullptr;
+    CheckPostfixIncDecRules(expr);
+    return new PostfixIncrementNode(expr);
 }
 
 void SemanticAnalyzer::CheckPostfixIncDecRules(ExprNode *expr)
@@ -82,7 +83,7 @@ bool SemanticAnalyzer::isPointerType(SymType *type)
     if (type->GetTypeKind() != TypeKind::POINTER) return false;
     auto bitk = ((SymPointer *)type)->GetTarget();
 //    return bitk != BuiltInTypeKind::VOID;
-    return false;
+    return true;
 }
 
 InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer)
@@ -97,4 +98,39 @@ InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *de
     // TODO initializer type check
 
     return new InitDeclaratorNode(declarator, initializer);
+}
+
+bool SemanticAnalyzer::isVoidPointer(SymType *type)
+{
+    if (type->GetTypeKind() != TypeKind::POINTER) return false;
+    auto target = ((SymPointer *)type)->GetTarget();
+    return target->GetTypeKind() == TypeKind::BUILTIN &&
+            ((SymBuiltInType *)target)->GetBuiltIntTypeKind() == BuiltInTypeKind::VOID;
+}
+
+StructureOrUnionMemberAccessNode *
+SemanticAnalyzer::BuildStructureOrUnionMemberAccessNode(ExprNode *structure, IdNode *field)
+{
+    auto type = structure->GetType();
+    if (type->GetTypeKind() != TypeKind::STRUCT) throw "";
+    auto stype = (SymRecord *)type;
+    SymVariable *sfield;
+    if (!(sfield = (SymVariable *)stype->GetFieldsTable()->Find(field->GetName()))) throw "";
+    auto res = new StructureOrUnionMemberAccessNode(structure, field);
+    res->SetType(sfield->GetType());
+    return res;
+}
+
+StructureOrUnionMemberAccessByPointerNode *
+SemanticAnalyzer::BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, IdNode *field)
+{
+    if (!isPointerType(ptr->GetType())) throw "";
+    auto ptype = (SymPointer *)ptr->GetType();
+    if (ptype->GetTarget()->GetTypeKind() != TypeKind::STRUCT) throw "";
+    auto stype = (SymRecord *)ptype->GetTarget();
+    SymVariable *sfield;
+    if (!(sfield = (SymVariable *)stype->GetFieldsTable()->Find(field->GetName()))) throw "";
+    auto res = new StructureOrUnionMemberAccessByPointerNode(ptr, field);
+    res->SetType(sfield->GetType());
+    return res;
 }

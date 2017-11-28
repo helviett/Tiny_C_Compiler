@@ -15,13 +15,16 @@ public:
     IdNode *BuildIdNode(std::shared_ptr<Token> token);
     StructSpecifierNode *BuildStructSpecifierNode(IdNode *tag, StructDeclarationListNode *structDeclarationList);
     ScopeTree *GetScopeTree();
-    PostfixIncrementNode *BuildPostfixDecrementNode(ExprNode *expr);
-    PostfixIncrementNode *BuildPostfixIncrementNode(ExprNode *node);
+    PostfixDecrementNode *BuildPostfixDecrementNode(ExprNode *expr);
+    PostfixIncrementNode *BuildPostfixIncrementNode(ExprNode *expr);
     InitDeclaratorNode *BuildInitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer);
+    StructureOrUnionMemberAccessNode *BuildStructureOrUnionMemberAccessNode(ExprNode *structure, IdNode *field);
+    StructureOrUnionMemberAccessByPointerNode *BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, IdNode *field);
 private:
     void CheckPostfixIncDecRules(ExprNode *expr);
     bool isArithmeticType(SymType *type);
     bool isPointerType(SymType *type);
+    bool isVoidPointer(SymType *type);
     ScopeTree scopeTree;
 };
 
