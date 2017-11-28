@@ -791,7 +791,6 @@ DeclarationNode * Parser::parseDeclaration(DeclarationSpecifiersNode *declaratio
     auto idl = parseInitDeclaratorList(ds, declarator);
     require(TokenType::SEMICOLON);
     scanner->Next();
-    sematicAnalyzer.Declare(idl);
     return new DeclarationNode(ds, idl);
 }
 
@@ -802,6 +801,7 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList(DeclarationSpecifiersNod
     auto idl = new InitDeclaratorListNode();
     if (declarator)
     {
+
         idl->Add(declarator);
         if (scanner->Current()->type != TokenType::COMMA) return idl;
         scanner->Next();
@@ -827,7 +827,7 @@ InitDeclaratorNode *Parser::parseInitDeclarator(DeclarationSpecifiersNode *decla
         scanner->Next();
         initializer = parseInitializer();
     }
-    return new InitDeclaratorNode(declarator, initializer);
+    return sematicAnalyzer.BuildInitDeclaratorNode(declarator, initializer);
 }
 
 //initializer ::= assignment-expr | {initializer-list} | {initializer-list , }
@@ -1144,9 +1144,10 @@ ExternalDeclarationNode *Parser::parseExternalDeclaration()
     if (scanner->Current()->type == TokenType::ASSIGNMENT)
     {
         scanner->Next();
-        return (ExternalDeclarationNode *)parseDeclaration(ds, new InitDeclaratorNode(declarator, parseInitializer()));
+        return (ExternalDeclarationNode *)
+                parseDeclaration(ds, sematicAnalyzer.BuildInitDeclaratorNode(declarator, parseInitializer()));
     }
-    return (ExternalDeclarationNode *)parseDeclaration(ds, new InitDeclaratorNode(declarator, nullptr));
+    return (ExternalDeclarationNode *)parseDeclaration(ds, sematicAnalyzer.BuildInitDeclaratorNode(declarator, nullptr));
 }
 
 void Parser::require(TokenType typeExpectation)

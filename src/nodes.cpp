@@ -35,6 +35,7 @@ void IdNode::Print(std::ostream &os, std::string indent, bool isTail)
 IdNode::IdNode(std::shared_ptr<Token> token): token(token)
 {
     if (token->type != TokenType::ID) throw "";
+    category = ValueCategory::LVAVLUE;
 }
 
 std::string IdNode::GetName() const
