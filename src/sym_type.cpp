@@ -41,6 +41,21 @@ bool SymBuiltInType::Equal(SymType *other)
     return kind == other->GetTypeKind() && builtInTypeKind == ((SymBuiltInType *)other)->GetBuiltIntTypeKind();
 }
 
+void SymBuiltInType::SetTypeQualifiers(uint32_t typeQualifiers)
+{
+    this->typeQualifiers = typeQualifiers;
+}
+
+uint32_t SymBuiltInType::GetTypeQualifiers() const
+{
+    return typeQualifiers;
+}
+
+SymBuiltInType::SymBuiltInType(BuiltInTypeKind builtInTypeKind, uint32_t typeQualifiers): SymBuiltInType(builtInTypeKind)
+{
+    this->typeQualifiers = typeQualifiers;
+}
+
 SymPointer::SymPointer(SymType *target) : SymType(), target(target)
 {
     kind = TypeKind::POINTER;
@@ -67,6 +82,16 @@ void SymPointer::SetTarget(SymType *target)
 bool SymPointer::Equal(SymType *other)
 {
     return kind == other->GetTypeKind() && target->Equal(((SymPointer *)other)->GetTarget());
+}
+
+void SymPointer::SetTypeQualifiers(uint32_t typeQualifiers)
+{
+    this->typeQualifiers = typeQualifiers;
+}
+
+uint32_t SymPointer::GetTypeQualifiers() const
+{
+    return typeQualifiers;
 }
 
 SymArray::SymArray(SymType *valueType, ExprNode *size): SymType(), valueType(valueType), size(size)
@@ -240,4 +265,14 @@ SymRecord::SymRecord(SymbolTable *fields, std::vector<SymVariable *> orderedFiel
 SymRecord::SymRecord(IdNode *tag): tag(tag)
 {
     name = "struct " + tag->GetName();
+}
+
+void SymRecord::SetTypeQualifiers(uint32_t typeQualifiers)
+{
+    this->typeQualifiers = typeQualifiers;
+}
+
+uint32_t SymRecord::GetTypeQualifiers() const
+{
+    return typeQualifiers;
 }

@@ -54,12 +54,16 @@ class SymBuiltInType: public SymType
 {
 public:
     explicit SymBuiltInType (BuiltInTypeKind builtInTypeKind);
+    SymBuiltInType (BuiltInTypeKind builtInTypeKind, uint32_t typeQualifiers);
     BuiltInTypeKind GetBuiltIntTypeKind() const;
     void SetBuiltIntTypeKind(BuiltInTypeKind typeKind);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     bool Equal(SymType *other) override;
+    void SetTypeQualifiers(uint32_t typeQualifiers);
+    uint32_t GetTypeQualifiers() const;
 private:
     BuiltInTypeKind builtInTypeKind;
+    uint32_t typeQualifiers;
 };
 
 class ExprNode;
@@ -106,9 +110,11 @@ public:
     SymType *GetTarget() const;
     void SetTarget(SymType *target);
     bool Equal(SymType *other) override;
+    void SetTypeQualifiers(uint32_t typeQualifiers);
+    uint32_t GetTypeQualifiers() const;
 private:
     SymType *target;
-    // TODO TypeQualifiers or so;
+    uint32_t typeQualifiers;
 };
 
 class SymAlias: public SymType
@@ -132,10 +138,13 @@ public:
     std::vector<SymVariable *> &GetOrderedFields();
     IdNode *GetTag() const;
     void SetTag(IdNode *tag);
+    void SetTypeQualifiers(uint32_t typeQualifiers);
+    uint32_t GetTypeQualifiers() const;
 private:
     IdNode *tag{nullptr};
     SymbolTable *fields{nullptr};
     std::vector<SymVariable *> orderedFields;
+    uint32_t typeQualifiers;
 };
 
 #endif //TINY_C_COMPILER_TYPE_H

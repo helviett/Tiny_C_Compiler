@@ -4,141 +4,146 @@
 
 SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
 {
-    enum {SINGED, UNSIGNED, DEFAULT} isSinged = DEFAULT;
-    enum {SCALAR, STRUCT, ENUM, NONE, VOID} kind = NONE;
-    enum {INTEGER, FLOAT, DOUBLE, UNKNOWN, CHAR} scalarKind = UNKNOWN;
-    SpecifierKind  specifierKind = SpecifierKind::UNDEFINED;
+    Singed isSinged = Singed::DEFAULT;
+    TypeKind kind = TypeKind::NONE;
+    ScalaraKind scalarKind = ScalaraKind::UNKNOWN;
     int longTimes = 0;
     SymType *type = nullptr;
+    uint32_t typeQuals = 0;
     for (auto it: declarationSpecifiers->List())
     {
         if (it->Kind() == SpecifierKind::SIMPLE)
         {
-            if (specifierKind == SpecifierKind::COMPLEX) throw "";
-            specifierKind = SpecifierKind::SIMPLE;
             auto simple = (SimpleSpecifier *)it;
+
+            if (!isTypeQualifier(simple) && kind != TypeKind::NONE) throw "";
+
             switch (simple->Value()->keyword)
             {
                 case Keyword::LONG:
                     ++longTimes;
                     if (longTimes > 1) throw "";
-                    if (kind != SCALAR && kind != NONE) throw "";
-                    if (scalarKind != INTEGER && scalarKind != UNKNOWN) throw "";
-                    kind = SCALAR; // TODO move functions like isTypeSpecifier to TypeBuilder
+                    if (kind != TypeKind::SCALAR && kind != TypeKind::NONE) throw "";
+                    if (scalarKind != ScalaraKind::INTEGER && scalarKind != ScalaraKind::UNKNOWN) throw "";
+                    kind = TypeKind::SCALAR; // TODO move functions like isTypeSpecifier to TypeBuilder
                     break;
                 case Keyword::UNSIGNED:
-                    if (isSinged == SINGED) throw "";
-                    if (isSinged == UNSIGNED) throw "";
-                    isSinged = UNSIGNED;
-                    if (kind != SCALAR && kind != NONE) throw "";
-                    kind = SCALAR;
+                    if (isSinged == Singed::SINGED) throw "";
+                    if (isSinged == Singed::UNSIGNED) throw "";
+                    isSinged = Singed::UNSIGNED;
+                    if (kind != TypeKind::SCALAR && kind != TypeKind::NONE) throw "";
+                    kind = TypeKind::SCALAR;
                 break;
                 case Keyword::SIGNED:
-                    if (isSinged == SINGED) throw "";
-                    if (isSinged == UNSIGNED) throw "";
-                    if (kind != SCALAR && kind != NONE) throw "";
-                    isSinged = SINGED;
-                    kind = SCALAR;
+                    if (isSinged == Singed::SINGED) throw "";
+                    if (isSinged == Singed::UNSIGNED) throw "";
+                    if (kind != TypeKind::SCALAR && kind != TypeKind::NONE) throw "";
+                    isSinged = Singed::SINGED;
+                    kind = TypeKind::SCALAR;
                     break;
                 case Keyword::FLOAT:
-                    if (scalarKind != UNKNOWN) throw "";
-                    scalarKind = FLOAT;
-                    if (isSinged != DEFAULT) throw "";
-                    if (kind != SCALAR && kind != NONE) throw "";
-                    kind = SCALAR;
+                    if (scalarKind != ScalaraKind::UNKNOWN) throw "";
+                    scalarKind = ScalaraKind::FLOAT;
+                    if (isSinged != Singed::DEFAULT) throw "";
+                    if (kind != TypeKind::SCALAR && kind != TypeKind::NONE) throw "";
+                    kind = TypeKind::SCALAR;
                     break;
                 case Keyword::DOUBLE:
-                    if (scalarKind != UNKNOWN) throw "";
-                    scalarKind = DOUBLE;
-                    if (kind != SCALAR && kind != NONE) throw "";
-                    if (isSinged != DEFAULT) throw "";
-                    kind = SCALAR;
+                    if (scalarKind != ScalaraKind::UNKNOWN) throw "";
+                    scalarKind = ScalaraKind::DOUBLE;
+                    if (kind != TypeKind::SCALAR && kind != TypeKind::NONE) throw "";
+                    if (isSinged != Singed::DEFAULT) throw "";
+                    kind = TypeKind::SCALAR;
                     break;
                 case Keyword::INT:
-                    if (scalarKind != UNKNOWN) throw "";
-                    scalarKind = INTEGER;
-                    if (kind != SCALAR && kind != NONE) throw "";
-                    kind = SCALAR;
+                    if (scalarKind != ScalaraKind::UNKNOWN) throw "";
+                    scalarKind = ScalaraKind::INTEGER;
+                    if (kind != TypeKind::SCALAR && kind != TypeKind::NONE) throw "";
+                    kind = TypeKind::SCALAR;
                     break;
                 case Keyword::VOID:
-                    if (kind != NONE) throw "";
-                    kind = VOID;
+                    if (kind != TypeKind::NONE) throw "";
+                    kind = TypeKind::VOID;
                     if (longTimes) throw "";
-                    if (isSinged != DEFAULT) throw "";
+                    if (isSinged != Singed::DEFAULT) throw "";
                     break;
                 case Keyword::CHAR:
-                    if (scalarKind != UNKNOWN) throw "";
-                    scalarKind = CHAR;
-                    if (kind != SCALAR && kind != NONE) throw "";
-                    kind = SCALAR;
+                    if (scalarKind != ScalaraKind::UNKNOWN) throw "";
+                    scalarKind = ScalaraKind::CHAR;
+                    if (kind != TypeKind::SCALAR && kind != TypeKind::NONE) throw "";
+                    kind = TypeKind::SCALAR;
                 // TODO static, auto, extern
+                case Keyword::CONST:
+                    typeQuals |= (uint32_t)TypeQualifier::CONST;
+                    break;
+                case Keyword::VOLATILE:
+                    typeQuals |= (uint32_t)TypeQualifier::VOLATILE;
+                    break;
             }
         }
         else
         {
-            if (specifierKind != SpecifierKind::UNDEFINED) throw "";
-            specifierKind = SpecifierKind::COMPLEX;
-            kind = STRUCT;
+            if (kind != TypeKind ::NONE) throw "";
+            kind = TypeKind::STRUCT;
             type = ((StructSpecifierNode *)it)->GetRecordType();
             // TODO struct and enum
         }
     }
-
     switch (kind)
     {
-        case SCALAR:
+        case TypeKind::SCALAR:
             switch (scalarKind)
             {
-                case INTEGER:
+                case ScalaraKind::INTEGER:
                     switch (isSinged)
                     {
-                        case SINGED:
-                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::INT64);
-                            return new SymBuiltInType(BuiltInTypeKind::INT32);
-                        case UNSIGNED:
-                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::UINT64);
-                            return new SymBuiltInType(BuiltInTypeKind::UINT32);
-                        case DEFAULT:
-                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::INT64);
-                            return new SymBuiltInType(BuiltInTypeKind::INT32);
+                        case Singed::SINGED:
+                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::INT64, typeQuals);
+                            return new SymBuiltInType(BuiltInTypeKind::INT32, typeQuals);
+                        case Singed::UNSIGNED:
+                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::UINT64, typeQuals);
+                            return new SymBuiltInType(BuiltInTypeKind::UINT32, typeQuals);
+                        case Singed::DEFAULT:
+                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::INT64, typeQuals);
+                            return new SymBuiltInType(BuiltInTypeKind::INT32, typeQuals);
                     }
                     break;
-                case DOUBLE:
-                    return new SymBuiltInType(BuiltInTypeKind::DOUBLE);
-                case FLOAT:
-                    return new SymBuiltInType(BuiltInTypeKind::FLOAT);
-                case CHAR:
+                case ScalaraKind::DOUBLE:
+                    return new SymBuiltInType(BuiltInTypeKind::DOUBLE, typeQuals);
+                case ScalaraKind::FLOAT:
+                    return new SymBuiltInType(BuiltInTypeKind::FLOAT, typeQuals);
+                case ScalaraKind::CHAR:
                     switch (isSinged)
                     {
-                        case SINGED:
-                            return new SymBuiltInType(BuiltInTypeKind::INT8);
-                        case UNSIGNED:
-                            return new SymBuiltInType(BuiltInTypeKind::UINT8);
-                        case DEFAULT:
-                            return new SymBuiltInType(BuiltInTypeKind::INT8);
+                        case Singed::SINGED:
+                            return new SymBuiltInType(BuiltInTypeKind::INT8, typeQuals);
+                        case Singed::UNSIGNED:
+                            return new SymBuiltInType(BuiltInTypeKind::UINT8, typeQuals);
+                        case Singed::DEFAULT:
+                            return new SymBuiltInType(BuiltInTypeKind::INT8, typeQuals);
                     }
-                    break;
-                case UNKNOWN:
+                case ScalaraKind::UNKNOWN:
                     switch (isSinged)
                     {
-                        case SINGED:
-                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::INT64);
+                        case Singed::SINGED:
+                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::INT64, typeQuals);
                             throw "";
-                        case UNSIGNED:
-                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::UINT64);
+                        case Singed::UNSIGNED:
+                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::UINT64, typeQuals);
                             throw "";
-                        case DEFAULT:
-                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::INT64);
+                        case Singed::DEFAULT:
+                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::INT64, typeQuals);
                             throw "";
                     }
             }
             break;
-        case VOID:
-            return new SymBuiltInType(BuiltInTypeKind::VOID);
-        case STRUCT:
+        case TypeKind::VOID:
+            return new SymBuiltInType(BuiltInTypeKind::VOID, typeQuals);
+        case TypeKind::STRUCT:
+            ((SymRecord *)type)->SetTypeQualifiers(typeQuals);
             return type;
     }
-    return nullptr;
+    throw "";
 }
 
 SymRecord *TypeBuilder::Build(StructDeclarationListNode *structDeclarationList, IdNode *tag = nullptr)
@@ -158,4 +163,10 @@ SymRecord *TypeBuilder::Build(StructDeclarationListNode *structDeclarationList, 
         }
     }
     return new SymRecord(fields, orderedFields, tag);
+}
+
+bool TypeBuilder::isTypeQualifier(SimpleSpecifier *simpleSpecifier)
+{
+    auto k = simpleSpecifier->Value()->keyword;
+    return k == Keyword::CONST || k == Keyword::VOLATILE || k == Keyword::REGISTER;
 }

@@ -68,7 +68,7 @@ void SemanticAnalyzer::CheckPostfixIncDecRules(ExprNode *expr)
     static std::vector<TypeKind> improperKinds = {};
     if (expr->GetValueCategory() == ValueCategory::RVALUE) throw "";
     auto type = expr->GetType();
-    if (!isArithmeticType(type) && !isPointerType(type)) throw "";
+    if (!isArithmeticType(type) && !isPointerType(type) || isVoidPointer(type)) throw "";
 }
 
 bool SemanticAnalyzer::isArithmeticType(SymType *type)

@@ -16,5 +16,12 @@ class TypeBuilder
 public:
     static SymType *Build(DeclarationSpecifiersNode *declarationSpecifiers);
     static SymRecord *Build(StructDeclarationListNode *structDeclarationList, IdNode *tag);
+private:
+    enum class Singed { SINGED, UNSIGNED, DEFAULT};
+    enum class ScalaraKind { INTEGER, FLOAT, DOUBLE, UNKNOWN, CHAR };
+    enum class TypeKind { SCALAR, STRUCT, ENUM, NONE, VOID };
+    static bool isTypeQualifier(SimpleSpecifier *simpleSpecifier);
+
+//    static bool isTypeSpecifier(SimpleSpecifier *simpleSpecifier);
 };
 #endif //TINY_C_COMPILER_TYPE_BUILDER_H
