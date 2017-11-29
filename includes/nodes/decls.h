@@ -23,7 +23,7 @@ public:
     IdNode *GetId() const;
 private:
     SymType *type;
-    IdNode *id;
+    IdNode *id{nullptr};
 };
 
 class DirectDeclaratorNode: public DeclaratorNode

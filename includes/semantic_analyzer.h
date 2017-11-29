@@ -19,12 +19,15 @@ public:
     PostfixIncrementNode *BuildPostfixIncrementNode(ExprNode *expr);
     InitDeclaratorNode *BuildInitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer);
     StructureOrUnionMemberAccessNode *BuildStructureOrUnionMemberAccessNode(ExprNode *structure, IdNode *field);
-    StructureOrUnionMemberAccessByPointerNode *BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, IdNode *field);
+    StructureOrUnionMemberAccessByPointerNode *BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr,
+                                                                                              IdNode *field);
+    ArrayAccessNode *BuildArrayAccessNode(ExprNode *array, ExprNode *index);
 private:
     void CheckPostfixIncDecRules(ExprNode *expr);
     bool isArithmeticType(SymType *type);
     bool isPointerType(SymType *type);
     bool isVoidPointer(SymType *type);
+    bool isIntegerType(SymType *type);
     ScopeTree scopeTree;
 };
 

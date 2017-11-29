@@ -82,7 +82,7 @@ ExprNode *Parser::parsePostfixExpr()
                 break;
             case TokenType::LSQUARE_BRACKET:
                 t = scanner->Next();
-                pe = new ArrayAccess(pe, parseExpr());
+                pe = sematicAnalyzer.BuildArrayAccessNode(pe, parseExpr());
                 require(TokenType::RSQUARE_BRACKET);
                 t = scanner->Next();
                 break;

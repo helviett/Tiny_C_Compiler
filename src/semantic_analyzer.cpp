@@ -124,11 +124,8 @@ StructureOrUnionMemberAccessByPointerNode *
 SemanticAnalyzer::BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, IdNode *field)
 {
     if (ptr->GetType()->GetTypeKind() == TypeKind::ARRAY)
-    {
-        auto newt = ((SymArray *)ptr->GetType())->ToPointer();
-        delete ptr->GetType();
-        ptr->SetType(newt);
-    }
+        ptr->SetType(((SymArray *)ptr->GetType())->ToPointer());
+
     if (!isPointerType(ptr->GetType())) throw "";
     auto ptype = (SymPointer *)ptr->GetType();
     if (ptype->GetTarget()->GetTypeKind() != TypeKind::STRUCT) throw "";
@@ -141,4 +138,29 @@ SemanticAnalyzer::BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, 
     rest->SetTypeQualifiers(rest->GetTypeQualifiers() | stype->GetTypeQualifiers());
     res->SetType(sfield->GetType());
     return res;
+}
+
+ArrayAccessNode *SemanticAnalyzer::BuildArrayAccessNode(ExprNode *array, ExprNode *index)
+{
+    auto itypeKind = index->GetType()->GetTypeKind();
+    if (itypeKind == TypeKind::POINTER || itypeKind == TypeKind::ARRAY)
+    {
+        auto tmp = array;
+        array = index;
+        index = tmp;
+    }
+    if (array->GetType()->GetTypeKind() == TypeKind::ARRAY)
+        array->SetType(((SymArray *)array->GetType())->ToPointer());
+    if (array->GetType()->GetTypeKind() != TypeKind::POINTER) throw "";
+    array->SetValueCategory(ValueCategory::LVAVLUE); // ?
+    if (!isIntegerType(index->GetType())) throw "";
+    return new ArrayAccessNode(array, index);
+}
+
+bool SemanticAnalyzer::isIntegerType(SymType *type)
+{
+    if (type->GetTypeKind() != TypeKind::BUILTIN) throw "";
+    auto btk = ((SymBuiltInType *)type)->GetBuiltIntTypeKind();
+    return btk == BuiltInTypeKind::INT8 || btk == BuiltInTypeKind::UINT8 || btk == BuiltInTypeKind::INT32
+           || btk == BuiltInTypeKind::UINT32 || btk == BuiltInTypeKind::INT64 || btk == BuiltInTypeKind::UINT64;
 }

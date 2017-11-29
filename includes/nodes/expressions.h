@@ -67,10 +67,10 @@ private:
     IdNode *member;
 };
 
-class ArrayAccess: public ExprNode
+class ArrayAccessNode: public ExprNode
 {
 public:
-    ArrayAccess(ExprNode *left, ExprNode *inBrackets);
+    ArrayAccessNode(ExprNode *left, ExprNode *inBrackets);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     ExprNode *left, *inBrackets;

@@ -13,6 +13,7 @@ void IntConstNode::Print(std::ostream &os, std::string indent, bool isTail)
 IntConstNode::IntConstNode(std::shared_ptr<Token> token): ConstNode(token)
 {
     if (token->type != TokenType::NUM_INT) throw "";
+    type = new SymBuiltInType(BuiltInTypeKind::INT32, 0);
 }
 
 void FloatConstNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -24,6 +25,7 @@ void FloatConstNode::Print(std::ostream &os, std::string indent, bool isTail)
 FloatConstNode::FloatConstNode(std::shared_ptr<Token> token): ConstNode(token)
 {
     if (token->type != TokenType::NUM_FLOAT) throw "";
+    type = new SymBuiltInType(BuiltInTypeKind::FLOAT, 0);
 }
 
 void IdNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -135,7 +137,7 @@ void BinOpNode::Print(std::ostream &os, std::string indent, bool isTail)
 
 BinOpNode::BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op) : left(left), right(right), op(op) {}
 
-void ArrayAccess::Print(std::ostream &os, std::string indent, bool isTail)
+void ArrayAccessNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << "[]" << std::endl;
@@ -144,7 +146,7 @@ void ArrayAccess::Print(std::ostream &os, std::string indent, bool isTail)
     inBrackets->Print(os, indent, true);
 }
 
-ArrayAccess::ArrayAccess(ExprNode *left, ExprNode *inBrackets) : left(left), inBrackets(inBrackets) {}
+ArrayAccessNode::ArrayAccessNode(ExprNode *left, ExprNode *inBrackets) : left(left), inBrackets(inBrackets) {}
 
 void TernaryOperatorNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
