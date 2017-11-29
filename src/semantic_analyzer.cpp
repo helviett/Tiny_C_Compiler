@@ -82,7 +82,6 @@ bool SemanticAnalyzer::isPointerType(SymType *type)
 {
     if (type->GetTypeKind() != TypeKind::POINTER) return false;
     auto bitk = ((SymPointer *)type)->GetTarget();
-//    return bitk != BuiltInTypeKind::VOID;
     return true;
 }
 
@@ -96,7 +95,6 @@ InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *de
         scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(),
                                            new SymVariable(declarator->GetId()->GetName(), declarator->GetType()));
     // TODO initializer type check
-
     return new InitDeclaratorNode(declarator, initializer);
 }
 
@@ -118,12 +116,19 @@ SemanticAnalyzer::BuildStructureOrUnionMemberAccessNode(ExprNode *structure, IdN
     if (!(sfield = (SymVariable *)stype->GetFieldsTable()->Find(field->GetName()))) throw "";
     auto res = new StructureOrUnionMemberAccessNode(structure, field);
     res->SetType(sfield->GetType());
+    res->SetValueCategory(structure->GetValueCategory());
     return res;
 }
 
 StructureOrUnionMemberAccessByPointerNode *
 SemanticAnalyzer::BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, IdNode *field)
 {
+    if (ptr->GetType()->GetTypeKind() == TypeKind::ARRAY)
+    {
+        auto newt = ((SymArray *)ptr->GetType())->ToPointer();
+        delete ptr->GetType();
+        ptr->SetType(newt);
+    }
     if (!isPointerType(ptr->GetType())) throw "";
     auto ptype = (SymPointer *)ptr->GetType();
     if (ptype->GetTarget()->GetTypeKind() != TypeKind::STRUCT) throw "";
@@ -131,6 +136,9 @@ SemanticAnalyzer::BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, 
     SymVariable *sfield;
     if (!(sfield = (SymVariable *)stype->GetFieldsTable()->Find(field->GetName()))) throw "";
     auto res = new StructureOrUnionMemberAccessByPointerNode(ptr, field);
+    res->SetValueCategory(ValueCategory::LVAVLUE);
+    auto rest = sfield->GetType();
+    rest->SetTypeQualifiers(rest->GetTypeQualifiers() | stype->GetTypeQualifiers());
     res->SetType(sfield->GetType());
     return res;
 }

@@ -46,8 +46,11 @@ public:
     void SetTypeKind(TypeKind typeKind);
     virtual void Print(std::ostream &os, std::string indent, bool isTail) = 0;
     virtual bool Equal(SymType *other) = 0;
+    void SetTypeQualifiers(uint32_t typeQualifiers);
+    uint32_t GetTypeQualifiers() const;
 protected:
     TypeKind kind;
+    uint32_t typeQualifiers{0};
 };
 
 class SymBuiltInType: public SymType
@@ -59,11 +62,20 @@ public:
     void SetBuiltIntTypeKind(BuiltInTypeKind typeKind);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     bool Equal(SymType *other) override;
-    void SetTypeQualifiers(uint32_t typeQualifiers);
-    uint32_t GetTypeQualifiers() const;
 private:
     BuiltInTypeKind builtInTypeKind;
-    uint32_t typeQualifiers;
+};
+
+class SymPointer: public SymType
+{
+public:
+    explicit SymPointer(SymType *target);
+    void Print(std::ostream &os, std::string indent, bool isTail) override;
+    SymType *GetTarget() const;
+    void SetTarget(SymType *target);
+    bool Equal(SymType *other) override;
+private:
+    SymType *target;
 };
 
 class ExprNode;
@@ -76,6 +88,7 @@ public:
     SymType *GetValueType() const;
     void SetValueType(SymType *valueType);
     bool Equal(SymType *other) override;
+    SymPointer *ToPointer();
 private:
     SymType *valueType;
     ExprNode *size;
@@ -102,21 +115,6 @@ private:
     std::vector<SymVariable *> orderedParams;
 };
 
-class SymPointer: public SymType
-{
-public:
-    explicit SymPointer(SymType *target);
-    void Print(std::ostream &os, std::string indent, bool isTail) override;
-    SymType *GetTarget() const;
-    void SetTarget(SymType *target);
-    bool Equal(SymType *other) override;
-    void SetTypeQualifiers(uint32_t typeQualifiers);
-    uint32_t GetTypeQualifiers() const;
-private:
-    SymType *target;
-    uint32_t typeQualifiers;
-};
-
 class SymAlias: public SymType
 {
 public:
@@ -138,13 +136,10 @@ public:
     std::vector<SymVariable *> &GetOrderedFields();
     IdNode *GetTag() const;
     void SetTag(IdNode *tag);
-    void SetTypeQualifiers(uint32_t typeQualifiers);
-    uint32_t GetTypeQualifiers() const;
 private:
     IdNode *tag{nullptr};
     SymbolTable *fields{nullptr};
     std::vector<SymVariable *> orderedFields;
-    uint32_t typeQualifiers;
 };
 
 #endif //TINY_C_COMPILER_TYPE_H
