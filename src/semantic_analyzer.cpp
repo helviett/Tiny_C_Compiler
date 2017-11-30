@@ -1,4 +1,3 @@
-
 #include "../includes/semantic_analyzer.h"
 
 IdNode *SemanticAnalyzer::BuildIdNode(std::shared_ptr<Token> token)
@@ -19,6 +18,15 @@ IdNode *SemanticAnalyzer::BuildIdNode(std::shared_ptr<Token> token)
                 id->SetValueCategory(ValueCategory::LVAVLUE);
         }
         return id;
+    }
+    if (symbol->GetSymbolClass() == SymbolClass::TYPE)
+    {
+        auto t = (SymType *)symbol;
+        switch (t->GetTypeKind())
+        {
+            case TypeKind::FUNCTION:
+                return new IdNode(token, t);
+        }
     }
     throw "";
 }
@@ -154,13 +162,37 @@ ArrayAccessNode *SemanticAnalyzer::BuildArrayAccessNode(ExprNode *array, ExprNod
     if (array->GetType()->GetTypeKind() != TypeKind::POINTER) throw "";
     array->SetValueCategory(ValueCategory::LVAVLUE); // ?
     if (!isIntegerType(index->GetType())) throw "";
-    return new ArrayAccessNode(array, index);
+    auto res = new ArrayAccessNode(array, index);
+    res->SetValueCategory(ValueCategory::LVAVLUE);
+    res->SetType(((SymPointer *)array->GetType())->GetTarget());
+    return res;
 }
 
 bool SemanticAnalyzer::isIntegerType(SymType *type)
 {
-    if (type->GetTypeKind() != TypeKind::BUILTIN) throw "";
+    if (type->GetTypeKind() != TypeKind::BUILTIN) return false;
     auto btk = ((SymBuiltInType *)type)->GetBuiltIntTypeKind();
     return btk == BuiltInTypeKind::INT8 || btk == BuiltInTypeKind::UINT8 || btk == BuiltInTypeKind::INT32
            || btk == BuiltInTypeKind::UINT32 || btk == BuiltInTypeKind::INT64 || btk == BuiltInTypeKind::UINT64;
+}
+
+FunctionCallNode *SemanticAnalyzer::BuildFunctionCallNode(ExprNode *func, ArgumentExprListNode *args)
+{
+    if (func->GetType()->GetTypeKind() != TypeKind::FUNCTION) throw "";
+    auto ftype = (SymFunction *)func->GetType();
+    size_t i = 0;
+    if (args->List().size() != ftype->GetOderedParams().size()) throw "";
+    for (auto arg = args->List().begin(); arg != args->List().end(); arg++)
+    {
+        // TODO TypeConversion5
+        if (!(*arg)->GetType()->Equal(ftype->GetOderedParams()[i]->GetType()))
+        {
+            Converter::Convert(&(*arg), ftype->GetOderedParams()[i]->GetType());
+        }
+        i++;
+//        arg->Print(std::cout, "", true);
+    }
+    auto res = new FunctionCallNode(func, args);
+    res->SetType(ftype->GetReturnType());
+    return res;
 }

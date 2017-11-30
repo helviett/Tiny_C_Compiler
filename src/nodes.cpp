@@ -386,7 +386,7 @@ void ArgumentExprListNode::Print(std::ostream &os, std::string indent, bool isTa
     (*it)->Print(os, indent, true);
 }
 
-void ArgumentExprListNode::Add(AssignmentExprNode *assignmentExpr)
+void ArgumentExprListNode::Add(ExprNode *assignmentExpr)
 {
     list.push_back(assignmentExpr);
 }
@@ -394,6 +394,11 @@ void ArgumentExprListNode::Add(AssignmentExprNode *assignmentExpr)
 uint64_t ArgumentExprListNode::Size()
 {
     return list.size();
+}
+
+std::list<ExprNode *> &ArgumentExprListNode::List()
+{
+    return list;
 }
 
 void FunctionCallNode::Print(std::ostream &os, std::string indent, bool isTail)

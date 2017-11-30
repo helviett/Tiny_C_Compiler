@@ -183,6 +183,11 @@ bool SymFunction::Equal(SymType *other)
     return false;
 }
 
+std::vector<SymVariable *> SymFunction::GetOderedParams()
+{
+    return orderedParams;
+}
+
 SymAlias::SymAlias(std::string name, SymType *type): type(type)
 {
     this->name = std::move(name);

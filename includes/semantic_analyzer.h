@@ -8,6 +8,8 @@
 #include "scope_tree.h"
 #include "nodes.h"
 #include "type_builder.h"
+#include <converter.h>
+#include <iostream>
 
 class SemanticAnalyzer
 {
@@ -22,6 +24,8 @@ public:
     StructureOrUnionMemberAccessByPointerNode *BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr,
                                                                                               IdNode *field);
     ArrayAccessNode *BuildArrayAccessNode(ExprNode *array, ExprNode *index);
+    FunctionCallNode *BuildFunctionCallNode(ExprNode *func, ArgumentExprListNode *args);
+
 private:
     void CheckPostfixIncDecRules(ExprNode *expr);
     bool isArithmeticType(SymType *type);

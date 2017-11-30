@@ -15,8 +15,8 @@
 
 enum class BuiltInTypeKind
 {
-    VOID, INT8, INT16, INT32, INT64, FLOAT, DOUBLE,
-    UINT8, UINT16, UINT32, UINT64, NONE
+    VOID = 0, INT8 = 1, INT16 = 3, INT32 = 5, INT64 = 7,
+    UINT8 = 2, UINT16 = 4, UINT32 = 6, UINT64 = 8, FLOAT = 9, DOUBLE = 10, NONE
 };
 
 enum class TypeKind
@@ -109,6 +109,7 @@ public:
     void SetReturnType(SymType *returnType);
     SymbolTable *GetParamsTable() const;
     bool Equal(SymType *other) override;
+    std::vector<SymVariable *> GetOderedParams();
 private:
     SymType *returnType{nullptr};
     SymbolTable *params{nullptr}, *body{nullptr};

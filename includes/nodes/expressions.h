@@ -76,16 +76,15 @@ private:
     ExprNode *left, *inBrackets;
 };
 
-class AssignmentExprNode;
-
 class ArgumentExprListNode: public Node
 {
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
-    void Add(AssignmentExprNode *assignmentExpr);
+    void Add(ExprNode *assignmentExpr);
     uint64_t Size();
+    std::list<ExprNode *> &List();
 private:
-    std::list<AssignmentExprNode *> list;
+    std::list<ExprNode *> list;
 };
 
 class FunctionCallNode: public ExprNode
@@ -165,13 +164,7 @@ private:
     ExprNode *condition, *iftrue, *iffalse;
 };
 
-class AssignmentExprNode: public ExprNode
-{
-public:
-    void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
-};
-
-class AssignmentNode: public AssignmentExprNode
+class AssignmentNode: public ExprNode
 {
 public:
     AssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp);

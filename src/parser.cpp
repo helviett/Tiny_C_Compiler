@@ -88,7 +88,7 @@ ExprNode *Parser::parsePostfixExpr()
                 break;
             case TokenType::LBRACKET:
                 t = scanner->Next();
-                pe = new FunctionCallNode(pe, parseArgumentExprList());
+                pe = sematicAnalyzer.BuildFunctionCallNode(pe, parseArgumentExprList());
                 require(TokenType::RBRACKET);
                 t = scanner->Next();
                 break;
@@ -682,7 +682,7 @@ ArgumentExprListNode *Parser::parseArgumentExprList()
     auto ael = new ArgumentExprListNode();
     while (scanner->Current()->type != TokenType::RBRACKET)
     {
-        ael->Add((AssignmentExprNode *)parseAssignmentExpr());
+        ael->Add(parseAssignmentExpr());
         if (scanner->Current()->type != TokenType::RBRACKET)
         {
             require(TokenType::COMMA);
