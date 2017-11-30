@@ -11,7 +11,7 @@
 class Converter
 {
 public:
-    static void ImplicityConvert(ExprNode **left, ExprNode **right);
+    static void ImplicitlyConvert(ExprNode **left, ExprNode **right);
     static void Convert(ExprNode **expr, SymType *type);
 };
 

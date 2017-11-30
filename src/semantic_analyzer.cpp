@@ -279,16 +279,16 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
     {
         case TokenType::REMINDER:
             if (!isIntegerType(ltype) || !isIntegerType(rtype)) throw "";
-            Converter::ImplicityConvert(&left, &right);
+            Converter::ImplicitlyConvert(&left, &right);
             return new BinOpNode(left, right, binOp);
         case TokenType::ASTERIX: case TokenType::FORWARD_SLASH:
             if (!isArithmeticType(ltype) || !isArithmeticType(rtype)) throw "";
-            Converter::ImplicityConvert(&left, &right);
+            Converter::ImplicitlyConvert(&left, &right);
             return new BinOpNode(left, right, binOp);
         case TokenType::PLUS:
             if (isArithmeticType(ltype) || isArithmeticType(rtype))
             {
-                Converter::ImplicityConvert(&left, &right);
+                Converter::ImplicitlyConvert(&left, &right);
                 return new BinOpNode(left, right, binOp);
             }
             if (isPointerType(rtype))
@@ -301,7 +301,7 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
         case TokenType::MINUS:
             if (isArithmeticType(ltype) && isArithmeticType(rtype))
             {
-                Converter::ImplicityConvert(&left, &right);
+                Converter::ImplicitlyConvert(&left, &right);
                 return new BinOpNode(left, right, binOp);
             }
             if (isPointerType(ltype) && isPointerType(rtype) && rtype->Equal(ltype))
@@ -313,6 +313,13 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
             if (isPointerType(ltype) && isIntegerType(rtype))
                 return new BinOpNode(left, right, binOp);
             throw "";
+        case TokenType::BITWISE_LSHIFT: case TokenType::BITWISE_RSHIFT:
+        case TokenType::BITWISE_AND: case TokenType::BITWISE_XOR: case TokenType::BITWISE_OR:
+            if (!isIntegerType(ltype) || !isIntegerType(rtype)) throw "";
+            Converter::ImplicitlyConvert(&left, &right);
+            return new BinOpNode(left, right, binOp);
+
+
     }
     return nullptr;
 }

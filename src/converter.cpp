@@ -1,7 +1,7 @@
 
 #include "../includes/converter.h"
 
-void Converter::ImplicityConvert(ExprNode **left, ExprNode **right)
+void Converter::ImplicitlyConvert(ExprNode **left, ExprNode **right)
 {
     auto ltype = (*left)->GetType(), rtype = (*right)->GetType();
     if (ltype->Equal(rtype)) return;
