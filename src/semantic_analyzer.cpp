@@ -61,17 +61,17 @@ ScopeTree *SemanticAnalyzer::GetScopeTree()
 
 PostfixDecrementNode *SemanticAnalyzer::BuildPostfixDecrementNode(ExprNode *expr)
 {
-    CheckPostfixIncDecRules(expr);
+    CheckIncDecRules(expr);
     return new PostfixDecrementNode(expr);
 }
 
 PostfixIncrementNode *SemanticAnalyzer::BuildPostfixIncrementNode(ExprNode *expr)
 {
-    CheckPostfixIncDecRules(expr);
+    CheckIncDecRules(expr);
     return new PostfixIncrementNode(expr);
 }
 
-void SemanticAnalyzer::CheckPostfixIncDecRules(ExprNode *expr)
+void SemanticAnalyzer::CheckIncDecRules(ExprNode *expr)
 {
     static std::vector<TypeKind> improperKinds = {};
     if (expr->GetValueCategory() == ValueCategory::RVALUE) throw "";
@@ -184,15 +184,32 @@ FunctionCallNode *SemanticAnalyzer::BuildFunctionCallNode(ExprNode *func, Argume
     if (args->List().size() != ftype->GetOderedParams().size()) throw "";
     for (auto arg = args->List().begin(); arg != args->List().end(); arg++)
     {
-        // TODO TypeConversion5
+        // TODO TypeConversions
         if (!(*arg)->GetType()->Equal(ftype->GetOderedParams()[i]->GetType()))
         {
             Converter::Convert(&(*arg), ftype->GetOderedParams()[i]->GetType());
         }
         i++;
-//        arg->Print(std::cout, "", true);
     }
     auto res = new FunctionCallNode(func, args);
     res->SetType(ftype->GetReturnType());
     return res;
+}
+
+PrefixIncrementNode *SemanticAnalyzer::BuildPrefixIncrementNode(ExprNode *expr)
+{
+    CheckIncDecRules(expr);
+    return new PrefixIncrementNode(expr);
+}
+
+void SemanticAnalyzer::performLvalueConversion(ExprNode *expr)
+{
+    expr->SetValueCategory(ValueCategory::RVALUE);
+    expr->GetType()->SetTypeQualifiers(0);
+}
+
+PrefixDecrementNode *SemanticAnalyzer::BuildPrefixDecrementNode(ExprNode *expr)
+{
+    CheckIncDecRules(expr);
+    return new PrefixDecrementNode(expr);
 }

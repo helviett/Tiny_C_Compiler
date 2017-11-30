@@ -25,13 +25,15 @@ public:
                                                                                               IdNode *field);
     ArrayAccessNode *BuildArrayAccessNode(ExprNode *array, ExprNode *index);
     FunctionCallNode *BuildFunctionCallNode(ExprNode *func, ArgumentExprListNode *args);
-
+    PrefixIncrementNode *BuildPrefixIncrementNode(ExprNode *expr);
+    PrefixDecrementNode *BuildPrefixDecrementNode(ExprNode *expr);
 private:
-    void CheckPostfixIncDecRules(ExprNode *expr);
+    void CheckIncDecRules(ExprNode *expr);
     bool isArithmeticType(SymType *type);
     bool isPointerType(SymType *type);
     bool isVoidPointer(SymType *type);
     bool isIntegerType(SymType *type);
+    void performLvalueConversion(ExprNode *expr);
     ScopeTree scopeTree;
 };
 

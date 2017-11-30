@@ -109,11 +109,11 @@ ExprNode *Parser::parseUnaryExpr()
     {
         case TokenType::DOUBLE_PLUS:
             t = scanner->Next();
-            ue = new PrefixIncrementNode(parseUnaryExpr());
+            ue = sematicAnalyzer.BuildPrefixIncrementNode(parseUnaryExpr());
             break;
         case TokenType::DOUBLE_MINUS:
             t = scanner->Next();
-            ue = new PrefixDecrementNode(parseUnaryExpr());
+            ue = sematicAnalyzer.BuildPrefixDecrementNode(parseUnaryExpr());
             break;
         case TokenType::KEYWORD:
             if (t->keyword == Keyword::SIZEOF)
