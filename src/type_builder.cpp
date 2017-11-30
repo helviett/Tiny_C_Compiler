@@ -16,7 +16,7 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
         {
             auto simple = (SimpleSpecifier *)it;
 
-            if (!isTypeQualifier(simple) && kind != TypeKind::NONE) throw "";
+            if (!isTypeQualifier(simple) && kind == TypeKind::STRUCT) throw "";
 
             switch (simple->Value()->keyword)
             {

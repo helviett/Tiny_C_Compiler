@@ -213,3 +213,60 @@ PrefixDecrementNode *SemanticAnalyzer::BuildPrefixDecrementNode(ExprNode *expr)
     CheckIncDecRules(expr);
     return new PrefixDecrementNode(expr);
 }
+
+UnaryOpNode *SemanticAnalyzer::BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, ExprNode *expr)
+{
+    UnaryOpNode *res = nullptr;
+    switch (unaryOp->type)
+    {
+        case TokenType::LOGIC_AND:
+            if (expr->GetValueCategory() != ValueCategory::LVAVLUE) throw "";
+            res = new UnaryOpNode(unaryOp, expr);
+            res->SetType(new SymPointer(expr->GetType()));
+            return res;
+        case TokenType::ASTERIX:
+            if (expr->GetType()->GetTypeKind() != TypeKind::POINTER) throw "";
+            res = new UnaryOpNode(unaryOp, expr);
+            res->SetValueCategory(ValueCategory::LVAVLUE);
+            res->SetType(((SymPointer *)expr->GetType())->GetTarget());
+            return res;
+        case TokenType::MINUS:
+            if (!isArithmeticType(expr->GetType())) throw "";
+            if (isUnsignedIntegerType(expr->GetType()))
+            {
+                // TODO this is wrong conversion, because I probably won't support int64
+                expr = new TypeCastNode(new TypeNameNode(new SymBuiltInType(BuiltInTypeKind::INT32, 0)), expr);
+            }
+            res = new UnaryOpNode(unaryOp, expr);
+            res->SetType(expr->GetType());
+            return res;
+        case TokenType::PLUS:
+            if (!isArithmeticType(expr->GetType())) throw "";
+            res = new UnaryOpNode(unaryOp, expr);
+            res->SetType(expr->GetType());
+            return res;
+        case TokenType::BITWISE_NOT:
+            if (!isIntegerType(expr->GetType())) throw "";
+            res = new UnaryOpNode(unaryOp, expr);
+            res->SetType(expr->GetType());
+            return res;
+        case TokenType::LOGIC_NO:
+            if (!isScalarType(expr->GetType())) throw "";
+            res = new UnaryOpNode(unaryOp, expr);
+            res->SetType(new SymBuiltInType(BuiltInTypeKind::INT32, 0));
+            return res;
+    }
+}
+
+bool SemanticAnalyzer::isUnsignedIntegerType(SymType *type)
+{
+    if (type->GetTypeKind() != TypeKind::BUILTIN) throw "";
+    auto btk = ((SymBuiltInType *)type)->GetBuiltIntTypeKind();
+    return btk == BuiltInTypeKind::UINT8 || btk == BuiltInTypeKind::UINT16 || btk == BuiltInTypeKind::UINT32 ||
+            btk == BuiltInTypeKind::UINT64;
+}
+
+bool SemanticAnalyzer::isScalarType(SymType *type)
+{
+    return type->GetTypeKind() == TypeKind::BUILTIN || type->GetTypeKind() == TypeKind::POINTER;
+}

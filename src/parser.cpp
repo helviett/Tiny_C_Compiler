@@ -134,7 +134,7 @@ ExprNode *Parser::parseUnaryExpr()
             if (isUnaryOp(t))
             {
                 scanner->Next();
-                ue = new UnaryOpNode(t, parseCastExpr());
+                ue = sematicAnalyzer.BuildUnaryOpNode(t, parseCastExpr());
                 t = scanner->Current();
                 break;
             }

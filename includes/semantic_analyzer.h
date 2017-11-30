@@ -27,6 +27,7 @@ public:
     FunctionCallNode *BuildFunctionCallNode(ExprNode *func, ArgumentExprListNode *args);
     PrefixIncrementNode *BuildPrefixIncrementNode(ExprNode *expr);
     PrefixDecrementNode *BuildPrefixDecrementNode(ExprNode *expr);
+    UnaryOpNode *BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, ExprNode *expr);
 private:
     void CheckIncDecRules(ExprNode *expr);
     bool isArithmeticType(SymType *type);
@@ -34,6 +35,8 @@ private:
     bool isVoidPointer(SymType *type);
     bool isIntegerType(SymType *type);
     void performLvalueConversion(ExprNode *expr);
+    bool isUnsignedIntegerType(SymType *type);
+    bool isScalarType(SymType *type);
     ScopeTree scopeTree;
 };
 
