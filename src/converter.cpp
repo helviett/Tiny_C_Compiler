@@ -4,6 +4,7 @@
 void Converter::ImplicityConvert(ExprNode **left, ExprNode **right)
 {
     auto ltype = (*left)->GetType(), rtype = (*right)->GetType();
+    if (ltype->Equal(rtype)) return;
     if (ltype->GetTypeKind() == TypeKind::BUILTIN)
     {
         auto lbt = (SymBuiltInType *)ltype;

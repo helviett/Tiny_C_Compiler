@@ -273,18 +273,46 @@ bool SemanticAnalyzer::isScalarType(SymType *type)
 
 BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> binOp)
 {
+    BinOpNode *res = nullptr;
+    auto ltype = left->GetType(), rtype = right->GetType();
     switch (binOp->type)
     {
         case TokenType::REMINDER:
-            if (!isIntegerType(left->GetType()) || !isIntegerType(right->GetType())) throw "";
-            if (!left->GetType()->Equal(right->GetType()))
-                Converter::ImplicityConvert(&left, &right);
+            if (!isIntegerType(ltype) || !isIntegerType(rtype)) throw "";
+            Converter::ImplicityConvert(&left, &right);
             return new BinOpNode(left, right, binOp);
         case TokenType::ASTERIX: case TokenType::FORWARD_SLASH:
-            if (!isArithmeticType(left->GetType()) || !isArithmeticType(right->GetType())) throw "";
-            if (!left->GetType()->Equal(right->GetType()))
-                Converter::ImplicityConvert(&left, &right);
+            if (!isArithmeticType(ltype) || !isArithmeticType(rtype)) throw "";
+            Converter::ImplicityConvert(&left, &right);
             return new BinOpNode(left, right, binOp);
+        case TokenType::PLUS:
+            if (isArithmeticType(ltype) || isArithmeticType(rtype))
+            {
+                Converter::ImplicityConvert(&left, &right);
+                return new BinOpNode(left, right, binOp);
+            }
+            if (isPointerType(rtype))
+            {
+                left->SetType(rtype); // TODO std::swap ?
+                right->SetType(ltype);
+            }
+            if (!isPointerType(left->GetType()) || !isArithmeticType(right->GetType())) throw "";
+            return new BinOpNode(left, right, binOp);
+        case TokenType::MINUS:
+            if (isArithmeticType(ltype) && isArithmeticType(rtype))
+            {
+                Converter::ImplicityConvert(&left, &right);
+                return new BinOpNode(left, right, binOp);
+            }
+            if (isPointerType(ltype) && isPointerType(rtype) && rtype->Equal(ltype))
+            {
+                res = new BinOpNode(left, right, binOp);
+                res->SetType(new SymBuiltInType(BuiltInTypeKind::INT32, 0));
+                return res;
+            }
+            if (isPointerType(ltype) && isIntegerType(rtype))
+                return new BinOpNode(left, right, binOp);
+            throw "";
     }
     return nullptr;
 }

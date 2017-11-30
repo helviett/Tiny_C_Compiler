@@ -135,7 +135,10 @@ void BinOpNode::Print(std::ostream &os, std::string indent, bool isTail)
     right->Print(os, indent, true);
 }
 
-BinOpNode::BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op) : left(left), right(right), op(op) {}
+BinOpNode::BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op) : left(left), right(right), op(op)
+{
+    this->type = left->GetType();
+}
 
 void ArrayAccessNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
