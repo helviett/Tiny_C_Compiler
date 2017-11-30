@@ -255,7 +255,7 @@ ExprNode *Parser::parseBinoOps(Parser *self, ExprNode *(Parser::*f)(),
     {
         self->scanner->Next();
         auto right = (ExprNode *) ((*self).*f)();
-        e = new BinOpNode(e, right, t);
+        e = sematicAnalyzer.BuildBinOpNode(e, right, t);
         t = self->scanner->Current();
     }
     return e;

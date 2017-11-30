@@ -270,3 +270,21 @@ bool SemanticAnalyzer::isScalarType(SymType *type)
 {
     return type->GetTypeKind() == TypeKind::BUILTIN || type->GetTypeKind() == TypeKind::POINTER;
 }
+
+BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> binOp)
+{
+    switch (binOp->type)
+    {
+        case TokenType::REMINDER:
+            if (!isIntegerType(left->GetType()) || !isIntegerType(right->GetType())) throw "";
+            if (!left->GetType()->Equal(right->GetType()))
+                Converter::ImplicityConvert(&left, &right);
+            return new BinOpNode(left, right, binOp);
+        case TokenType::ASTERIX: case TokenType::FORWARD_SLASH:
+            if (!isArithmeticType(left->GetType()) || !isArithmeticType(right->GetType())) throw "";
+            if (!left->GetType()->Equal(right->GetType()))
+                Converter::ImplicityConvert(&left, &right);
+            return new BinOpNode(left, right, binOp);
+    }
+    return nullptr;
+}
