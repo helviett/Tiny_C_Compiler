@@ -29,6 +29,7 @@ public:
     PrefixDecrementNode *BuildPrefixDecrementNode(ExprNode *expr);
     UnaryOpNode *BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, ExprNode *expr);
     BinOpNode *BuildBinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> binOp);
+    TernaryOperatorNode *BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, ExprNode *iffalse);
 private:
     void CheckIncDecRules(ExprNode *expr);
     bool isArithmeticType(SymType *type);

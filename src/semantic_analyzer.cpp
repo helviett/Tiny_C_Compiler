@@ -323,10 +323,10 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
             if (isArithmeticType(ltype) && isArithmeticType(rtype))
             {
                 Converter::ImplicitlyConvert(&left, &right);
-                return new BinOpNode(left, right, binOp);
+                return new BinOpNode(left, right, binOp, new SymBuiltInType(BuiltInTypeKind::INT32, 0));
             }
             if (isPointerType(ltype) && isPointerType(rtype) && ltype->Equal(rtype))
-                return new BinOpNode(left, right, binOp);
+                return new BinOpNode(left, right, binOp, new SymBuiltInType(BuiltInTypeKind::INT32, 0));
             throw "";
         case TokenType::RELOP_EQ: case TokenType::RELOP_NE:
             if (isArithmeticType(ltype) && isArithmeticType(rtype))
@@ -340,6 +340,29 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
                     return new BinOpNode(left, right, binOp, new SymBuiltInType(BuiltInTypeKind::INT32, 0));
             }
             throw "";
+        case TokenType::LOGIC_OR: case TokenType::LOGIC_AND:
+            if (!isScalarType(ltype) || !isScalarType(rtype)) throw "";
+            return new BinOpNode(left, right, binOp, new SymBuiltInType(BuiltInTypeKind::INT32, 0)); // TODO typepool
     }
     return nullptr;
+}
+
+TernaryOperatorNode *
+SemanticAnalyzer::BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, ExprNode *iffalse)
+{
+    auto ctype = condition->GetType(), ttype = iftrue->GetType(), ftype = iffalse->GetType();
+    if (!isScalarType(ctype)) throw "";
+    if (isArithmeticType(ttype) && isArithmeticType(ftype))
+    {
+        Converter::ImplicitlyConvert(&iftrue, &iffalse);
+        return new TernaryOperatorNode(condition, iftrue, iffalse);
+    }
+    if (isPointerType(ttype) && isPointerType(ftype))
+    {
+        if (ttype->Equal(ftype) || isVoidPointer(ttype) || isVoidPointer(ftype))
+            return new TernaryOperatorNode(condition, iftrue, iffalse);
+    }
+    if (ttype->Equal(ftype))
+        return new TernaryOperatorNode(condition, iftrue, iffalse);
+    throw "";
 }

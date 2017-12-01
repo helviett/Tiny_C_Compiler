@@ -168,7 +168,10 @@ void TernaryOperatorNode::Print(std::ostream &os, std::string indent, bool isTai
 }
 
 TernaryOperatorNode::TernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, ExprNode *iffalse) :
-        condition(condition), iftrue(iftrue), iffalse(iffalse) {}
+        condition(condition), iftrue(iftrue), iffalse(iffalse)
+{
+    this->type = iftrue->GetType();
+}
 
 
 void AssignmentNode::Print(std::ostream &os, std::string indent, bool isTail)
