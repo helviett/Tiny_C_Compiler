@@ -140,6 +140,12 @@ BinOpNode::BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op)
     this->type = left->GetType();
 }
 
+BinOpNode::BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op, SymType *resultType):
+        BinOpNode(left, right, op)
+{
+    this->type = resultType;
+}
+
 void ArrayAccessNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");

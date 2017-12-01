@@ -318,8 +318,28 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
             if (!isIntegerType(ltype) || !isIntegerType(rtype)) throw "";
             Converter::ImplicitlyConvert(&left, &right);
             return new BinOpNode(left, right, binOp);
-
-
+        case TokenType::RELOP_LE: case TokenType::RELOP_LT:
+        case TokenType::RELOP_GE: case TokenType::RELOP_GT:
+            if (isArithmeticType(ltype) && isArithmeticType(rtype))
+            {
+                Converter::ImplicitlyConvert(&left, &right);
+                return new BinOpNode(left, right, binOp);
+            }
+            if (isPointerType(ltype) && isPointerType(rtype) && ltype->Equal(rtype))
+                return new BinOpNode(left, right, binOp);
+            throw "";
+        case TokenType::RELOP_EQ: case TokenType::RELOP_NE:
+            if (isArithmeticType(ltype) && isArithmeticType(rtype))
+            {
+                Converter::ImplicitlyConvert(&left, &right);
+                return new BinOpNode(left, right, binOp, new SymBuiltInType(BuiltInTypeKind::INT32, 0));
+            }
+            if (isPointerType(ltype) && isPointerType(rtype))
+            {
+                 if (ltype->Equal(rtype) || isVoidPointer(ltype) || isVoidPointer(rtype)) // TODO isNullPointerConstant
+                    return new BinOpNode(left, right, binOp, new SymBuiltInType(BuiltInTypeKind::INT32, 0));
+            }
+            throw "";
     }
     return nullptr;
 }

@@ -149,6 +149,7 @@ class BinOpNode: public ExprNode
 {
 public:
     BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op);
+    BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op, SymType *resultType);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     ExprNode *left, *right;
