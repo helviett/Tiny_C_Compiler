@@ -48,6 +48,7 @@ public:
     virtual bool Equal(SymType *other) = 0;
     void SetTypeQualifiers(uint32_t typeQualifiers);
     uint32_t GetTypeQualifiers() const;
+    virtual bool IsComplete() = 0;
 protected:
     TypeKind kind;
     uint32_t typeQualifiers{0};
@@ -62,6 +63,7 @@ public:
     void SetBuiltIntTypeKind(BuiltInTypeKind typeKind);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     bool Equal(SymType *other) override;
+    bool IsComplete() override;
 private:
     BuiltInTypeKind builtInTypeKind;
 };
@@ -74,6 +76,7 @@ public:
     SymType *GetTarget() const;
     void SetTarget(SymType *target);
     bool Equal(SymType *other) override;
+    bool IsComplete() override;
 private:
     SymType *target;
 };
@@ -89,6 +92,7 @@ public:
     void SetValueType(SymType *valueType);
     bool Equal(SymType *other) override;
     SymPointer *ToPointer();
+    bool IsComplete() override;
 private:
     SymType *valueType;
     ExprNode *size;
@@ -110,6 +114,7 @@ public:
     SymbolTable *GetParamsTable() const;
     bool Equal(SymType *other) override;
     std::vector<SymVariable *> GetOderedParams();
+    bool IsComplete() override;
 private:
     SymType *returnType{nullptr};
     SymbolTable *params{nullptr}, *body{nullptr};
@@ -137,6 +142,7 @@ public:
     std::vector<SymVariable *> &GetOrderedFields();
     IdNode *GetTag() const;
     void SetTag(IdNode *tag);
+    bool IsComplete() override;
 private:
     IdNode *tag{nullptr};
     SymbolTable *fields{nullptr};

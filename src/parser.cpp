@@ -275,7 +275,7 @@ ExprNode *Parser::parseConditionalExpr()
         require(TokenType::COLON);
         t = scanner->Next();
         ExprNode *lse = parseConditionalExpr();
-        return new TernaryOperatorNode(loe, then, lse);
+        return sematicAnalyzer.BuildTernaryOperatorNode(loe, then, lse);
     }
     return loe;
 }
@@ -289,8 +289,7 @@ ExprNode *Parser::parseAssignmentExpr()
     if (isAssignmentOp(t))
     {
         scanner->Next();
-        return new AssignmentNode(ce, parseAssignmentExpr(), t);
-
+        return sematicAnalyzer.BuildAssignmentNode(ce, parseAssignmentExpr(), t);
     }
     return ce;
 }

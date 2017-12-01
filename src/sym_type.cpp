@@ -56,6 +56,11 @@ SymBuiltInType::SymBuiltInType(BuiltInTypeKind builtInTypeKind, uint32_t typeQua
     this->typeQualifiers = typeQualifiers;
 }
 
+bool SymBuiltInType::IsComplete()
+{
+    return true;
+}
+
 SymPointer::SymPointer(SymType *target) : SymType(), target(target)
 {
     kind = TypeKind::POINTER;
@@ -82,6 +87,11 @@ void SymPointer::SetTarget(SymType *target)
 bool SymPointer::Equal(SymType *other)
 {
     return kind == other->GetTypeKind() && target->Equal(((SymPointer *)other)->GetTarget());
+}
+
+bool SymPointer::IsComplete()
+{
+    return target->IsComplete();
 }
 
 SymArray::SymArray(SymType *valueType, ExprNode *size): SymType(), valueType(valueType), size(size)
@@ -117,6 +127,11 @@ bool SymArray::Equal(SymType *other)
 SymPointer *SymArray::ToPointer()
 {
     return new SymPointer(valueType);
+}
+
+bool SymArray::IsComplete()
+{
+    return valueType->IsComplete();
 }
 
 SymFunction::SymFunction(SymType *returnType): SymType(), returnType(returnType)
@@ -186,6 +201,13 @@ bool SymFunction::Equal(SymType *other)
 std::vector<SymVariable *> SymFunction::GetOderedParams()
 {
     return orderedParams;
+}
+
+bool SymFunction::IsComplete()
+{
+    for (auto it: orderedParams)
+        if (it->GetName()[0] == '#') return false;
+    return body;
 }
 
 SymAlias::SymAlias(std::string name, SymType *type): type(type)
@@ -265,4 +287,9 @@ SymRecord::SymRecord(SymbolTable *fields, std::vector<SymVariable *> orderedFiel
 SymRecord::SymRecord(IdNode *tag): tag(tag)
 {
     name = "struct " + tag->GetName();
+}
+
+bool SymRecord::IsComplete()
+{
+    return fields;
 }

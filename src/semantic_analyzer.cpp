@@ -187,7 +187,7 @@ FunctionCallNode *SemanticAnalyzer::BuildFunctionCallNode(ExprNode *func, Argume
         // TODO TypeConversions
         if (!(*arg)->GetType()->Equal(ftype->GetOderedParams()[i]->GetType()))
         {
-            Converter::Convert(&(*arg), ftype->GetOderedParams()[i]->GetType());
+            Convert(&(*arg), ftype->GetOderedParams()[i]->GetType());
         }
         i++;
     }
@@ -279,16 +279,16 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
     {
         case TokenType::REMINDER:
             if (!isIntegerType(ltype) || !isIntegerType(rtype)) throw "";
-            Converter::ImplicitlyConvert(&left, &right);
+            ImplicitlyConvert(&left, &right);
             return new BinOpNode(left, right, binOp);
         case TokenType::ASTERIX: case TokenType::FORWARD_SLASH:
             if (!isArithmeticType(ltype) || !isArithmeticType(rtype)) throw "";
-            Converter::ImplicitlyConvert(&left, &right);
+            ImplicitlyConvert(&left, &right);
             return new BinOpNode(left, right, binOp);
         case TokenType::PLUS:
             if (isArithmeticType(ltype) || isArithmeticType(rtype))
             {
-                Converter::ImplicitlyConvert(&left, &right);
+                ImplicitlyConvert(&left, &right);
                 return new BinOpNode(left, right, binOp);
             }
             if (isPointerType(rtype))
@@ -301,7 +301,7 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
         case TokenType::MINUS:
             if (isArithmeticType(ltype) && isArithmeticType(rtype))
             {
-                Converter::ImplicitlyConvert(&left, &right);
+                ImplicitlyConvert(&left, &right);
                 return new BinOpNode(left, right, binOp);
             }
             if (isPointerType(ltype) && isPointerType(rtype) && rtype->Equal(ltype))
@@ -316,13 +316,13 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
         case TokenType::BITWISE_LSHIFT: case TokenType::BITWISE_RSHIFT:
         case TokenType::BITWISE_AND: case TokenType::BITWISE_XOR: case TokenType::BITWISE_OR:
             if (!isIntegerType(ltype) || !isIntegerType(rtype)) throw "";
-            Converter::ImplicitlyConvert(&left, &right);
+            ImplicitlyConvert(&left, &right);
             return new BinOpNode(left, right, binOp);
         case TokenType::RELOP_LE: case TokenType::RELOP_LT:
         case TokenType::RELOP_GE: case TokenType::RELOP_GT:
             if (isArithmeticType(ltype) && isArithmeticType(rtype))
             {
-                Converter::ImplicitlyConvert(&left, &right);
+                ImplicitlyConvert(&left, &right);
                 return new BinOpNode(left, right, binOp, new SymBuiltInType(BuiltInTypeKind::INT32, 0));
             }
             if (isPointerType(ltype) && isPointerType(rtype) && ltype->Equal(rtype))
@@ -331,7 +331,7 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
         case TokenType::RELOP_EQ: case TokenType::RELOP_NE:
             if (isArithmeticType(ltype) && isArithmeticType(rtype))
             {
-                Converter::ImplicitlyConvert(&left, &right);
+                ImplicitlyConvert(&left, &right);
                 return new BinOpNode(left, right, binOp, new SymBuiltInType(BuiltInTypeKind::INT32, 0));
             }
             if (isPointerType(ltype) && isPointerType(rtype))
@@ -354,7 +354,7 @@ SemanticAnalyzer::BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue
     if (!isScalarType(ctype)) throw "";
     if (isArithmeticType(ttype) && isArithmeticType(ftype))
     {
-        Converter::ImplicitlyConvert(&iftrue, &iffalse);
+        ImplicitlyConvert(&iftrue, &iffalse);
         return new TernaryOperatorNode(condition, iftrue, iffalse);
     }
     if (isPointerType(ttype) && isPointerType(ftype))
@@ -364,5 +364,87 @@ SemanticAnalyzer::BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue
     }
     if (ttype->Equal(ftype))
         return new TernaryOperatorNode(condition, iftrue, iffalse);
+    throw "";
+}
+
+AssignmentNode *SemanticAnalyzer::BuildAssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp)
+{
+    if (!isModifiableLvalue(left)) throw "";
+    auto ltype = left->GetType(), rtype = right->GetType();
+    if (assignmentOp->type != TokenType::ASSIGNMENT)
+        right = BuildBinOpNode(left, right, extractArithmeticOperationFromAssignmentBy(assignmentOp));  // TODO redo
+    Convert(&right, ltype);
+    left->SetType(ltype);
+    return new AssignmentNode(left, right, assignmentOp);
+}
+
+bool SemanticAnalyzer::isModifiableLvalue(ExprNode *expr)
+{
+    return expr->GetValueCategory() == ValueCategory::LVAVLUE &&
+            !isConstQualified(expr) && expr->GetType()->IsComplete() && expr->GetType()->GetTypeKind() != TypeKind::ARRAY;
+}
+
+bool SemanticAnalyzer::isConstQualified(ExprNode *expr)
+{
+    return (expr->GetType()->GetTypeQualifiers()) & 1U;
+}
+
+std::shared_ptr<Token> SemanticAnalyzer::extractArithmeticOperationFromAssignmentBy(const std::shared_ptr<Token> &assignemtBy)
+{
+    switch (assignemtBy->type)
+    {
+        case TokenType::ASSIGNMENT_BY_REMINDER:
+            return std::make_shared<Token>(TokenType::REMINDER, assignemtBy->row, assignemtBy->col, "");
+        case TokenType::ASSIGNMENT_BY_BITWISE_XOR:
+            return std::make_shared<Token>(TokenType::BITWISE_XOR, assignemtBy->row, assignemtBy->col, "");
+        case TokenType::ASSIGNMENT_BY_BITWISE_AND:
+            return std::make_shared<Token>(TokenType::BITWISE_AND, assignemtBy->row, assignemtBy->col, "");
+        case TokenType::ASSIGNMENT_BY_BITWISE_RSHIFT:
+            return std::make_shared<Token>(TokenType::BITWISE_RSHIFT, assignemtBy->row, assignemtBy->col, "");
+        case TokenType::ASSIGNMENT_BY_BITWISE_LSHIFT:
+            return std::make_shared<Token>(TokenType::BITWISE_LSHIFT, assignemtBy->row, assignemtBy->col, "");
+        case TokenType::ASSIGNMENT_BY_DIFFERENCE:
+            return std::make_shared<Token>(TokenType::MINUS, assignemtBy->row, assignemtBy->col, "");
+        case TokenType::ASSIGNMENT_BY_SUM:
+            return std::make_shared<Token>(TokenType::PLUS, assignemtBy->row, assignemtBy->col, "");
+        case TokenType::ASSIGNMENT_BY_QUOTIENT:
+            return std::make_shared<Token>(TokenType::FORWARD_SLASH, assignemtBy->row, assignemtBy->col, "");
+        case TokenType::ASSIGNMENT_BY_PRODUCT:
+            return std::make_shared<Token>(TokenType::ASTERIX, assignemtBy->row, assignemtBy->col, "");
+        case TokenType::ASSIGNMENT_BY_BITWISE_OR:
+            return std::make_shared<Token>(TokenType::BITWISE_OR, assignemtBy->row, assignemtBy->col, "");
+    }
+    return std::shared_ptr<Token>();
+}
+
+void SemanticAnalyzer::ImplicitlyConvert(ExprNode **left, ExprNode **right)
+{
+    auto ltype = (*left)->GetType(), rtype = (*right)->GetType();
+    if (ltype->Equal(rtype)) return;
+    if (ltype->GetTypeKind() == TypeKind::BUILTIN)
+    {
+        auto lbt = (SymBuiltInType *)ltype;
+        if (rtype->GetTypeKind() == TypeKind::BUILTIN)
+        {
+            auto rbt = (SymBuiltInType *)rtype;
+            if (lbt->GetBuiltIntTypeKind() > rbt->GetBuiltIntTypeKind())
+                *right = new TypeCastNode(new TypeNameNode(lbt), *right);
+            else if (lbt->GetBuiltIntTypeKind() < rbt->GetBuiltIntTypeKind())
+                *left = new TypeCastNode(new TypeNameNode(lbt), *left);
+
+        }
+    }
+}
+
+void SemanticAnalyzer::Convert(ExprNode **expr, SymType *type)
+{
+    auto etype = (*expr)->GetType();
+    if (etype->Equal(type)) return;
+    if (isArithmeticType(etype) && isArithmeticType(type) || isIntegerType(etype) && isPointerType(type)
+            || isPointerType(etype) && isPointerType(type))
+    {
+        *expr = new TypeCastNode(new TypeNameNode(type), *expr);
+        return;
+    }
     throw "";
 }

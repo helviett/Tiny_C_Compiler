@@ -8,7 +8,6 @@
 #include "scope_tree.h"
 #include "nodes.h"
 #include "type_builder.h"
-#include <converter.h>
 #include <iostream>
 
 class SemanticAnalyzer
@@ -30,6 +29,7 @@ public:
     UnaryOpNode *BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, ExprNode *expr);
     BinOpNode *BuildBinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> binOp);
     TernaryOperatorNode *BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, ExprNode *iffalse);
+    AssignmentNode *BuildAssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp);
 private:
     void CheckIncDecRules(ExprNode *expr);
     bool isArithmeticType(SymType *type);
@@ -39,6 +39,11 @@ private:
     void performLvalueConversion(ExprNode *expr);
     bool isUnsignedIntegerType(SymType *type);
     bool isScalarType(SymType *type);
+    bool isModifiableLvalue(ExprNode *expr);
+    bool isConstQualified(ExprNode *expr);
+    std::shared_ptr<Token> extractArithmeticOperationFromAssignmentBy(const std::shared_ptr<Token> &assignemtBy);
+    void ImplicitlyConvert(ExprNode **left, ExprNode **right);
+    void Convert(ExprNode **expr, SymType *type);
     ScopeTree scopeTree;
 };
 
