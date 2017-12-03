@@ -151,7 +151,7 @@ ExprNode *Parser::parseCastExpr()
             (isTypeQualifier(scanner->Peek()) || isTypeSpecifier(scanner->Peek())))
     {
         scanner->Next();
-        TypeNameNode *typName = parseTypeName();
+        auto typName = parseTypeName();
         scanner->Next();
         return new TypeCastNode(typName, parseCastExpr());
     }
@@ -309,14 +309,14 @@ ExprNode *Parser::parseExpr()
 
 //type-id ::= specifier-qualifier-list `abstract-declarator
 
-TypeNameNode *Parser::parseTypeName()
+SymType *Parser::parseTypeName()
 {
     auto tnn = parseSpecifierQualifierList();
     if (tnn->Size() == 0) throw NoDeclarationSpecifiers(scanner->Current());
     auto abstractDeclarator = new DeclaratorNode();
     abstractDeclarator->SetType(TypeBuilder::Build(tnn));
     parseDeclarator(DeclaratorKind::ABSTRACT, abstractDeclarator);
-    return new TypeNameNode(abstractDeclarator->GetType());
+    return abstractDeclarator->GetType();
 }
 
 //type-specifier ::= void | char | short | int | long | float | double | singed
@@ -953,18 +953,19 @@ bool Parser::isSimpleSpecifier(std::shared_ptr<Token> token)
 
 StructSpecifierNode *Parser::parseStructSpecifier()
 {
+    auto stoken = scanner->Current();
     requierKeyword(Keyword::STRUCT);
     scanner->Next();
     IdNode *id = maybe(TokenType::ID) ? new IdNode(scanner->Current()) : nullptr;
     if (!id)
     {
         requireNext(TokenType::LCURLY_BRACKET);
-        return sematicAnalyzer.BuildStructSpecifierNode(id, parseStructDeclarationList());
+        return sematicAnalyzer.BuildStructSpecifierNode(id, parseStructDeclarationList(), stoken);
     }
     scanner->Next();
     if (maybeNext(TokenType::LCURLY_BRACKET))
-        return sematicAnalyzer.BuildStructSpecifierNode(id, parseStructDeclarationList());
-    return new StructSpecifierNode(new SymRecord(id));
+        return sematicAnalyzer.BuildStructSpecifierNode(id, parseStructDeclarationList(), stoken);
+    return sematicAnalyzer.BuildStructSpecifierNode(id, nullptr, stoken);
 }
 
 //struct-declaration-list ::= struct-declaration | struct-declaration-list struct-declaration
@@ -1030,6 +1031,7 @@ DeclarationSpecifiersNode *Parser::parseSpecifierQualifierList()
                  (TypeSpecifierQualifierNode *)new TypeQualifierNode(t)) ;
         t = scanner->Next();
     }
+    if (tnn->List().empty()) throw NoDeclarationSpecifiers(scanner->Current());
     return tnn;
 }
 

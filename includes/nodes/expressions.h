@@ -111,10 +111,10 @@ class TypeNameNode;
 class SizeofTypeNameNode: public ExprNode
 {
 public:
-    SizeofTypeNameNode(TypeNameNode *typeName);
+    SizeofTypeNameNode(SymType *typeName);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    TypeNameNode *typeName;
+    SymType *typeName;
 };
 
 class UnaryOpNode: public ExprNode

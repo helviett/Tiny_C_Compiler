@@ -9,12 +9,15 @@
 #include "nodes.h"
 #include "type_builder.h"
 #include <iostream>
+#include <errors/semantic_errors.h>
 
 class SemanticAnalyzer
 {
 public:
     IdNode *BuildIdNode(std::shared_ptr<Token> token);
-    StructSpecifierNode *BuildStructSpecifierNode(IdNode *tag, StructDeclarationListNode *structDeclarationList);
+    StructSpecifierNode *BuildStructSpecifierNode(IdNode *tag,
+                                                  StructDeclarationListNode *structDeclarationList,
+                                                  std::shared_ptr<Token> structToken);
     ScopeTree *GetScopeTree();
     PostfixDecrementNode *BuildPostfixDecrementNode(ExprNode *expr);
     PostfixIncrementNode *BuildPostfixIncrementNode(ExprNode *expr);
@@ -30,6 +33,7 @@ public:
     BinOpNode *BuildBinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> binOp);
     TernaryOperatorNode *BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, ExprNode *iffalse);
     AssignmentNode *BuildAssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp);
+    FunctionDefinitionNode *BuildFunctionDefinitionNode(DeclaratorNode *declarator, CompoundStatement *body);
 private:
     void CheckIncDecRules(ExprNode *expr);
     bool isArithmeticType(SymType *type);

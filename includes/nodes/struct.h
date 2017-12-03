@@ -53,14 +53,16 @@ protected:
 class StructSpecifierNode: public DeclarationSpecifierNode
 {
 public:
-    explicit StructSpecifierNode(SymRecord *type);
+    explicit StructSpecifierNode(SymRecord *type, std::shared_ptr<Token> structToken);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void SetId(IdNode *id);
     IdNode *GetId() const;
     SymRecord *GetRecordType() const;
     void SetRecordType(SymRecord *type);
+    std::shared_ptr<Token> GetToken() const;
 private:
     SymRecord *type{nullptr};
+    std::shared_ptr<Token> token;
 };
 
 #endif //TINY_C_COMPILER_STRUCT_H

@@ -9,22 +9,13 @@
 #include "declaration_specifier_nodes.h"
 #include "decls.h"
 
-class TypeNameNode: public Node
-{
-public:
-    TypeNameNode(SymType *type): type(type) {}
-    void Print(std::ostream &os, std::string ident, bool isTail) override;
-private:
-    SymType *type;
-};
-
 class TypeCastNode: public ExprNode
 {
 public:
-    TypeCastNode(TypeNameNode *typeName, ExprNode *castExpr): typeName(typeName), castExpr(castExpr) {}
+    TypeCastNode(SymType *typeName, ExprNode *castExpr);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    TypeNameNode *typeName;
+    SymType *castType;
     ExprNode *castExpr;
 };
 

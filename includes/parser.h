@@ -80,7 +80,7 @@ private:
     ExprNode            *parseAssignmentExpr();
     ExprNode            *parseExpr();
     ExprNode            *parseConstantExpr();
-    TypeNameNode               *parseTypeName();
+    SymType               *parseTypeName();
     DeclarationSpecifiersNode      *parseTypeQualifierList();
     PointerNode                *parsePointer();
     StatementNode              *parseStatement();

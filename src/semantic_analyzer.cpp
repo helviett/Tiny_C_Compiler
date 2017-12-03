@@ -3,8 +3,8 @@
 IdNode *SemanticAnalyzer::BuildIdNode(std::shared_ptr<Token> token)
 {
     auto symbol = scopeTree.Find(token->stringValue);
-    if (!symbol) throw "";
-    if (symbol->GetSymbolClass() == SymbolClass::UNDEFINED) throw "";
+    if (!symbol) throw UndeclaredIdentifierError(token);
+    if (symbol->GetSymbolClass() == SymbolClass::UNDEFINED) throw ""; // Unreachable
     if (symbol->GetSymbolClass() == SymbolClass::VARIABLE)
     {
 
@@ -28,30 +28,42 @@ IdNode *SemanticAnalyzer::BuildIdNode(std::shared_ptr<Token> token)
                 return new IdNode(token, t);
         }
     }
-    throw "";
+    throw ""; // Unreachable
 }
 
 StructSpecifierNode *SemanticAnalyzer::BuildStructSpecifierNode(IdNode *tag,
-                                                                StructDeclarationListNode *structDeclarationList)
+                                                                StructDeclarationListNode *structDeclarationList,
+                                                                std::shared_ptr<Token> structToken)
 {
-    auto rt = TypeBuilder::Build(structDeclarationList, tag);
-    rt->SetTag(tag);
+    if (!tag && !structDeclarationList) throw "";
+    SymRecord *rt = nullptr;
+    if (structDeclarationList)
+    {
+        rt = TypeBuilder::Build(structDeclarationList, tag);
+        rt->SetTag(tag);
+    }
     Symbol *s = nullptr;
     if (tag)
     {
         s = scopeTree.GetActiveScope()->Find("struct " + tag->GetName());
         if (s)
         {
-            if (s->GetSymbolClass() != SymbolClass::TYPE) throw "";
-            if (((SymType *)s)->GetTypeKind() != TypeKind::STRUCT) throw "";
+            if (s->GetSymbolClass() != SymbolClass::TYPE) throw ""; // Unreachable
+            if (((SymType *)s)->GetTypeKind() != TypeKind::STRUCT) throw ""; // Unreachable
             auto record = (SymRecord *)s;
-            if (!record->GetOrderedFields().empty()) throw "";
-            delete record;
+            if (structDeclarationList)
+            {
+                if (!record->GetOrderedFields().empty()) throw "";
+            }
+            if (rt)
+                *record = *rt;
+            return new StructSpecifierNode(record, structToken);
         }
+        if (!rt) rt = new SymRecord(tag);
         rt->SetName("struct " + tag->GetName());
         scopeTree.GetActiveScope()->Insert(rt->GetName(), rt);
     }
-    return new StructSpecifierNode(rt);
+    return new StructSpecifierNode(rt, structToken);
 }
 
 ScopeTree *SemanticAnalyzer::GetScopeTree()
@@ -121,6 +133,12 @@ SemanticAnalyzer::BuildStructureOrUnionMemberAccessNode(ExprNode *structure, IdN
     if (type->GetTypeKind() != TypeKind::STRUCT) throw "";
     auto stype = (SymRecord *)type;
     SymVariable *sfield;
+    if (!stype->GetFieldsTable())
+    {
+        SymRecord *definedSType = (SymRecord *)scopeTree.Find(stype->GetName());
+        if (!definedSType->GetFieldsTable()) throw "";
+        *stype = *definedSType;
+    }
     if (!(sfield = (SymVariable *)stype->GetFieldsTable()->Find(field->GetName()))) throw "";
     auto res = new StructureOrUnionMemberAccessNode(structure, field);
     res->SetType(sfield->GetType());
@@ -131,9 +149,9 @@ SemanticAnalyzer::BuildStructureOrUnionMemberAccessNode(ExprNode *structure, IdN
 StructureOrUnionMemberAccessByPointerNode *
 SemanticAnalyzer::BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, IdNode *field)
 {
+
     if (ptr->GetType()->GetTypeKind() == TypeKind::ARRAY)
         ptr->SetType(((SymArray *)ptr->GetType())->ToPointer());
-
     if (!isPointerType(ptr->GetType())) throw "";
     auto ptype = (SymPointer *)ptr->GetType();
     if (ptype->GetTarget()->GetTypeKind() != TypeKind::STRUCT) throw "";
@@ -143,7 +161,7 @@ SemanticAnalyzer::BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, 
     auto res = new StructureOrUnionMemberAccessByPointerNode(ptr, field);
     res->SetValueCategory(ValueCategory::LVAVLUE);
     auto rest = sfield->GetType();
-    rest->SetTypeQualifiers(rest->GetTypeQualifiers() | stype->GetTypeQualifiers());
+//    rest->SetTypeQualifiers(rest->GetTypeQualifiers() | stype->GetTypeQualifiers());
     res->SetType(sfield->GetType());
     return res;
 }
@@ -205,7 +223,7 @@ PrefixIncrementNode *SemanticAnalyzer::BuildPrefixIncrementNode(ExprNode *expr)
 void SemanticAnalyzer::performLvalueConversion(ExprNode *expr)
 {
     expr->SetValueCategory(ValueCategory::RVALUE);
-    expr->GetType()->SetTypeQualifiers(0);
+//    expr->GetType()->SetTypeQualifiers(0);
 }
 
 PrefixDecrementNode *SemanticAnalyzer::BuildPrefixDecrementNode(ExprNode *expr)
@@ -235,7 +253,7 @@ UnaryOpNode *SemanticAnalyzer::BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, 
             if (isUnsignedIntegerType(expr->GetType()))
             {
                 // TODO this is wrong conversion, because I probably won't support int64
-                expr = new TypeCastNode(new TypeNameNode(new SymBuiltInType(BuiltInTypeKind::INT32, 0)), expr);
+                expr = new TypeCastNode(new SymBuiltInType(BuiltInTypeKind::INT32), expr);
             }
             res = new UnaryOpNode(unaryOp, expr);
             res->SetType(expr->GetType());
@@ -253,7 +271,7 @@ UnaryOpNode *SemanticAnalyzer::BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, 
         case TokenType::LOGIC_NO:
             if (!isScalarType(expr->GetType())) throw "";
             res = new UnaryOpNode(unaryOp, expr);
-            res->SetType(new SymBuiltInType(BuiltInTypeKind::INT32, 0));
+            res->SetType(new SymBuiltInType(BuiltInTypeKind::INT32));
             return res;
     }
 }
@@ -286,7 +304,7 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
             ImplicitlyConvert(&left, &right);
             return new BinOpNode(left, right, binOp);
         case TokenType::PLUS:
-            if (isArithmeticType(ltype) || isArithmeticType(rtype))
+            if (isArithmeticType(ltype) && isArithmeticType(rtype))
             {
                 ImplicitlyConvert(&left, &right);
                 return new BinOpNode(left, right, binOp);
@@ -386,7 +404,8 @@ bool SemanticAnalyzer::isModifiableLvalue(ExprNode *expr)
 
 bool SemanticAnalyzer::isConstQualified(ExprNode *expr)
 {
-    return (expr->GetType()->GetTypeQualifiers()) & 1U;
+    return false;
+//    return (expr->GetType()->GetTypeQualifiers()) & 1U;
 }
 
 std::shared_ptr<Token> SemanticAnalyzer::extractArithmeticOperationFromAssignmentBy(const std::shared_ptr<Token> &assignemtBy)
@@ -414,7 +433,7 @@ std::shared_ptr<Token> SemanticAnalyzer::extractArithmeticOperationFromAssignmen
         case TokenType::ASSIGNMENT_BY_BITWISE_OR:
             return std::make_shared<Token>(TokenType::BITWISE_OR, assignemtBy->row, assignemtBy->col, "");
     }
-    return std::shared_ptr<Token>();
+    throw "";
 }
 
 void SemanticAnalyzer::ImplicitlyConvert(ExprNode **left, ExprNode **right)
@@ -428,9 +447,9 @@ void SemanticAnalyzer::ImplicitlyConvert(ExprNode **left, ExprNode **right)
         {
             auto rbt = (SymBuiltInType *)rtype;
             if (lbt->GetBuiltIntTypeKind() > rbt->GetBuiltIntTypeKind())
-                *right = new TypeCastNode(new TypeNameNode(lbt), *right);
+                *right = new TypeCastNode(lbt, *right);
             else if (lbt->GetBuiltIntTypeKind() < rbt->GetBuiltIntTypeKind())
-                *left = new TypeCastNode(new TypeNameNode(lbt), *left);
+                *left = new TypeCastNode(rbt, *left);
 
         }
     }
@@ -443,8 +462,15 @@ void SemanticAnalyzer::Convert(ExprNode **expr, SymType *type)
     if (isArithmeticType(etype) && isArithmeticType(type) || isIntegerType(etype) && isPointerType(type)
             || isPointerType(etype) && isPointerType(type))
     {
-        *expr = new TypeCastNode(new TypeNameNode(type), *expr);
+        *expr = new TypeCastNode(type, *expr);
         return;
     }
     throw "";
+}
+
+FunctionDefinitionNode *
+SemanticAnalyzer::BuildFunctionDefinitionNode(DeclaratorNode *declarator, CompoundStatement *body)
+{
+
+    return nullptr;
 }

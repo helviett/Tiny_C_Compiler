@@ -6,6 +6,7 @@
 #define TINY_C_COMPILER_TYPE_BUILDER_H
 
 #include "symbols.h"
+#include "errors/semantic_errors.h"
 
 class StructDeclarationListNode;
 

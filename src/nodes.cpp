@@ -191,8 +191,13 @@ void TypeCastNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << indent << (isTail ? "└── " : "├── ");
     os << "typcast" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    typeName->Print(os, indent, false);
+    castType->Print(os, indent, false);
     castExpr->Print(os, indent, true);
+}
+
+TypeCastNode::TypeCastNode(SymType *type, ExprNode *castExpr) : castType(type), castExpr(castExpr)
+{
+    this->type = type;
 }
 
 void UnaryOpNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -223,7 +228,7 @@ void SizeofTypeNameNode::Print(std::ostream &os, std::string indent, bool isTail
     typeName->Print(os, indent, true);
 }
 
-SizeofTypeNameNode::SizeofTypeNameNode(TypeNameNode *typeName) : typeName(typeName) {}
+SizeofTypeNameNode::SizeofTypeNameNode(SymType *typeName) : typeName(typeName) {}
 
 void CommaSeparatedExprs::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -346,14 +351,6 @@ void LabelStatementNode::Print(std::ostream &os, std::string indent, bool isTail
     indent.append(isTail ? "    " : "│   ");
     labelName->Print(os, indent, false);
     statement->Print(os, indent, true);
-}
-
-void TypeNameNode::Print(std::ostream &os, std::string indent, bool isTail)
-{
-    os << indent << (isTail ? "└── " : "├── ");
-    os << "TypeName" << std::endl;
-    indent.append(isTail ? "    " : "│   ");
-    type->Print(os, indent, true);
 }
 
 void DeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -807,7 +804,16 @@ void StructSpecifierNode::SetRecordType(SymRecord *type)
     this->type = type;
 }
 
-StructSpecifierNode::StructSpecifierNode(SymRecord *type) : type(type) { kind = SpecifierKind::COMPLEX; }
+StructSpecifierNode::StructSpecifierNode(SymRecord *type, std::shared_ptr<Token> structToken) : type(type),
+                                                                                                token(structToken)
+{
+    kind = SpecifierKind::COMPLEX;
+}
+
+std::shared_ptr<Token> StructSpecifierNode::GetToken() const
+{
+    return std::shared_ptr<Token>();
+}
 
 void StructDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
 {

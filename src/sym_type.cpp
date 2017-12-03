@@ -14,16 +14,6 @@ void SymType::SetTypeKind(TypeKind typeKind)
     kind = typeKind;
 }
 
-void SymType::SetTypeQualifiers(uint32_t typeQualifiers)
-{
-    this->typeQualifiers = typeQualifiers;
-}
-
-uint32_t SymType::GetTypeQualifiers() const
-{
-    return typeQualifiers;
-}
-
 BuiltInTypeKind SymBuiltInType::GetBuiltIntTypeKind() const
 {
     return builtInTypeKind;
@@ -53,7 +43,7 @@ bool SymBuiltInType::Equal(SymType *other)
 
 SymBuiltInType::SymBuiltInType(BuiltInTypeKind builtInTypeKind, uint32_t typeQualifiers): SymBuiltInType(builtInTypeKind)
 {
-    this->typeQualifiers = typeQualifiers;
+
 }
 
 bool SymBuiltInType::IsComplete()
@@ -287,6 +277,8 @@ SymRecord::SymRecord(SymbolTable *fields, std::vector<SymVariable *> orderedFiel
 SymRecord::SymRecord(IdNode *tag): tag(tag)
 {
     name = "struct " + tag->GetName();
+    symbolClass = SymbolClass::TYPE;
+    kind = TypeKind::STRUCT;
 }
 
 bool SymRecord::IsComplete()

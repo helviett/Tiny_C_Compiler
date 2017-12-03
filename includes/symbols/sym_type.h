@@ -46,12 +46,9 @@ public:
     void SetTypeKind(TypeKind typeKind);
     virtual void Print(std::ostream &os, std::string indent, bool isTail) = 0;
     virtual bool Equal(SymType *other) = 0;
-    void SetTypeQualifiers(uint32_t typeQualifiers);
-    uint32_t GetTypeQualifiers() const;
     virtual bool IsComplete() = 0;
 protected:
     TypeKind kind;
-    uint32_t typeQualifiers{0};
 };
 
 class SymBuiltInType: public SymType
@@ -133,6 +130,7 @@ class SymRecord: public SymType
 {
 public:
     SymRecord();
+    SymRecord(SymRecord *record, uint32_t typeQualifiers);
     SymRecord(IdNode *tag);
     SymRecord(SymbolTable *fields,  std::vector<SymVariable *> orderedFields);
     SymRecord(SymbolTable *fields,  std::vector<SymVariable *> orderedFields, IdNode *tag);
