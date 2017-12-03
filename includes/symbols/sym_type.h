@@ -47,8 +47,26 @@ public:
     virtual void Print(std::ostream &os, std::string indent, bool isTail) = 0;
     virtual bool Equal(SymType *other) = 0;
     virtual bool IsComplete() = 0;
+    bool IsQualified() const;
 protected:
     TypeKind kind;
+    bool isQualified{false};
+};
+
+class SymQualifiedType: public SymType
+{
+public:
+    SymQualifiedType(SymType *type, uint32_t qualifiers);
+    void Print(std::ostream &os, std::string indent, bool isTail) override;
+    bool Equal(SymType *other) override;
+    bool IsComplete() override;
+    SymType *GetType() const;
+    void SetType(SymType *type);
+    uint32_t GetQualifiers() const;
+    void SetQualifiers(uint32_t qualifiers);
+private:
+    SymType *type;
+    uint32_t qualfiers{0};
 };
 
 class SymBuiltInType: public SymType

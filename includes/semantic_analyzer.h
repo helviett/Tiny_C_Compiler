@@ -48,6 +48,7 @@ private:
     std::shared_ptr<Token> extractArithmeticOperationFromAssignmentBy(const std::shared_ptr<Token> &assignemtBy);
     void ImplicitlyConvert(ExprNode **left, ExprNode **right);
     void Convert(ExprNode **expr, SymType *type);
+    SymType *unqualify(SymType *type);
     ScopeTree scopeTree;
 };
 

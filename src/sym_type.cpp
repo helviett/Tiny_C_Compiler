@@ -14,6 +14,11 @@ void SymType::SetTypeKind(TypeKind typeKind)
     kind = typeKind;
 }
 
+bool SymType::IsQualified() const
+{
+    return isQualified;
+}
+
 BuiltInTypeKind SymBuiltInType::GetBuiltIntTypeKind() const
 {
     return builtInTypeKind;
@@ -38,6 +43,7 @@ void SymBuiltInType::Print(std::ostream &os, std::string indent, bool isTail)
 
 bool SymBuiltInType::Equal(SymType *other)
 {
+    if (other->IsQualified()) other = ((SymQualifiedType *)other)->GetType();
     return kind == other->GetTypeKind() && builtInTypeKind == ((SymBuiltInType *)other)->GetBuiltIntTypeKind();
 }
 
@@ -76,6 +82,7 @@ void SymPointer::SetTarget(SymType *target)
 
 bool SymPointer::Equal(SymType *other)
 {
+    if (other->IsQualified()) other = ((SymQualifiedType *)other)->GetType();
     return kind == other->GetTypeKind() && target->Equal(((SymPointer *)other)->GetTarget());
 }
 
@@ -111,6 +118,7 @@ void SymArray::SetValueType(SymType *valueType)
 
 bool SymArray::Equal(SymType *other)
 {
+    if (other->IsQualified()) other = ((SymQualifiedType *)other)->GetType();
     return kind == other->GetTypeKind() && valueType->Equal(((SymArray *)other)->GetValueType());
 }
 
@@ -173,6 +181,7 @@ SymbolTable *SymFunction::GetParamsTable() const
 
 bool SymFunction::Equal(SymType *other)
 {
+    if (other->IsQualified()) other = ((SymQualifiedType *)other)->GetType();
     auto f = (SymFunction *)other;
     if (kind == other->GetTypeKind() && (f->GetReturnType()->Equal(returnType)))
     {
@@ -220,6 +229,7 @@ void SymRecord::Print(std::ostream &os, std::string indent, bool isTail)
 
 bool SymRecord::Equal(SymType *other)
 {
+    if (other->IsQualified()) other = ((SymQualifiedType *)other)->GetType();
     auto r = (SymRecord *)other;
     if (kind == other->GetTypeKind())
     {
@@ -284,4 +294,48 @@ SymRecord::SymRecord(IdNode *tag): tag(tag)
 bool SymRecord::IsComplete()
 {
     return fields;
+}
+
+void SymQualifiedType::Print(std::ostream &os, std::string indent, bool isTail)
+{
+    os << indent << (isTail ? "└── " : "├── ");
+    os << "Qualified " + std::to_string(qualfiers) << std::endl;
+    indent.append(isTail ? "    " : "│   ");
+    type->Print(os, indent, true);
+}
+
+bool SymQualifiedType::Equal(SymType *other)
+{
+    return type->Equal(other);
+}
+
+bool SymQualifiedType::IsComplete()
+{
+    return type->IsComplete();
+}
+
+SymQualifiedType::SymQualifiedType(SymType *type, uint32_t qualifiers): type(type), qualfiers(qualifiers)
+{
+    this->isQualified = true;
+    kind = type->GetTypeKind();
+}
+
+SymType *SymQualifiedType::GetType() const
+{
+    return type;
+}
+
+void SymQualifiedType::SetType(SymType *type1)
+{
+    this->type = type;
+}
+
+void SymQualifiedType::SetQualifiers(uint32_t qualifiers)
+{
+    this->qualfiers = qualifiers;
+}
+
+uint32_t SymQualifiedType::GetQualifiers() const
+{
+    return qualfiers;
 }

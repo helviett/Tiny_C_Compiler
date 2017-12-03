@@ -103,37 +103,37 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
                     switch (isSinged)
                     {
                         case Singed::SINGED:
-                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::INT64);
-                            return new SymBuiltInType(BuiltInTypeKind::INT32);
+                            if (longTimes) return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::INT64), typeQuals);
+                            return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::INT32), typeQuals);
                         case Singed::UNSIGNED:
-                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::UINT64);
-                            return new SymBuiltInType(BuiltInTypeKind::UINT32);
+                            if (longTimes) return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::UINT64), typeQuals);
+                            return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::UINT32), typeQuals);
                     }
                 case ScalaraKind::DOUBLE:
-                    return new SymBuiltInType(BuiltInTypeKind::DOUBLE);
+                    return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::DOUBLE), typeQuals);
                 case ScalaraKind::FLOAT:
-                    return new SymBuiltInType(BuiltInTypeKind::FLOAT);
+                    return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::FLOAT), typeQuals);
                 case ScalaraKind::CHAR:
                     switch (isSinged)
                     {
                         case Singed::SINGED:
-                            return new SymBuiltInType(BuiltInTypeKind::INT8);
+                            return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::INT8), typeQuals);
                         case Singed::UNSIGNED:
-                            return new SymBuiltInType(BuiltInTypeKind::UINT8);
+                            return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::UINT8), typeQuals);
                     }
                 case ScalaraKind::UNKNOWN:
                     switch (isSinged)
                     {
                         case Singed::SINGED:
-                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::INT64);
-                            return new SymBuiltInType(BuiltInTypeKind::INT32);
+                            if (longTimes) return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::INT64), typeQuals);
+                            return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::INT32), typeQuals);
                         case Singed::UNSIGNED:
-                            if (longTimes) return new SymBuiltInType(BuiltInTypeKind::UINT64);
-                            return new SymBuiltInType(BuiltInTypeKind::UINT32);
+                            if (longTimes) return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::UINT64), typeQuals);
+                            return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::UINT32), typeQuals);
                     }
             }
         case TypeKind::VOID:
-            return new SymBuiltInType(BuiltInTypeKind::VOID);
+            return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::VOID), typeQuals);
         case TypeKind::STRUCT:
             return type;
     }

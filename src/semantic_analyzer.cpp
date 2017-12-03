@@ -85,14 +85,15 @@ PostfixIncrementNode *SemanticAnalyzer::BuildPostfixIncrementNode(ExprNode *expr
 
 void SemanticAnalyzer::CheckIncDecRules(ExprNode *expr)
 {
-    static std::vector<TypeKind> improperKinds = {};
+
     if (expr->GetValueCategory() == ValueCategory::RVALUE) throw "";
-    auto type = expr->GetType();
+    auto type = unqualify(expr->GetType());
     if (!isArithmeticType(type) && !isPointerType(type) || isVoidPointer(type)) throw "";
 }
 
 bool SemanticAnalyzer::isArithmeticType(SymType *type)
 {
+    type = unqualify(type);
     if (type->GetTypeKind() != TypeKind::BUILTIN) return false;
     auto bitk = ((SymBuiltInType *)type)->GetBuiltIntTypeKind();
     return bitk != BuiltInTypeKind::VOID;
@@ -100,9 +101,7 @@ bool SemanticAnalyzer::isArithmeticType(SymType *type)
 
 bool SemanticAnalyzer::isPointerType(SymType *type)
 {
-    if (type->GetTypeKind() != TypeKind::POINTER) return false;
-    auto bitk = ((SymPointer *)type)->GetTarget();
-    return true;
+    return type->GetTypeKind() == TypeKind::POINTER;
 }
 
 InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer)
@@ -188,6 +187,7 @@ ArrayAccessNode *SemanticAnalyzer::BuildArrayAccessNode(ExprNode *array, ExprNod
 
 bool SemanticAnalyzer::isIntegerType(SymType *type)
 {
+    type = unqualify(type);
     if (type->GetTypeKind() != TypeKind::BUILTIN) return false;
     auto btk = ((SymBuiltInType *)type)->GetBuiltIntTypeKind();
     return btk == BuiltInTypeKind::INT8 || btk == BuiltInTypeKind::UINT8 || btk == BuiltInTypeKind::INT32
@@ -223,7 +223,8 @@ PrefixIncrementNode *SemanticAnalyzer::BuildPrefixIncrementNode(ExprNode *expr)
 void SemanticAnalyzer::performLvalueConversion(ExprNode *expr)
 {
     expr->SetValueCategory(ValueCategory::RVALUE);
-//    expr->GetType()->SetTypeQualifiers(0);
+    if (expr->GetType()->IsQualified())
+        ((SymQualifiedType *)expr->GetType())->SetQualifiers(0);
 }
 
 PrefixDecrementNode *SemanticAnalyzer::BuildPrefixDecrementNode(ExprNode *expr)
@@ -235,6 +236,7 @@ PrefixDecrementNode *SemanticAnalyzer::BuildPrefixDecrementNode(ExprNode *expr)
 UnaryOpNode *SemanticAnalyzer::BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, ExprNode *expr)
 {
     UnaryOpNode *res = nullptr;
+    SymType *t = unqualify(expr->GetType());
     switch (unaryOp->type)
     {
         case TokenType::LOGIC_AND:
@@ -310,10 +312,7 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
                 return new BinOpNode(left, right, binOp);
             }
             if (isPointerType(rtype))
-            {
-                left->SetType(rtype); // TODO std::swap ?
-                right->SetType(ltype);
-            }
+                std::swap(left, right);
             if (!isPointerType(left->GetType()) || !isArithmeticType(right->GetType())) throw "";
             return new BinOpNode(left, right, binOp);
         case TokenType::MINUS:
@@ -322,7 +321,7 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
                 ImplicitlyConvert(&left, &right);
                 return new BinOpNode(left, right, binOp);
             }
-            if (isPointerType(ltype) && isPointerType(rtype) && rtype->Equal(ltype))
+            if (isPointerType(ltype) && isPointerType(rtype) && unqualify(rtype)->Equal(unqualify(ltype)))
             {
                 res = new BinOpNode(left, right, binOp);
                 res->SetType(new SymBuiltInType(BuiltInTypeKind::INT32, 0));
@@ -404,8 +403,7 @@ bool SemanticAnalyzer::isModifiableLvalue(ExprNode *expr)
 
 bool SemanticAnalyzer::isConstQualified(ExprNode *expr)
 {
-    return false;
-//    return (expr->GetType()->GetTypeQualifiers()) & 1U;
+    return expr->GetType()->IsQualified() && ((SymQualifiedType *)expr->GetType())->GetQualifiers() & 1U;
 }
 
 std::shared_ptr<Token> SemanticAnalyzer::extractArithmeticOperationFromAssignmentBy(const std::shared_ptr<Token> &assignemtBy)
@@ -438,7 +436,7 @@ std::shared_ptr<Token> SemanticAnalyzer::extractArithmeticOperationFromAssignmen
 
 void SemanticAnalyzer::ImplicitlyConvert(ExprNode **left, ExprNode **right)
 {
-    auto ltype = (*left)->GetType(), rtype = (*right)->GetType();
+    auto ltype = unqualify((*left)->GetType()), rtype = unqualify((*right)->GetType());
     if (ltype->Equal(rtype)) return;
     if (ltype->GetTypeKind() == TypeKind::BUILTIN)
     {
@@ -473,4 +471,9 @@ SemanticAnalyzer::BuildFunctionDefinitionNode(DeclaratorNode *declarator, Compou
 {
 
     return nullptr;
+}
+
+SymType *SemanticAnalyzer::unqualify(SymType *type)
+{
+    return type->IsQualified() ? ((SymQualifiedType *)type)->GetType() : type;
 }
