@@ -48,6 +48,7 @@ private:
     bool isScalarType(SymType *type);
     bool isModifiableLvalue(ExprNode *expr);
     bool isConstQualified(ExprNode *expr);
+    bool isStructType(SymType *type);
     std::shared_ptr<Token> extractArithmeticOperationFromAssignmentBy(const std::shared_ptr<Token> &assignemtBy);
     void ImplicitlyConvert(ExprNode **left, ExprNode **right);
     void Convert(ExprNode **expr, SymType *type);

@@ -135,3 +135,14 @@ BadMemberAccessError::BadMemberAccessError(SymType *record)
     msg = "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) +
           "): invalid use of undefined type: '" + rec->GetName() + "'";
 }
+
+InvalidUseOfIncompleteType::InvalidUseOfIncompleteType(std::shared_ptr<Token> token, SymType *type)
+{
+    msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
+          ") InvalidUseOfIncompleteType in '" + token->stringValue + "'.";
+}
+
+const char *InvalidUseOfIncompleteType::what() const throw()
+{
+    return msg.c_str();
+}

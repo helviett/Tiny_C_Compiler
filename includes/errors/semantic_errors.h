@@ -102,4 +102,11 @@ public:
     const char *what() const throw() override;
 };
 
+class InvalidUseOfIncompleteType: public SemanticError
+{
+public:
+    InvalidUseOfIncompleteType(std::shared_ptr<Token> token, SymType *type);
+    const char *what() const throw() override;
+};
+
 #endif //TINY_C_COMPILER_SEMANTIC_ERRORS_H

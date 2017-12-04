@@ -395,8 +395,24 @@ AssignmentNode *SemanticAnalyzer::BuildAssignmentNode(ExprNode *left, ExprNode *
     auto ltype = left->GetType(), rtype = right->GetType();
     if (assignmentOp->type != TokenType::ASSIGNMENT)
         right = BuildBinOpNode(left, right, extractArithmeticOperationFromAssignmentBy(assignmentOp));  // TODO redo
-    Convert(&right, ltype);
     left->SetType(ltype);
+    if (isArithmeticType(ltype) && isArithmeticType(rtype))
+    {
+        Convert(&right, ltype);
+        return new AssignmentNode(left, right, assignmentOp);
+    }
+    if (isPointerType(ltype) && isPointerType(rtype))
+    {
+        // TODO type qualifiers checking
+        if (ltype->Equal(rtype) || isVoidPointer(ltype) || isVoidPointer(rtype))
+            return new AssignmentNode(left, right, assignmentOp);
+    }
+    if (isStructType(ltype) && isStructType(rtype))
+    {
+        if (!rtype->IsComplete()) throw InvalidUseOfIncompleteType(assignmentOp, rtype);
+        if (!ltype->Equal(rtype)) throw InvalidOperandError(assignmentOp, ltype, rtype);
+        return new AssignmentNode(left, right, assignmentOp);
+    }
     return new AssignmentNode(left, right, assignmentOp);
 }
 
@@ -432,7 +448,7 @@ std::shared_ptr<Token> SemanticAnalyzer::extractArithmeticOperationFromAssignmen
         case TokenType::ASSIGNMENT_BY_QUOTIENT:
             return std::make_shared<Token>(TokenType::FORWARD_SLASH, assignemtBy->row, assignemtBy->col, "/");
         case TokenType::ASSIGNMENT_BY_PRODUCT:
-            return std::make_shared<Token>(TokenType::ASTERIX, assignemtBy->row, assignemtBy->col, "*");
+                return std::make_shared<Token>(TokenType::ASTERIX, assignemtBy->row, assignemtBy->col, "*");
         case TokenType::ASSIGNMENT_BY_BITWISE_OR:
             return std::make_shared<Token>(TokenType::BITWISE_OR, assignemtBy->row, assignemtBy->col, "|");
     }
@@ -480,4 +496,10 @@ SemanticAnalyzer::BuildFunctionDefinitionNode(DeclaratorNode *declarator, Compou
 SymType *SemanticAnalyzer::unqualify(SymType *type)
 {
     return type->IsQualified() ? ((SymQualifiedType *)type)->GetType() : type;
+}
+
+bool SemanticAnalyzer::isStructType(SymType *type)
+{
+    type = unqualify(type);
+    return type->GetTypeKind() == TypeKind::STRUCT;
 }
