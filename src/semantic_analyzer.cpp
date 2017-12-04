@@ -238,10 +238,10 @@ PrefixDecrementNode *SemanticAnalyzer::BuildPrefixDecrementNode(ExprNode *expr, 
 UnaryOpNode *SemanticAnalyzer::BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, ExprNode *expr)
 {
     UnaryOpNode *res = nullptr;
-    SymType *t = unqualify(expr->GetType());
+    SymType *t = unqualify(expr->GetType());\
     switch (unaryOp->type)
     {
-        case TokenType::LOGIC_AND:
+        case TokenType::BITWISE_AND:
             if (expr->GetValueCategory() != ValueCategory::LVAVLUE) throw InvalidOperandError(unaryOp, expr->GetType());
             res = new UnaryOpNode(unaryOp, expr);
             res->SetType(new SymPointer(expr->GetType()));
@@ -282,6 +282,7 @@ UnaryOpNode *SemanticAnalyzer::BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, 
 
 bool SemanticAnalyzer::isUnsignedIntegerType(SymType *type)
 {
+    type = unqualify(type);
     if (type->GetTypeKind() != TypeKind::BUILTIN) return false;
     auto btk = ((SymBuiltInType *)type)->GetBuiltIntTypeKind();
     return btk == BuiltInTypeKind::UINT8 || btk == BuiltInTypeKind::UINT16 || btk == BuiltInTypeKind::UINT32 ||
