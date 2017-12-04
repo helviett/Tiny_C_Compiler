@@ -36,7 +36,7 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
                     if (longTimes > 1) throw TooLongError(simple->Value(), longTimes);
                     if (scalarKind != ScalaraKind::INTEGER && scalarKind != ScalaraKind::UNKNOWN)
                         throw UnsupportedTypeError(simple->Value());
-                    kind = TypeKind::SCALAR; // TODO move functions like isTypeSpecifier to TypeBuilder
+                    kind = TypeKind::SCALAR;
                     scalarKind = ScalaraKind::INTEGER;
                     break;
                 case Keyword::UNSIGNED:
@@ -74,7 +74,6 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
                     if (scalarKind != ScalaraKind::UNKNOWN) throw ManyDataTypesError(simple->Value());
                     scalarKind = ScalaraKind::CHAR;
                     kind = TypeKind::SCALAR;
-                // TODO static, auto, extern
                 case Keyword::CONST:
                     typeQuals |= (uint32_t)TypeQualifier::CONST;
                     break;

@@ -148,7 +148,6 @@ class SymRecord: public SymType
 {
 public:
     SymRecord();
-    SymRecord(SymRecord *record, uint32_t typeQualifiers);
     SymRecord(IdNode *tag);
     SymRecord(SymbolTable *fields,  std::vector<SymVariable *> orderedFields);
     SymRecord(SymbolTable *fields,  std::vector<SymVariable *> orderedFields, IdNode *tag);
