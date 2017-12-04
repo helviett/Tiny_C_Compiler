@@ -50,6 +50,11 @@ IdNode::IdNode(std::shared_ptr<Token> token, SymType *type): IdNode(token)
     this->type = type;
 }
 
+std::pair<int, int> IdNode::GetPosition() const
+{
+    return std::make_pair(token->row, token->col);
+}
+
 void StringLiteralNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -69,7 +74,10 @@ void PostfixIncrementNode::Print(std::ostream &os, std::string indent, bool isTa
     node->Print(os, indent, true);
 }
 
-PostfixIncrementNode::PostfixIncrementNode(ExprNode *node) : node(node) {}
+PostfixIncrementNode::PostfixIncrementNode(ExprNode *node) : node(node)
+{
+    this->type = node->GetType();
+}
 
 void PostfixDecrementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -79,7 +87,10 @@ void PostfixDecrementNode::Print(std::ostream &os, std::string indent, bool isTa
     node->Print(os, indent, true);
 }
 
-PostfixDecrementNode::PostfixDecrementNode(ExprNode *node) : node(node) {}
+PostfixDecrementNode::PostfixDecrementNode(ExprNode *node) : node(node)
+{
+    this->type = node->GetType();
+}
 
 void StructureOrUnionMemberAccessNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -114,7 +125,10 @@ void PrefixIncrementNode::Print(std::ostream &os, std::string indent, bool isTai
     node->Print(os, indent, true);
 }
 
-PrefixIncrementNode::PrefixIncrementNode(ExprNode *node) : node(node){}
+PrefixIncrementNode::PrefixIncrementNode(ExprNode *node) : node(node)
+{
+    this->type = node->GetType();
+}
 
 void PrefixDecrementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -124,7 +138,10 @@ void PrefixDecrementNode::Print(std::ostream &os, std::string indent, bool isTai
     node->Print(os, indent, true);
 }
 
-PrefixDecrementNode::PrefixDecrementNode(ExprNode *node) : node(node){}
+PrefixDecrementNode::PrefixDecrementNode(ExprNode *node) : node(node)
+{
+    this->type = node->GetType();
+}
 
 void BinOpNode::Print(std::ostream &os, std::string indent, bool isTail)
 {

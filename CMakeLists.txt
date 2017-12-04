@@ -16,7 +16,7 @@ set(SOURCE_FILES
         includes/type_builder.h src/type_builder.cpp src/sym_type.cpp includes/symbols/sym_type.h includes/symbols/symbol.h
         src/symbol_table.cpp includes/scope_tree.h src/scope_tree.cpp includes/symbols/sym_variable.h src/sym_variable.cpp
         src/symbol.cpp includes/semantic_analyzer.h src/semantic_analyzer.cpp includes/value_category.h
-        includes/errors/semantic_errors.h)
+        includes/errors/semantic_errors.h src/semantic_errors.cpp)
 
 include_directories(includes src)
 

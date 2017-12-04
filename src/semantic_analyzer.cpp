@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "../includes/semantic_analyzer.h"
 
 IdNode *SemanticAnalyzer::BuildIdNode(std::shared_ptr<Token> token)
@@ -9,9 +11,10 @@ IdNode *SemanticAnalyzer::BuildIdNode(std::shared_ptr<Token> token)
     {
 
         auto id = new IdNode(token, ((SymVariable *)symbol)->GetType());
+//        std::cout << id->GetName() <<std::endl;
         switch (id->GetType()->GetTypeKind())
         {
-            case TypeKind::ARRAY: case TypeKind::FUNCTION :case TypeKind::STRUCT:
+            case TypeKind::ARRAY: case TypeKind::FUNCTION ://case TypeKind::STRUCT:
                 id->SetValueCategory(ValueCategory::RVALUE);
                 break;
             default:
@@ -71,24 +74,24 @@ ScopeTree *SemanticAnalyzer::GetScopeTree()
     return &scopeTree;
 }
 
-PostfixDecrementNode *SemanticAnalyzer::BuildPostfixDecrementNode(ExprNode *expr)
+PostfixDecrementNode *SemanticAnalyzer::BuildPostfixDecrementNode(ExprNode *expr, const std::shared_ptr<Token> &op)
 {
-    CheckIncDecRules(expr);
+    CheckIncDecRules(expr, op);
     return new PostfixDecrementNode(expr);
 }
 
-PostfixIncrementNode *SemanticAnalyzer::BuildPostfixIncrementNode(ExprNode *expr)
+PostfixIncrementNode *SemanticAnalyzer::BuildPostfixIncrementNode(ExprNode *expr, const std::shared_ptr<Token> &op)
 {
-    CheckIncDecRules(expr);
+    CheckIncDecRules(expr, op);
     return new PostfixIncrementNode(expr);
 }
 
-void SemanticAnalyzer::CheckIncDecRules(ExprNode *expr)
+void SemanticAnalyzer::CheckIncDecRules(ExprNode *expr, std::shared_ptr<Token> op)
 {
-
-    if (expr->GetValueCategory() == ValueCategory::RVALUE) throw "";
+    if (!isModifiableLvalue(expr)) throw RequiredModifiableLvalueError();
     auto type = unqualify(expr->GetType());
-    if (!isArithmeticType(type) && !isPointerType(type) || isVoidPointer(type)) throw "";
+    if (!isArithmeticType(type) && !isPointerType(type) || isVoidPointer(type))
+        throw InvalidOperandError(std::move(op), expr->GetType());
 }
 
 bool SemanticAnalyzer::isArithmeticType(SymType *type)
@@ -119,26 +122,23 @@ InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *de
 
 bool SemanticAnalyzer::isVoidPointer(SymType *type)
 {
+    type = unqualify(type);
     if (type->GetTypeKind() != TypeKind::POINTER) return false;
-    auto target = ((SymPointer *)type)->GetTarget();
+    auto target = unqualify(((SymPointer *)type)->GetTarget());
     return target->GetTypeKind() == TypeKind::BUILTIN &&
             ((SymBuiltInType *)target)->GetBuiltIntTypeKind() == BuiltInTypeKind::VOID;
 }
 
 StructureOrUnionMemberAccessNode *
-SemanticAnalyzer::BuildStructureOrUnionMemberAccessNode(ExprNode *structure, IdNode *field)
+SemanticAnalyzer::BuildStructureOrUnionMemberAccessNode(ExprNode *structure, IdNode *field, std::shared_ptr<Token> dot)
 {
     auto type = structure->GetType();
-    if (type->GetTypeKind() != TypeKind::STRUCT) throw "";
+    if (type->GetTypeKind() != TypeKind::STRUCT) throw BadMemberAccessError(type, field);
     auto stype = (SymRecord *)type;
+    if (!stype->IsComplete()) throw BadMemberAccessError(structure->GetType());
     SymVariable *sfield;
-    if (!stype->GetFieldsTable())
-    {
-        SymRecord *definedSType = (SymRecord *)scopeTree.Find(stype->GetName());
-        if (!definedSType->GetFieldsTable()) throw "";
-        *stype = *definedSType;
-    }
-    if (!(sfield = (SymVariable *)stype->GetFieldsTable()->Find(field->GetName()))) throw "";
+    if (!(sfield = (SymVariable *)stype->GetFieldsTable()->Find(field->GetName())))
+        throw NonexistentMemberError(stype, field);
     auto res = new StructureOrUnionMemberAccessNode(structure, field);
     res->SetType(sfield->GetType());
     res->SetValueCategory(structure->GetValueCategory());
@@ -146,17 +146,19 @@ SemanticAnalyzer::BuildStructureOrUnionMemberAccessNode(ExprNode *structure, IdN
 }
 
 StructureOrUnionMemberAccessByPointerNode *
-SemanticAnalyzer::BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, IdNode *field)
+SemanticAnalyzer::BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, IdNode *field, std::shared_ptr<Token> arrow)
 {
-
+// TODO if IsConstQualified() ..
     if (ptr->GetType()->GetTypeKind() == TypeKind::ARRAY)
         ptr->SetType(((SymArray *)ptr->GetType())->ToPointer());
-    if (!isPointerType(ptr->GetType())) throw "";
+    if (!isPointerType(ptr->GetType())) throw InvalidOperandError(std::move(arrow), ptr->GetType());
     auto ptype = (SymPointer *)ptr->GetType();
-    if (ptype->GetTarget()->GetTypeKind() != TypeKind::STRUCT) throw "";
+    if (ptype->GetTarget()->GetTypeKind() != TypeKind::STRUCT) throw BadMemberAccessError(ptype, field);
     auto stype = (SymRecord *)ptype->GetTarget();
+    if (!stype->IsComplete()) throw BadMemberAccessError(stype); // TODO InvalidUseOfIncompleteTypeError
     SymVariable *sfield;
-    if (!(sfield = (SymVariable *)stype->GetFieldsTable()->Find(field->GetName()))) throw "";
+    if (!(sfield = (SymVariable *)stype->GetFieldsTable()->Find(field->GetName())))
+        throw NonexistentMemberError(stype, field);
     auto res = new StructureOrUnionMemberAccessByPointerNode(ptr, field);
     res->SetValueCategory(ValueCategory::LVAVLUE);
     auto rest = sfield->GetType();
@@ -176,9 +178,9 @@ ArrayAccessNode *SemanticAnalyzer::BuildArrayAccessNode(ExprNode *array, ExprNod
     }
     if (array->GetType()->GetTypeKind() == TypeKind::ARRAY)
         array->SetType(((SymArray *)array->GetType())->ToPointer());
-    if (array->GetType()->GetTypeKind() != TypeKind::POINTER) throw "";
+    if (array->GetType()->GetTypeKind() != TypeKind::POINTER) throw BadIndexingError();
     array->SetValueCategory(ValueCategory::LVAVLUE); // ?
-    if (!isIntegerType(index->GetType())) throw "";
+    if (!isIntegerType(index->GetType())) throw BadIndexingError(index->GetType());
     auto res = new ArrayAccessNode(array, index);
     res->SetValueCategory(ValueCategory::LVAVLUE);
     res->SetType(((SymPointer *)array->GetType())->GetTarget());
@@ -200,12 +202,12 @@ FunctionCallNode *SemanticAnalyzer::BuildFunctionCallNode(ExprNode *func, Argume
     auto ftype = (SymFunction *)func->GetType();
     size_t i = 0;
     if (args->List().size() != ftype->GetOderedParams().size()) throw "";
-    for (auto arg = args->List().begin(); arg != args->List().end(); arg++)
+    for (auto &arg : args->List())
     {
         // TODO TypeConversions
-        if (!(*arg)->GetType()->Equal(ftype->GetOderedParams()[i]->GetType()))
+        if (!arg->GetType()->Equal(ftype->GetOderedParams()[i]->GetType()))
         {
-            Convert(&(*arg), ftype->GetOderedParams()[i]->GetType());
+            Convert(&arg, ftype->GetOderedParams()[i]->GetType());
         }
         i++;
     }
@@ -214,9 +216,9 @@ FunctionCallNode *SemanticAnalyzer::BuildFunctionCallNode(ExprNode *func, Argume
     return res;
 }
 
-PrefixIncrementNode *SemanticAnalyzer::BuildPrefixIncrementNode(ExprNode *expr)
+PrefixIncrementNode *SemanticAnalyzer::BuildPrefixIncrementNode(ExprNode *expr, const std::shared_ptr<Token> &op)
 {
-    CheckIncDecRules(expr);
+    CheckIncDecRules(expr, op);
     return new PrefixIncrementNode(expr);
 }
 
@@ -227,9 +229,9 @@ void SemanticAnalyzer::performLvalueConversion(ExprNode *expr)
         ((SymQualifiedType *)expr->GetType())->SetQualifiers(0);
 }
 
-PrefixDecrementNode *SemanticAnalyzer::BuildPrefixDecrementNode(ExprNode *expr)
+PrefixDecrementNode *SemanticAnalyzer::BuildPrefixDecrementNode(ExprNode *expr, const std::shared_ptr<Token> &op)
 {
-    CheckIncDecRules(expr);
+    CheckIncDecRules(expr, op);
     return new PrefixDecrementNode(expr);
 }
 
@@ -240,18 +242,18 @@ UnaryOpNode *SemanticAnalyzer::BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, 
     switch (unaryOp->type)
     {
         case TokenType::LOGIC_AND:
-            if (expr->GetValueCategory() != ValueCategory::LVAVLUE) throw "";
+            if (expr->GetValueCategory() != ValueCategory::LVAVLUE) throw InvalidOperandError(unaryOp, expr->GetType());
             res = new UnaryOpNode(unaryOp, expr);
             res->SetType(new SymPointer(expr->GetType()));
             return res;
         case TokenType::ASTERIX:
-            if (expr->GetType()->GetTypeKind() != TypeKind::POINTER) throw "";
+            if (expr->GetType()->GetTypeKind() != TypeKind::POINTER) throw InvalidOperandError(unaryOp, expr->GetType());
             res = new UnaryOpNode(unaryOp, expr);
             res->SetValueCategory(ValueCategory::LVAVLUE);
             res->SetType(((SymPointer *)expr->GetType())->GetTarget());
             return res;
         case TokenType::MINUS:
-            if (!isArithmeticType(expr->GetType())) throw "";
+            if (!isArithmeticType(expr->GetType())) throw InvalidOperandError(unaryOp, expr->GetType());
             if (isUnsignedIntegerType(expr->GetType()))
             {
                 // TODO this is wrong conversion, because I probably won't support int64
@@ -261,17 +263,17 @@ UnaryOpNode *SemanticAnalyzer::BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, 
             res->SetType(expr->GetType());
             return res;
         case TokenType::PLUS:
-            if (!isArithmeticType(expr->GetType())) throw "";
+            if (!isArithmeticType(expr->GetType())) throw InvalidOperandError(unaryOp, expr->GetType());
             res = new UnaryOpNode(unaryOp, expr);
             res->SetType(expr->GetType());
             return res;
         case TokenType::BITWISE_NOT:
-            if (!isIntegerType(expr->GetType())) throw "";
+            if (!isIntegerType(expr->GetType())) throw InvalidOperandError(unaryOp, expr->GetType());
             res = new UnaryOpNode(unaryOp, expr);
             res->SetType(expr->GetType());
             return res;
         case TokenType::LOGIC_NO:
-            if (!isScalarType(expr->GetType())) throw "";
+            if (!isScalarType(expr->GetType())) throw InvalidOperandError(unaryOp, expr->GetType());
             res = new UnaryOpNode(unaryOp, expr);
             res->SetType(new SymBuiltInType(BuiltInTypeKind::INT32));
             return res;
@@ -280,7 +282,7 @@ UnaryOpNode *SemanticAnalyzer::BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, 
 
 bool SemanticAnalyzer::isUnsignedIntegerType(SymType *type)
 {
-    if (type->GetTypeKind() != TypeKind::BUILTIN) throw "";
+    if (type->GetTypeKind() != TypeKind::BUILTIN) return false;
     auto btk = ((SymBuiltInType *)type)->GetBuiltIntTypeKind();
     return btk == BuiltInTypeKind::UINT8 || btk == BuiltInTypeKind::UINT16 || btk == BuiltInTypeKind::UINT32 ||
             btk == BuiltInTypeKind::UINT64;
@@ -288,6 +290,7 @@ bool SemanticAnalyzer::isUnsignedIntegerType(SymType *type)
 
 bool SemanticAnalyzer::isScalarType(SymType *type)
 {
+    type = unqualify(type);
     return type->GetTypeKind() == TypeKind::BUILTIN || type->GetTypeKind() == TypeKind::POINTER;
 }
 
@@ -298,11 +301,11 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
     switch (binOp->type)
     {
         case TokenType::REMINDER:
-            if (!isIntegerType(ltype) || !isIntegerType(rtype)) throw "";
+            if (!isIntegerType(ltype) || !isIntegerType(rtype)) throw InvalidOperandError(binOp, ltype, rtype);
             ImplicitlyConvert(&left, &right);
             return new BinOpNode(left, right, binOp);
         case TokenType::ASTERIX: case TokenType::FORWARD_SLASH:
-            if (!isArithmeticType(ltype) || !isArithmeticType(rtype)) throw "";
+            if (!isArithmeticType(ltype) || !isArithmeticType(rtype)) throw InvalidOperandError(binOp, ltype, rtype);
             ImplicitlyConvert(&left, &right);
             return new BinOpNode(left, right, binOp);
         case TokenType::PLUS:
@@ -313,7 +316,8 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
             }
             if (isPointerType(rtype))
                 std::swap(left, right);
-            if (!isPointerType(left->GetType()) || !isArithmeticType(right->GetType())) throw "";
+            if (!isPointerType(left->GetType()) || !isArithmeticType(right->GetType()))
+                throw InvalidOperandError(binOp, ltype, rtype);
             return new BinOpNode(left, right, binOp);
         case TokenType::MINUS:
             if (isArithmeticType(ltype) && isArithmeticType(rtype))
@@ -332,7 +336,7 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
             throw "";
         case TokenType::BITWISE_LSHIFT: case TokenType::BITWISE_RSHIFT:
         case TokenType::BITWISE_AND: case TokenType::BITWISE_XOR: case TokenType::BITWISE_OR:
-            if (!isIntegerType(ltype) || !isIntegerType(rtype)) throw "";
+            if (!isIntegerType(ltype) || !isIntegerType(rtype)) throw InvalidOperandError(binOp, ltype, rtype);
             ImplicitlyConvert(&left, &right);
             return new BinOpNode(left, right, binOp);
         case TokenType::RELOP_LE: case TokenType::RELOP_LT:
@@ -344,7 +348,7 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
             }
             if (isPointerType(ltype) && isPointerType(rtype) && ltype->Equal(rtype))
                 return new BinOpNode(left, right, binOp, new SymBuiltInType(BuiltInTypeKind::INT32, 0));
-            throw "";
+            throw InvalidOperandError(binOp, ltype, rtype);
         case TokenType::RELOP_EQ: case TokenType::RELOP_NE:
             if (isArithmeticType(ltype) && isArithmeticType(rtype))
             {
@@ -356,9 +360,9 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
                  if (ltype->Equal(rtype) || isVoidPointer(ltype) || isVoidPointer(rtype)) // TODO isNullPointerConstant
                     return new BinOpNode(left, right, binOp, new SymBuiltInType(BuiltInTypeKind::INT32, 0));
             }
-            throw "";
+            throw InvalidOperandError(binOp, ltype, rtype);
         case TokenType::LOGIC_OR: case TokenType::LOGIC_AND:
-            if (!isScalarType(ltype) || !isScalarType(rtype)) throw "";
+            if (!isScalarType(ltype) || !isScalarType(rtype)) throw InvalidOperandError(binOp, ltype, rtype);
             return new BinOpNode(left, right, binOp, new SymBuiltInType(BuiltInTypeKind::INT32, 0)); // TODO typepool
     }
     return nullptr;
@@ -386,7 +390,7 @@ SemanticAnalyzer::BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue
 
 AssignmentNode *SemanticAnalyzer::BuildAssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp)
 {
-    if (!isModifiableLvalue(left)) throw "";
+    if (!isModifiableLvalue(left)) throw RequiredModifiableLvalueError();
     auto ltype = left->GetType(), rtype = right->GetType();
     if (assignmentOp->type != TokenType::ASSIGNMENT)
         right = BuildBinOpNode(left, right, extractArithmeticOperationFromAssignmentBy(assignmentOp));  // TODO redo
@@ -411,25 +415,25 @@ std::shared_ptr<Token> SemanticAnalyzer::extractArithmeticOperationFromAssignmen
     switch (assignemtBy->type)
     {
         case TokenType::ASSIGNMENT_BY_REMINDER:
-            return std::make_shared<Token>(TokenType::REMINDER, assignemtBy->row, assignemtBy->col, "");
+            return std::make_shared<Token>(TokenType::REMINDER, assignemtBy->row, assignemtBy->col, "%");
         case TokenType::ASSIGNMENT_BY_BITWISE_XOR:
-            return std::make_shared<Token>(TokenType::BITWISE_XOR, assignemtBy->row, assignemtBy->col, "");
+            return std::make_shared<Token>(TokenType::BITWISE_XOR, assignemtBy->row, assignemtBy->col, "^");
         case TokenType::ASSIGNMENT_BY_BITWISE_AND:
-            return std::make_shared<Token>(TokenType::BITWISE_AND, assignemtBy->row, assignemtBy->col, "");
+            return std::make_shared<Token>(TokenType::BITWISE_AND, assignemtBy->row, assignemtBy->col, "&");
         case TokenType::ASSIGNMENT_BY_BITWISE_RSHIFT:
-            return std::make_shared<Token>(TokenType::BITWISE_RSHIFT, assignemtBy->row, assignemtBy->col, "");
+            return std::make_shared<Token>(TokenType::BITWISE_RSHIFT, assignemtBy->row, assignemtBy->col, ">>");
         case TokenType::ASSIGNMENT_BY_BITWISE_LSHIFT:
-            return std::make_shared<Token>(TokenType::BITWISE_LSHIFT, assignemtBy->row, assignemtBy->col, "");
+            return std::make_shared<Token>(TokenType::BITWISE_LSHIFT, assignemtBy->row, assignemtBy->col, "<<");
         case TokenType::ASSIGNMENT_BY_DIFFERENCE:
-            return std::make_shared<Token>(TokenType::MINUS, assignemtBy->row, assignemtBy->col, "");
+            return std::make_shared<Token>(TokenType::MINUS, assignemtBy->row, assignemtBy->col, "-");
         case TokenType::ASSIGNMENT_BY_SUM:
-            return std::make_shared<Token>(TokenType::PLUS, assignemtBy->row, assignemtBy->col, "");
+            return std::make_shared<Token>(TokenType::PLUS, assignemtBy->row, assignemtBy->col, "+");
         case TokenType::ASSIGNMENT_BY_QUOTIENT:
-            return std::make_shared<Token>(TokenType::FORWARD_SLASH, assignemtBy->row, assignemtBy->col, "");
+            return std::make_shared<Token>(TokenType::FORWARD_SLASH, assignemtBy->row, assignemtBy->col, "/");
         case TokenType::ASSIGNMENT_BY_PRODUCT:
-            return std::make_shared<Token>(TokenType::ASTERIX, assignemtBy->row, assignemtBy->col, "");
+            return std::make_shared<Token>(TokenType::ASTERIX, assignemtBy->row, assignemtBy->col, "*");
         case TokenType::ASSIGNMENT_BY_BITWISE_OR:
-            return std::make_shared<Token>(TokenType::BITWISE_OR, assignemtBy->row, assignemtBy->col, "");
+            return std::make_shared<Token>(TokenType::BITWISE_OR, assignemtBy->row, assignemtBy->col, "|");
     }
     throw "";
 }
@@ -448,7 +452,6 @@ void SemanticAnalyzer::ImplicitlyConvert(ExprNode **left, ExprNode **right)
                 *right = new TypeCastNode(lbt, *right);
             else if (lbt->GetBuiltIntTypeKind() < rbt->GetBuiltIntTypeKind())
                 *left = new TypeCastNode(rbt, *left);
-
         }
     }
 }

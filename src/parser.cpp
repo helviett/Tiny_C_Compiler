@@ -57,27 +57,30 @@ ExprNode *Parser::parsePostfixExpr()
     ExprNode *pe = parsePrimaryExpr();
     t = scanner->Current();
     bool stillPostfixOperator = true;
+
     while (stillPostfixOperator)
+    {
+        auto op = t;
         switch (t->type)
         {
             case TokenType::DOUBLE_PLUS:
+                pe = sematicAnalyzer.BuildPostfixIncrementNode(pe, op);
                 t = scanner->Next();
-                pe = sematicAnalyzer.BuildPostfixIncrementNode(pe);
                 break;
             case TokenType::DOUBLE_MINUS:
+                pe = sematicAnalyzer.BuildPostfixDecrementNode(pe, op);
                 t = scanner->Next();
-                pe = sematicAnalyzer.BuildPostfixDecrementNode(pe);
                 break;
             case TokenType::DOT:
                 t = scanner->Next();
                 require(TokenType::ID);
-                pe = sematicAnalyzer.BuildStructureOrUnionMemberAccessNode(pe, new IdNode(t));
+                pe = sematicAnalyzer.BuildStructureOrUnionMemberAccessNode(pe, new IdNode(t), op);
                 t = scanner->Next();
                 break;
             case TokenType::ARROW:
                 t = scanner->Next();
                 require(TokenType::ID);
-                pe = sematicAnalyzer.BuildStructureOrUnionMemberAccessByPointerNode(pe, new IdNode(t));
+                pe = sematicAnalyzer.BuildStructureOrUnionMemberAccessByPointerNode(pe, new IdNode(t), op);
                 t = scanner->Next();
                 break;
             case TokenType::LSQUARE_BRACKET:
@@ -95,6 +98,7 @@ ExprNode *Parser::parsePostfixExpr()
             default:
                 stillPostfixOperator = false;
         }
+    }
     return pe;
 }
 
@@ -104,16 +108,16 @@ ExprNode *Parser::parsePostfixExpr()
 ExprNode *Parser::parseUnaryExpr()
 {
     ExprNode *ue;
-    auto t = scanner->Current();
+    auto t = scanner->Current(), op = t;
     switch (t->type)
     {
         case TokenType::DOUBLE_PLUS:
             t = scanner->Next();
-            ue = sematicAnalyzer.BuildPrefixIncrementNode(parseUnaryExpr());
+            ue = sematicAnalyzer.BuildPrefixIncrementNode(parseUnaryExpr(), op);
             break;
         case TokenType::DOUBLE_MINUS:
             t = scanner->Next();
-            ue = sematicAnalyzer.BuildPrefixDecrementNode(parseUnaryExpr());
+            ue = sematicAnalyzer.BuildPrefixDecrementNode(parseUnaryExpr(), op);
             break;
         case TokenType::KEYWORD:
             if (t->keyword == Keyword::SIZEOF)

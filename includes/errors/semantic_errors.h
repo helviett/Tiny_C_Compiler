@@ -16,96 +16,90 @@ public:
 class UndeclaredIdentifierError: public SemanticError
 {
 public:
-    explicit UndeclaredIdentifierError(std::shared_ptr<Token> token)
-    {
-        msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
-              ") UndeclaredIdentifierError: " + token->stringValue + ".";
-    }
-
-    const char * what() const throw() override
-    {
-        return msg.c_str();
-    }
+    explicit UndeclaredIdentifierError(std::shared_ptr<Token> token);
+    const char *what() const throw() override;
 };
 
 class TooLongError: public SemanticError
 {
 public:
-    explicit TooLongError(std::shared_ptr<Token> token, int longtimes)
-    {
-        msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
-              "): " + std::to_string(longtimes) + "is too long for tcc.";
-    }
-
-    const char * what() const throw() override
-    {
-        return msg.c_str();
-    }
+    explicit TooLongError(std::shared_ptr<Token> token, int longtimes);
+    const char *what() const throw() override;
 };
 
 class UnsupportedTypeError: public SemanticError
 {
 public:
-    explicit UnsupportedTypeError(std::shared_ptr<Token> token)
-    {
-        msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
-              "): Unsupported combination of declaration specifiers. ";
-    }
-
-    const char * what() const throw() override
-    {
-        return msg.c_str();
-    }
+    explicit UnsupportedTypeError(std::shared_ptr<Token> token);
+    const char *what() const throw() override;
 };
 
 class DuplicateError: public SemanticError
 {
 public:
-    explicit DuplicateError(std::shared_ptr<Token> token)
-    {
-        msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
-              "): duplicate " + token->text + ".";
-    }
-
-    const char * what() const throw() override
-    {
-        return msg.c_str();
-    }
+    explicit DuplicateError(std::shared_ptr<Token> token);
+    const char *what() const throw() override;
 };
 
 class ManyDataTypesError: public SemanticError
 {
 public:
-    explicit ManyDataTypesError(std::shared_ptr<Token> token)
-    {
-        msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
-              "): two or more data types in declaration specifiers. ";
-    }
-
-    const char * what() const throw() override
-    {
-        return msg.c_str();
-    }
+    explicit ManyDataTypesError(std::shared_ptr<Token> token);
+    const char *what() const throw() override;
 };
 
 class IncompatibleDeclarationSpecifiersError: public SemanticError
 {
 public:
-    explicit IncompatibleDeclarationSpecifiersError(std::shared_ptr<Token> token, std::string spec)
-    {
-        msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
-              "): both " + token->text + " and " + spec + " presented.";
-    }
+    explicit IncompatibleDeclarationSpecifiersError(std::shared_ptr<Token> token, std::string spec);
+    const char *what() const throw() override;
+};
 
-    const char * what() const throw() override
+class RequiredModifiableLvalueError: public SemanticError
+{
+public:
+    explicit RequiredModifiableLvalueError();
+    const char *what() const throw() override;
+};
+
+class SymType;
+class SymRecord;
+class IdNode;
+
+class InvalidOperandError: public SemanticError
+{
+public:
+    explicit InvalidOperandError(std::shared_ptr<Token> op, SymType *ltype, SymType *rtype);
+    explicit InvalidOperandError(std::shared_ptr<Token> op, SymType *type);
+
+    const char *what() const throw() override;
+};
+
+class BadIndexingError: public SemanticError
+{
+public:
+    BadIndexingError();
+    explicit BadIndexingError(SymType *type);
+
+    const char *what() const throw() override
     {
         return msg.c_str();
     }
 };
 
-class RequiredLvalueError: public SemanticError
+class NonexistentMemberError: public SemanticError
 {
+public:
+    NonexistentMemberError(SymRecord *record, IdNode *field);
+    const char *what() const throw() override;
+};
 
+class BadMemberAccessError: public SemanticError
+{
+public:
+    BadMemberAccessError(SymType *notrecord, IdNode *field);
+    BadMemberAccessError(SymType *record);
+    const char *what() const throw() override;
 };
 
 #endif //TINY_C_COMPILER_SEMANTIC_ERRORS_H

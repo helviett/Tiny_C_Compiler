@@ -19,23 +19,26 @@ public:
                                                   StructDeclarationListNode *structDeclarationList,
                                                   std::shared_ptr<Token> structToken);
     ScopeTree *GetScopeTree();
-    PostfixDecrementNode *BuildPostfixDecrementNode(ExprNode *expr);
-    PostfixIncrementNode *BuildPostfixIncrementNode(ExprNode *expr);
+    PostfixDecrementNode *BuildPostfixDecrementNode(ExprNode *expr, const std::shared_ptr<Token> &op);
+    PostfixIncrementNode *BuildPostfixIncrementNode(ExprNode *expr, const std::shared_ptr<Token> &op);
     InitDeclaratorNode *BuildInitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer);
-    StructureOrUnionMemberAccessNode *BuildStructureOrUnionMemberAccessNode(ExprNode *structure, IdNode *field);
+    StructureOrUnionMemberAccessNode *BuildStructureOrUnionMemberAccessNode(ExprNode *structure,
+                                                                            IdNode *field,
+                                                                            std::shared_ptr<Token> dot);
     StructureOrUnionMemberAccessByPointerNode *BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr,
-                                                                                              IdNode *field);
+                                                                                              IdNode *field,
+                                                                                              std::shared_ptr<Token> arrow);
     ArrayAccessNode *BuildArrayAccessNode(ExprNode *array, ExprNode *index);
     FunctionCallNode *BuildFunctionCallNode(ExprNode *func, ArgumentExprListNode *args);
-    PrefixIncrementNode *BuildPrefixIncrementNode(ExprNode *expr);
-    PrefixDecrementNode *BuildPrefixDecrementNode(ExprNode *expr);
+    PrefixIncrementNode *BuildPrefixIncrementNode(ExprNode *expr, const std::shared_ptr<Token> &op);
+    PrefixDecrementNode *BuildPrefixDecrementNode(ExprNode *expr, const std::shared_ptr<Token> &op);
     UnaryOpNode *BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, ExprNode *expr);
     BinOpNode *BuildBinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> binOp);
     TernaryOperatorNode *BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, ExprNode *iffalse);
     AssignmentNode *BuildAssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp);
     FunctionDefinitionNode *BuildFunctionDefinitionNode(DeclaratorNode *declarator, CompoundStatement *body);
 private:
-    void CheckIncDecRules(ExprNode *expr);
+    void CheckIncDecRules(ExprNode *expr, std::shared_ptr<Token> op);
     bool isArithmeticType(SymType *type);
     bool isPointerType(SymType *type);
     bool isVoidPointer(SymType *type);
