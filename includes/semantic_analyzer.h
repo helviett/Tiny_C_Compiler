@@ -34,7 +34,9 @@ public:
     PrefixDecrementNode *BuildPrefixDecrementNode(ExprNode *expr, const std::shared_ptr<Token> &op);
     UnaryOpNode *BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, ExprNode *expr);
     BinOpNode *BuildBinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> binOp);
-    TernaryOperatorNode *BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, ExprNode *iffalse);
+    TernaryOperatorNode *BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, ExprNode *iffalse,
+                                                  const std::shared_ptr<Token> &question,
+                                                  const std::shared_ptr<Token> &colon);
     AssignmentNode *BuildAssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp);
     FunctionDefinitionNode *BuildFunctionDefinitionNode(DeclaratorNode *declarator, CompoundStatement *body);
 private:

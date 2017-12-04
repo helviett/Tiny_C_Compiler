@@ -146,3 +146,14 @@ const char *InvalidUseOfIncompleteType::what() const throw()
 {
     return msg.c_str();
 }
+
+const char *RequiredScalarTypeError::what() const throw()
+{
+    return msg.c_str();
+}
+
+RequiredScalarTypeError::RequiredScalarTypeError(std::shared_ptr<Token> token, SymType *got)
+{
+    msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
+          ") Requaired scalar type in '" + token->stringValue + "'.";
+}

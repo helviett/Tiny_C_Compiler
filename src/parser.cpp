@@ -270,16 +270,16 @@ ExprNode *Parser::parseBinoOps(Parser *self, ExprNode *(Parser::*f)(),
 ExprNode *Parser::parseConditionalExpr()
 {
     ExprNode *loe =  parseLogicalOrExpr();
-    auto t = scanner->Current();
+    auto t = scanner->Current(), q = t;
     if (t->type == TokenType::QUESTION_MARK)
     {
         t = scanner->Next();
         ExprNode *then = parseExpr();
-        t = scanner->Current();
+        auto c = t = scanner->Current();
         require(TokenType::COLON);
         t = scanner->Next();
         ExprNode *lse = parseConditionalExpr();
-        return sematicAnalyzer.BuildTernaryOperatorNode(loe, then, lse);
+        return sematicAnalyzer.BuildTernaryOperatorNode(loe, then, lse, q, c);
     }
     return loe;
 }

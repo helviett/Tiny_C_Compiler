@@ -370,10 +370,11 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
 }
 
 TernaryOperatorNode *
-SemanticAnalyzer::BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, ExprNode *iffalse)
+SemanticAnalyzer::BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, ExprNode *iffalse,
+                                           const std::shared_ptr<Token> &question, const std::shared_ptr<Token> &colon)
 {
     auto ctype = condition->GetType(), ttype = iftrue->GetType(), ftype = iffalse->GetType();
-    if (!isScalarType(ctype)) throw "";
+    if (!isScalarType(ctype)) throw RequiredScalarTypeError(question, ctype);
     if (isArithmeticType(ttype) && isArithmeticType(ftype))
     {
         ImplicitlyConvert(&iftrue, &iffalse);
@@ -386,7 +387,7 @@ SemanticAnalyzer::BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue
     }
     if (ttype->Equal(ftype))
         return new TernaryOperatorNode(condition, iftrue, iffalse);
-    throw "";
+    throw InvalidOperandError(colon, ttype, ftype);
 }
 
 AssignmentNode *SemanticAnalyzer::BuildAssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp)
