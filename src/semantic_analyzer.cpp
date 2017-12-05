@@ -30,6 +30,8 @@ IdNode *SemanticAnalyzer::BuildIdNode(std::shared_ptr<Token> token)
                 return new IdNode(token, t);
             case TypeKind::TYPEDEF:
                 throw BadTypedefUsageError((SymAlias *)symbol);
+            case TypeKind::ENUMERATOR:
+                return (IdNode *)((SymEnumerator *)symbol)->GetValue();
         }
     }
     throw ""; // Unreachable
@@ -582,20 +584,33 @@ EnumeratorNode *SemanticAnalyzer::BuildEnumeratorNode(IdNode *enumerator, ExprNo
 
 EnumSpecifierNode *SemanticAnalyzer::BuildEnumSpecifierNode(IdNode *tag, EnumeratorList *list)
 {
-//    auto prev = -1;
-//    for (auto enumerator: list->List())
-//    {
-//        auto id = enumerator->GetId();
-//        auto value = enumerator->GetValue();
-//        if (!value)
-//        {
-//            value = new IntConstNode(std::shared_ptr<Token>()); // do the shit
-//            enumerator->SetValue(value);
-//        }
-//        // prev = value + 1 or so
-//
-//    } // TOD TODO TODO
-    return nullptr;
+    auto prev = -1;
+    Evaluator evaler;
+    for (auto enumerator: list->List())
+    {
+        auto id = enumerator->GetId();
+        auto value = enumerator->GetValue();
+        if (!value)
+        {
+            auto token = std::make_shared<Token>(TokenType::NUM_INT, -1, -1, std::to_string(prev + 1));
+            token->intValue = ++prev;
+            value = new IntConstNode(token); // do the shit
+            enumerator->SetValue(value);
+        }
+        else
+        {
+            value = evaler.Eval(value);
+            if (!value) throw "";
+            auto intconst = dynamic_cast<IntConstNode *>(value);
+            if (!intconst) throw "";
+            enumerator->SetValue(value);
+            prev = intconst->GetValue()->intValue;
+        }
+        auto symenumerator = scopeTree.GetActiveScope()->Find(id->GetName());
+        if (symenumerator) throw RedeclarationError(id, symenumerator);
+        scopeTree.GetActiveScope()->Insert(id->GetName(), new SymEnumerator(id->GetName(), value));
+    }
+    return new EnumSpecifierNode(tag, list);
 }
 
 void SemanticAnalyzer::ProcessFunction(SymType *funcType)

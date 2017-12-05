@@ -3,6 +3,7 @@
 //
 
 #include "../includes/nodes.h"
+#include "../includes/evaluator.h"
 
 void IntConstNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -16,6 +17,11 @@ IntConstNode::IntConstNode(std::shared_ptr<Token> token): ConstNode(token)
     type = new SymBuiltInType(BuiltInTypeKind::INT32, 0);
 }
 
+ExprNode *IntConstNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
+}
+
 void FloatConstNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -26,6 +32,11 @@ FloatConstNode::FloatConstNode(std::shared_ptr<Token> token): ConstNode(token)
 {
     if (token->type != TokenType::NUM_FLOAT) throw "";
     type = new SymBuiltInType(BuiltInTypeKind::FLOAT, 0);
+}
+
+ExprNode *FloatConstNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
 }
 
 void IdNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -55,6 +66,11 @@ std::pair<int, int> IdNode::GetPosition() const
     return std::make_pair(token->row, token->col);
 }
 
+ExprNode *IdNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
+}
+
 void StringLiteralNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -64,6 +80,11 @@ void StringLiteralNode::Print(std::ostream &os, std::string indent, bool isTail)
 StringLiteralNode::StringLiteralNode(std::shared_ptr<Token> token): token(token)
 {
     if (token->type != TokenType::STRING) throw "";
+}
+
+ExprNode *StringLiteralNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
 }
 
 void PostfixIncrementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -79,6 +100,11 @@ PostfixIncrementNode::PostfixIncrementNode(ExprNode *node) : node(node)
     this->type = node->GetType();
 }
 
+ExprNode * PostfixIncrementNode::Eval(Evaluator *evaluator)
+{
+    evaluator->Eval(this);
+}
+
 void PostfixDecrementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -90,6 +116,11 @@ void PostfixDecrementNode::Print(std::ostream &os, std::string indent, bool isTa
 PostfixDecrementNode::PostfixDecrementNode(ExprNode *node) : node(node)
 {
     this->type = node->GetType();
+}
+
+ExprNode *PostfixDecrementNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
 }
 
 void StructureOrUnionMemberAccessNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -104,6 +135,11 @@ void StructureOrUnionMemberAccessNode::Print(std::ostream &os, std::string inden
 StructureOrUnionMemberAccessNode::StructureOrUnionMemberAccessNode(ExprNode *structureOrUnion, IdNode *member) : member(member),
                                                                                                                  structureOrUnion(structureOrUnion) {}
 
+ExprNode *StructureOrUnionMemberAccessNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
+}
+
 void StructureOrUnionMemberAccessByPointerNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -116,6 +152,11 @@ void StructureOrUnionMemberAccessByPointerNode::Print(std::ostream &os, std::str
 StructureOrUnionMemberAccessByPointerNode::StructureOrUnionMemberAccessByPointerNode(ExprNode *structureOrUnion,
                                                                                      IdNode *member) : member(member),
                                                                                                        structureOrUnion(structureOrUnion) {}
+
+ExprNode *StructureOrUnionMemberAccessByPointerNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
+}
 
 void PrefixIncrementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -130,6 +171,11 @@ PrefixIncrementNode::PrefixIncrementNode(ExprNode *node) : node(node)
     this->type = node->GetType();
 }
 
+ExprNode *PrefixIncrementNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
+}
+
 void PrefixDecrementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -141,6 +187,11 @@ void PrefixDecrementNode::Print(std::ostream &os, std::string indent, bool isTai
 PrefixDecrementNode::PrefixDecrementNode(ExprNode *node) : node(node)
 {
     this->type = node->GetType();
+}
+
+ExprNode *PrefixDecrementNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
 }
 
 void BinOpNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -163,6 +214,26 @@ BinOpNode::BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op,
     this->type = resultType;
 }
 
+ExprNode *BinOpNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
+}
+
+ExprNode *BinOpNode::Left() const
+{
+    return left;
+}
+
+ExprNode *BinOpNode::Right() const
+{
+    return right;
+}
+
+std::shared_ptr<Token> BinOpNode::GetOperation() const
+{
+    return op;
+}
+
 void ArrayAccessNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -173,6 +244,11 @@ void ArrayAccessNode::Print(std::ostream &os, std::string indent, bool isTail)
 }
 
 ArrayAccessNode::ArrayAccessNode(ExprNode *left, ExprNode *inBrackets) : left(left), inBrackets(inBrackets) {}
+
+ExprNode *ArrayAccessNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
+}
 
 void TernaryOperatorNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -190,6 +266,11 @@ TernaryOperatorNode::TernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, 
     this->type = iftrue->GetType();
 }
 
+ExprNode *TernaryOperatorNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
+}
+
 
 void AssignmentNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -202,6 +283,11 @@ void AssignmentNode::Print(std::ostream &os, std::string indent, bool isTail)
 
 AssignmentNode::AssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp) : left(left), right(right),
                                                                                                        assignmentOp(assignmentOp) {}
+
+ExprNode *AssignmentNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
+}
 
 void TypeCastNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -217,6 +303,11 @@ TypeCastNode::TypeCastNode(SymType *type, ExprNode *castExpr) : castType(type), 
     this->type = type;
 }
 
+ExprNode *TypeCastNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
+}
+
 void UnaryOpNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -226,6 +317,11 @@ void UnaryOpNode::Print(std::ostream &os, std::string indent, bool isTail)
 }
 
 UnaryOpNode::UnaryOpNode(std::shared_ptr<Token> unaryOp, ExprNode *expr) : unaryOp(unaryOp), expr(expr) {}
+
+ExprNode *UnaryOpNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
+}
 
 void SizeofExprNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -237,6 +333,11 @@ void SizeofExprNode::Print(std::ostream &os, std::string indent, bool isTail)
 
 SizeofExprNode::SizeofExprNode(ExprNode *expr) : expr(expr) {}
 
+ExprNode *SizeofExprNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
+}
+
 void SizeofTypeNameNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -246,6 +347,11 @@ void SizeofTypeNameNode::Print(std::ostream &os, std::string indent, bool isTail
 }
 
 SizeofTypeNameNode::SizeofTypeNameNode(SymType *typeName) : typeName(typeName) {}
+
+ExprNode *SizeofTypeNameNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
+}
 
 void CommaSeparatedExprs::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -257,6 +363,11 @@ void CommaSeparatedExprs::Print(std::ostream &os, std::string indent, bool isTai
 }
 
 CommaSeparatedExprs::CommaSeparatedExprs(ExprNode *left, ExprNode *right) : left(left), right(right) {}
+
+ExprNode *CommaSeparatedExprs::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
+}
 
 void PointerNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -467,6 +578,11 @@ void FunctionCallNode::Print(std::ostream &os, std::string indent, bool isTail)
 
 FunctionCallNode::FunctionCallNode(ExprNode *functionName, ArgumentExprListNode *arguments) :
         functionName(functionName), arguments(arguments) {}
+
+ExprNode *FunctionCallNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
+}
 
 void DeclarationSpecifiersNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -722,6 +838,11 @@ EnumeratorNode::EnumeratorNode(IdNode *enumerationConstant, ExprNode *value) :
         enumerationConstant(enumerationConstant), value(value)
 {
     this->type = new SymBuiltInType(BuiltInTypeKind::INT32);
+}
+
+ExprNode *EnumeratorNode::Eval(Evaluator *evaluator)
+{
+    return evaluator->Eval(this);
 }
 
 void TypeSpecifierQualifierNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1047,6 +1168,11 @@ ValueCategory ExprNode::GetValueCategory() const
 }
 
 ConstNode::ConstNode(std::shared_ptr<Token> token) : token(std::move(token)) {}
+
+std::shared_ptr<Token> ConstNode::GetValue()
+{
+    return token;
+}
 
 void IterationStatementNode::SetBody(StatementNode *body)
 {

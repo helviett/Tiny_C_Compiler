@@ -941,11 +941,11 @@ EnumSpecifierNode *Parser::parseEnumSpecifier()
     if (scanner->Current()->type == TokenType::LCURLY_BRACKET && scanner->Next())
     {
         list = parseEnumeratorList();
-        if (!list->Size()) EmptyEnumeratorListError(scanner->Current());
+        if (!list->Size()) throw EmptyEnumeratorListError(scanner->Current());
         require(TokenType::RCURLY_BRACKET);
         scanner->Next();
     }
-    return new EnumSpecifierNode(id, list);
+    return sematicAnalyzer.BuildEnumSpecifierNode(id, list);
 }
 
 //enumerator-list ::= enumerator | enumerator-list , enumerator

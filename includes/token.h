@@ -128,7 +128,7 @@ struct Token
     union
     {
         char *stringValue;
-        uint64_t intValue;
+        int64_t intValue;
         long double floatValue;
         Keyword keyword;
     };

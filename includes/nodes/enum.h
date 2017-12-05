@@ -17,6 +17,7 @@ public:
     ExprNode *GetValue() const;
     void SetValue(ExprNode *);
     IdNode *GetId();
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     IdNode *enumerationConstant;
     ExprNode *value;

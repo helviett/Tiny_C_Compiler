@@ -378,3 +378,38 @@ uint32_t SymQualifiedType::GetQualifiers() const
 {
     return qualfiers;
 }
+
+SymEnumerator::SymEnumerator(std::string name, ExprNode *value): value(value)
+{
+    this->name = std::move(name);
+    kind = TypeKind::ENUMERATOR;
+    symbolClass = SymbolClass::TYPE;
+}
+
+ExprNode *SymEnumerator::GetValue() const
+{
+    return value;
+}
+
+void SymEnumerator::SetValue(ExprNode *value)
+{
+    this->value = value;
+}
+
+bool SymEnumerator::IsComplete()
+{
+    return true;
+}
+
+bool SymEnumerator::Equal(SymType *other)
+{
+    return value->GetType()->Equal(other);
+}
+
+void SymEnumerator::Print(std::ostream &os, std::string indent, bool isTail)
+{
+    os << indent << (isTail ? "└── " : "├── ");
+    os << "Enumerator" << std::endl;
+    indent.append(isTail ? "    " : "│   ");
+    value->Print(os, indent, true);
+}

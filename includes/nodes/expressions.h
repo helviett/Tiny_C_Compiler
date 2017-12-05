@@ -12,6 +12,8 @@
 
 class SymType;
 
+class Evaluator;
+
 //struct EvaluevaluationResult
 //{
 //    valueType
@@ -26,6 +28,7 @@ public:
     void SetType(SymType *type);
     ValueCategory  GetValueCategory() const;
     void SetValueCategory(ValueCategory category);
+    virtual ExprNode * Eval(Evaluator *evaluator) = 0;
 protected:
     SymType *type{nullptr};
     ValueCategory  category{ValueCategory::RVALUE};
@@ -36,6 +39,7 @@ class PostfixIncrementNode: public ExprNode
 public:
     explicit PostfixIncrementNode(ExprNode *node);
     virtual void Print(std::ostream &os, std::string ident, bool isTail);
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     ExprNode *node;
 };
@@ -45,6 +49,7 @@ class PostfixDecrementNode: public ExprNode
 public:
     explicit PostfixDecrementNode(ExprNode *node);
     virtual void Print(std::ostream &os, std::string ident, bool isTail);
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     ExprNode *node;
 };
@@ -55,8 +60,8 @@ class StructureOrUnionMemberAccessNode: public ExprNode
 {
 public:
     StructureOrUnionMemberAccessNode(ExprNode *structureOrUnion, IdNode *member);
-
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     ExprNode *structureOrUnion;
     IdNode *member;
@@ -66,8 +71,8 @@ class StructureOrUnionMemberAccessByPointerNode: public ExprNode
 {
 public:
     StructureOrUnionMemberAccessByPointerNode(ExprNode *structureOrUnion, IdNode *member);
-
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     ExprNode *structureOrUnion;
     IdNode *member;
@@ -78,6 +83,7 @@ class ArrayAccessNode: public ExprNode
 public:
     ArrayAccessNode(ExprNode *left, ExprNode *inBrackets);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     ExprNode *left, *inBrackets;
 };
@@ -98,6 +104,7 @@ class FunctionCallNode: public ExprNode
 public:
     FunctionCallNode(ExprNode *functionName, ArgumentExprListNode *arguments);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     ExprNode *functionName;
     ArgumentExprListNode *arguments;
@@ -108,6 +115,7 @@ class SizeofExprNode: public  ExprNode
 public:
     SizeofExprNode(ExprNode *expr);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     ExprNode *expr;
 };
@@ -119,6 +127,7 @@ class SizeofTypeNameNode: public ExprNode
 public:
     SizeofTypeNameNode(SymType *typeName);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     SymType *typeName;
 };
@@ -128,6 +137,7 @@ class UnaryOpNode: public ExprNode
 public:
     UnaryOpNode (std::shared_ptr<Token> unaryOp, ExprNode *expr);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     std::shared_ptr<Token> unaryOp;
     ExprNode *expr;
@@ -138,6 +148,7 @@ class PrefixIncrementNode: public ExprNode
 public:
     explicit PrefixIncrementNode(ExprNode *node);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     ExprNode *node;
 };
@@ -147,6 +158,7 @@ class PrefixDecrementNode: public ExprNode
 public:
     explicit PrefixDecrementNode(ExprNode *node);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     ExprNode *node;
 };
@@ -157,6 +169,10 @@ public:
     BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op);
     BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op, SymType *resultType);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
+    ExprNode *Left() const;
+    ExprNode *Right() const;
+    std::shared_ptr<Token> GetOperation() const;
 private:
     ExprNode *left, *right;
     std::shared_ptr<Token> op;
@@ -167,6 +183,7 @@ class TernaryOperatorNode: public ExprNode
 public:
     TernaryOperatorNode(ExprNode *condition, ExprNode *iftrue, ExprNode *iffalse);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     ExprNode *condition, *iftrue, *iffalse;
 };
@@ -176,6 +193,7 @@ class AssignmentNode: public ExprNode
 public:
     AssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     ExprNode *left, *right;
     std::shared_ptr<Token> assignmentOp;
@@ -186,6 +204,7 @@ class CommaSeparatedExprs: public ExprNode
 public:
     CommaSeparatedExprs(ExprNode *left, ExprNode *right);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     ExprNode *left, *right;
 };
@@ -198,6 +217,7 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     std::string GetName() const;
     std::pair<int, int> GetPosition() const;
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     std::shared_ptr<Token> token;
 };
@@ -207,6 +227,8 @@ class ConstNode: public ExprNode
 public:
     explicit ConstNode(std::shared_ptr<Token> token);
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
+    ExprNode * Eval(Evaluator *evaluator) override = 0;
+    std::shared_ptr<Token> GetValue();
 protected:
     std::shared_ptr<Token> token;
 };
@@ -216,6 +238,7 @@ class IntConstNode: public ConstNode
 public:
     explicit IntConstNode(std::shared_ptr<Token> token);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
 };
 
 class FloatConstNode: public ConstNode
@@ -223,6 +246,7 @@ class FloatConstNode: public ConstNode
 public:
     explicit FloatConstNode(std::shared_ptr<Token> token);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
 };
 
 class StringLiteralNode: public ExprNode
@@ -230,6 +254,7 @@ class StringLiteralNode: public ExprNode
 public:
     explicit StringLiteralNode(std::shared_ptr<Token> token);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode * Eval(Evaluator *evaluator) override;
 private:
     std::shared_ptr<Token> token;
 };

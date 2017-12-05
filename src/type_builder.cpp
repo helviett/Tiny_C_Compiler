@@ -1,3 +1,4 @@
+#include <nodes.h>
 #include "../includes/type_builder.h"
 #include "../includes/nodes/struct.h"
 #include "../includes/symbol_table.h"
@@ -101,6 +102,11 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers, bo
             kind = TypeKind::TYPEDEF;
             type = ((TypedefIdentifierNode *)it)->GetAlias()->GetType();
         }
+        else
+        {
+            if (kind != TypeKind ::NONE) throw ManyDataTypesError(((TypedefIdentifierNode *)it)->GetToken());
+            kind = TypeKind::ENUM;
+        }
     }
     if (kind == TypeKind::NONE) kind = TypeKind::SCALAR;
     if (isSinged == Singed::DEFAULT) isSinged = Singed::SINGED;
@@ -149,6 +155,9 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers, bo
         case TypeKind::TYPEDEF:
             if (typeQuals) return new SymQualifiedType(type, typeQuals);
             return type;
+        case TypeKind::ENUM:
+            if (typeQuals) return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::INT32), typeQuals);
+            return new SymBuiltInType(BuiltInTypeKind::INT32);
     }
     throw ""; // Unreachable
 }

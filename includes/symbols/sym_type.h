@@ -21,7 +21,7 @@ enum class BuiltInTypeKind
 
 enum class TypeKind
 {
-    ENUM, STRUCT, POINTER, BUILTIN, ARRAY, FUNCTION, TYPEDEF
+    ENUMERATOR, STRUCT, POINTER, BUILTIN, ARRAY, FUNCTION, TYPEDEF
 };
 
 enum class TypeQualifier
@@ -169,6 +169,19 @@ private:
     IdNode *tag{nullptr};
     SymbolTable *fields{nullptr};
     std::vector<SymVariable *> orderedFields;
+};
+
+class SymEnumerator: public SymType
+{
+public:
+    SymEnumerator(std::string name, ExprNode *value);
+    ExprNode *GetValue() const;
+    void SetValue(ExprNode *value);
+    void Print(std::ostream &os, std::string indent, bool isTail) override;
+    bool Equal(SymType *other) override;
+    bool IsComplete() override;
+private:
+    ExprNode *value{nullptr};
 };
 
 #endif //TINY_C_COMPILER_TYPE_H
