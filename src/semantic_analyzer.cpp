@@ -4,7 +4,7 @@
 
 IdNode *SemanticAnalyzer::BuildIdNode(std::shared_ptr<Token> token)
 {
-    auto symbol = scopeTree.Find(token->stringValue);
+    auto symbol = scopeTree.Find(token->text);
     if (!symbol) throw UndeclaredIdentifierError(token);
     if (symbol->GetSymbolClass() == SymbolClass::UNDEFINED) throw ""; // Unreachable
     if (symbol->GetSymbolClass() == SymbolClass::VARIABLE)
@@ -109,14 +109,16 @@ bool SemanticAnalyzer::isPointerType(SymType *type)
 
 InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer)
 {
-    if (scopeTree.GetActiveScope()->Find(declarator->GetId()->GetName())) throw "";
+    auto prev = scopeTree.GetActiveScope()->Find(declarator->GetId()->GetName()); // TODO FUNCTIONS
+    if (prev) throw RedeclarationError(declarator->GetId(), prev);
     auto t = declarator->GetType();
     if (t->GetTypeKind() == TypeKind::FUNCTION)
         scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(), t);
     else
         scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(),
-                                           new SymVariable(declarator->GetId()->GetName(), declarator->GetType()));
+                                           new SymVariable(declarator->GetId()->GetName(), declarator->GetType(), declarator->GetId()));
     // TODO initializer type check
+
     return new InitDeclaratorNode(declarator, initializer);
 }
 
@@ -500,8 +502,27 @@ void SemanticAnalyzer::Convert(ExprNode **expr, SymType *type)
 FunctionDefinitionNode *
 SemanticAnalyzer::BuildFunctionDefinitionNode(DeclaratorNode *declarator, CompoundStatement *body)
 {
-
-    return nullptr;
+    // TODO check qualifiers equality
+    if (declarator->GetType()->GetTypeKind() != TypeKind::FUNCTION) throw "";
+    auto f = (SymFunction *)unqualify(declarator->GetType());
+    auto sym = scopeTree.Find(declarator->GetId()->GetName());
+    SymFunction *fdeclaration = nullptr;
+    if (sym)
+    {
+        if (sym->GetSymbolClass() != SymbolClass::TYPE) throw "";
+        fdeclaration = (SymFunction *)unqualify((SymType *)sym);
+        if (fdeclaration->GetTypeKind() != TypeKind::FUNCTION) throw "";
+        if (!(fdeclaration->Equal(f))) throw "";
+        if (fdeclaration->Defined()) throw "";
+        fdeclaration->SetOrderedParams(f->GetOderedParams());
+        fdeclaration->SetParamsTable(f->GetParamsTable());
+        f = fdeclaration;
+    }
+    f->Define();
+    scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(), f);
+    scopeTree.SetActiveScope(f->GetParamsTable());
+    auto res = new FunctionDefinitionNode(declarator, nullptr);
+    return res;
 }
 
 SymType *SemanticAnalyzer::unqualify(SymType *type)
@@ -519,4 +540,30 @@ TypeCastNode *SemanticAnalyzer::BuildTypeCastNode(SymType *typeName, ExprNode *c
 {
     Convert(&castExpr, typeName);
     return (TypeCastNode *)castExpr;
+}
+
+EnumeratorNode *SemanticAnalyzer::BuildEnumeratorNode(IdNode *enumerator, ExprNode *expr)
+{
+    if (!expr) return new EnumeratorNode(enumerator, expr);
+    if (!isIntegerType(expr->GetType())) throw EnumeratorConstantTypeError(enumerator, expr->GetType());
+    Convert(&expr, new SymBuiltInType(BuiltInTypeKind::INT32));
+    return new EnumeratorNode(enumerator, expr);
+}
+
+EnumSpecifierNode *SemanticAnalyzer::BuildEnumSpecifierNode(IdNode *tag, EnumeratorList *list)
+{
+    auto prev = -1;
+    for (auto enumerator: list->List())
+    {
+        auto id = enumerator->GetId();
+        auto value = enumerator->GetValue();
+        if (!value)
+        {
+            value = new IntConstNode(std::shared_ptr<Token>()); // do the shit
+            enumerator->SetValue(value);
+        }
+        // prev = value + 1 or so
+
+    } // TOD TODO TODO
+    return nullptr;
 }

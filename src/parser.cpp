@@ -643,7 +643,7 @@ void Parser::parseFunctionDeclarator(DeclaratorNode *declarator)
     {
         std::string name = it->GetId() ? it->GetId()->GetName() : "#" + std::to_string(orderedParamTypes.size());
 
-        auto var = new SymVariable(name, (*it).GetType());
+        auto var = new SymVariable(name, (*it).GetType(), (*it).GetId());
         var->SetName(name);
         orderedParamTypes.push_back(var);
         table->Insert(name, var);
@@ -867,7 +867,11 @@ CompoundStatement *Parser::parseCompoundStatement()
 
     require(TokenType::LCURLY_BRACKET);
     sematicAnalyzer.GetScopeTree()->StartScope();
-    if (scanner->Next()->type == TokenType::RCURLY_BRACKET && scanner->Next()) return new CompoundStatement(nullptr);
+    if (scanner->Next()->type == TokenType::RCURLY_BRACKET && scanner->Next())
+    {
+        sematicAnalyzer.GetScopeTree()->EndScope();
+        return new CompoundStatement(nullptr);
+    }
     auto blockItemList = parseBlockItemList();
     require(TokenType::RCURLY_BRACKET);
     sematicAnalyzer.GetScopeTree()->EndScope();
@@ -940,8 +944,8 @@ EnumeratorNode *Parser::parseEnumerator()
     auto id = new IdNode(scanner->Current());
     scanner->Next();
     if (scanner->Current()->type == TokenType::ASSIGNMENT && scanner->Next())
-        return new EnumeratorNode(id, (ExprNode *)parseConstantExpr());
-    return new EnumeratorNode(id, nullptr);
+        return sematicAnalyzer.BuildEnumeratorNode(id, parseConstantExpr());
+    return sematicAnalyzer.BuildEnumeratorNode(id, nullptr);
 }
 
 // a specifier that consists of 1 keyword: type-qualifier | type-specifier
@@ -1137,20 +1141,11 @@ ExternalDeclarationNode *Parser::parseExternalDeclaration()
     parseDeclarator(DeclaratorKind::NORMAL, declarator);
     if (scanner->Current()->type == TokenType::LCURLY_BRACKET)
     {
-        if (declarator->GetType()->GetTypeKind() != TypeKind::FUNCTION) throw "";
-        auto f = (SymFunction *)declarator->GetType();
-        auto fdeclaration = (SymFunction *)sematicAnalyzer.GetScopeTree()->Find(declarator->GetId()->GetName());
-        if (fdeclaration)
-        {
-            if (fdeclaration->GetTypeKind() != TypeKind::FUNCTION) throw "";
-            if (!(fdeclaration->Equal(f))) throw "";
-            // TODO check body existence
-        }
-        sematicAnalyzer.GetScopeTree()->GetActiveScope()->Insert(declarator->GetId()->GetName(), f);
-        sematicAnalyzer.GetScopeTree()->SetActiveScope(f->GetParamsTable());
-        auto res = (ExternalDeclarationNode *)new FunctionDefinitionNode(declarator, parseCompoundStatement());
+        auto res = sematicAnalyzer.BuildFunctionDefinitionNode(declarator, nullptr);
+        auto body = parseCompoundStatement();
+        res->SetBody(body);
         sematicAnalyzer.GetScopeTree()->EndScope();
-        return res;
+        return (ExternalDeclarationNode *)res;
     }
     if (scanner->Current()->type == TokenType::ASSIGNMENT)
     {

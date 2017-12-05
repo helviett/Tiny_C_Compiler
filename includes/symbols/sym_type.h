@@ -121,18 +121,21 @@ class SymFunction: public SymType
 public:
     explicit SymFunction(SymType *returnType);
     SymFunction(SymType *returnType, SymbolTable *params, const std::vector<SymVariable *> &orderedParamTypes);
-    SymFunction(SymType *returnType, SymbolTable *params,  const std::vector<SymVariable *> &orderedParamTypes,
-                SymbolTable *body);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     SymType *GetReturnType() const;
     void SetReturnType(SymType *returnType);
     SymbolTable *GetParamsTable() const;
+    void SetParamsTable(SymbolTable *params);
+    void SetOrderedParams(std::vector<SymVariable *> &orderedParams);
     bool Equal(SymType *other) override;
-    std::vector<SymVariable *> GetOderedParams();
+    std::vector<SymVariable *> &GetOderedParams();
     bool IsComplete() override;
+    bool Defined() const;
+    void Define();
 private:
     SymType *returnType{nullptr};
-    SymbolTable *params{nullptr}, *body{nullptr};
+    SymbolTable *params{nullptr};
+    bool defined{false};
     std::vector<SymVariable *> orderedParams;
 };
 

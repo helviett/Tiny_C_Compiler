@@ -168,12 +168,6 @@ SymFunction::SymFunction(SymType *returnType, SymbolTable *params, const std::ve
     kind = TypeKind::FUNCTION;
 }
 
-SymFunction::SymFunction(SymType *returnType, SymbolTable *params, const std::vector<SymVariable *> &orderedParamTypes,
-                         SymbolTable *body): SymFunction(returnType, params, orderedParamTypes)
-{
-    this->body = body;
-}
-
 SymbolTable *SymFunction::GetParamsTable() const
 {
     return params;
@@ -197,7 +191,7 @@ bool SymFunction::Equal(SymType *other)
     return false;
 }
 
-std::vector<SymVariable *> SymFunction::GetOderedParams()
+std::vector<SymVariable *> &SymFunction::GetOderedParams()
 {
     return orderedParams;
 }
@@ -206,7 +200,27 @@ bool SymFunction::IsComplete()
 {
     for (auto it: orderedParams)
         if (it->GetName()[0] == '#') return false;
-    return body;
+    return defined;
+}
+
+bool SymFunction::Defined() const
+{
+    return defined;
+}
+
+void SymFunction::Define()
+{
+    defined = true;
+}
+
+void SymFunction::SetParamsTable(SymbolTable *params)
+{
+    this->params = params;
+}
+
+void SymFunction::SetOrderedParams(std::vector<SymVariable *> &orderedParams)
+{
+    this->orderedParams = orderedParams;
 }
 
 SymAlias::SymAlias(std::string name, SymType *type): type(type)

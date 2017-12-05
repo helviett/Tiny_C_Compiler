@@ -62,6 +62,7 @@ public:
     const char *what() const throw() override;
 };
 
+class Symbol;
 class SymType;
 class SymRecord;
 class IdNode;
@@ -120,6 +121,20 @@ class BadTypeConversionError: public SemanticError
 {
 public:
     explicit BadTypeConversionError(SymType *type, SymType *castType);
+    const char *what() const throw() override;
+};
+
+class EnumeratorConstantTypeError: public SemanticError
+{
+public:
+    EnumeratorConstantTypeError(IdNode *enumerator, SymType *exprType);
+    const char *what() const throw() override;
+};
+
+class RedeclarationError: public SemanticError
+{
+public:
+    RedeclarationError(IdNode *id, Symbol *symbol);
     const char *what() const throw() override;
 };
 

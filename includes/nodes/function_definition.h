@@ -14,11 +14,12 @@ class FunctionDefinitionNode: public Node
 {
 public:
     FunctionDefinitionNode(DeclaratorNode *declarator, CompoundStatement *compoundStatement):
-            declarator(declarator), compoundStatement(compoundStatement) {}
+            declarator(declarator), body(compoundStatement) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    void SetBody(CompoundStatement *body);
 private:
     DeclaratorNode *declarator;
-    CompoundStatement *compoundStatement;
+    CompoundStatement *body;
 };
 
 #endif //TINY_C_COMPILER_FUNCTION_DEFINITION_H

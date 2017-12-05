@@ -151,7 +151,7 @@ SymRecord *TypeBuilder::Build(StructDeclarationListNode *structDeclarationList, 
             std::string name = declarator->GetId() ? declarator->GetId()->GetName() :
                                "#" + std::to_string(orderedFields.size());
             if (fields->Find(name)) throw "";
-            auto var = new SymVariable(name, (*declarator).GetType());
+            auto var = new SymVariable(name, (*declarator).GetType(), declarator->GetId());
             orderedFields.push_back(var);
             fields->Insert(name, var);
         }

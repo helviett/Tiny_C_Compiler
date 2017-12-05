@@ -167,3 +167,38 @@ BadTypeConversionError::BadTypeConversionError(SymType *type, SymType *castType)
 {
     msg =  "Bad type conversion";
 }
+
+const char *EnumeratorConstantTypeError::what() const throw()
+{
+    return msg.c_str();
+}
+
+EnumeratorConstantTypeError::EnumeratorConstantTypeError(IdNode *enumerator, SymType *exprType)
+{
+    auto pos = enumerator->GetPosition();
+    msg = "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) +
+          "): enumerator value for '" + enumerator->GetName() + "' is not an integer constant.";
+}
+
+const char *RedeclarationError::what() const throw()
+{
+    return msg.c_str();
+}
+
+RedeclarationError::RedeclarationError(IdNode *id, Symbol *symbol)
+{
+    auto pos = id->GetPosition();
+    msg = "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) +
+          "): redeclaration of '" + id->GetName() + "'.\n";
+    IdNode *prev = nullptr;
+    switch (symbol->GetSymbolClass())
+    {
+        case SymbolClass::VARIABLE:
+            if ((prev = ((SymVariable *) symbol)->GetId()))
+            {
+                auto pos = prev->GetPosition();
+                msg += "Previous declaration of '" + id->GetName() + "' was at " +
+                        "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) + ")";
+            }
+    }
+}

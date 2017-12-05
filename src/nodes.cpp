@@ -639,6 +639,11 @@ void EnumeratorList::Print(std::ostream &os, std::string indent, bool isTail)
     (*it)->Print(os, indent, true);
 }
 
+std::list<EnumeratorNode *> &EnumeratorList::List()
+{
+    return list;
+}
+
 void EnumSpecifierNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -670,6 +675,27 @@ void EnumeratorNode::Print(std::ostream &os, std::string indent, bool isTail)
         return;
     }
     enumerationConstant->Print(os, indent, true);
+}
+
+ExprNode *EnumeratorNode::GetValue() const
+{
+    return value;
+}
+
+void EnumeratorNode::SetValue(ExprNode *value)
+{
+    this->value = value;
+}
+
+IdNode *EnumeratorNode::GetId()
+{
+    return enumerationConstant;
+}
+
+EnumeratorNode::EnumeratorNode(IdNode *enumerationConstant, ExprNode *value) :
+        enumerationConstant(enumerationConstant), value(value)
+{
+    this->type = new SymBuiltInType(BuiltInTypeKind::INT32);
 }
 
 void TypeSpecifierQualifierNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -933,7 +959,12 @@ void FunctionDefinitionNode::Print(std::ostream &os, std::string indent, bool is
     os << "FuncDef" << std::endl;
     indent.append(isTail ? "    " : "│   ");
     declarator->Print(os, indent, false);
-    compoundStatement->Print(os, indent, true);
+    body->Print(os, indent, true);
+}
+
+void FunctionDefinitionNode::SetBody(CompoundStatement *body)
+{
+    this->body = body;
 }
 
 void TranslationUnitNode::Print(std::ostream &os, std::string indent, bool isTail)

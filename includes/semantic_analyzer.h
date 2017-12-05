@@ -40,6 +40,8 @@ public:
     AssignmentNode *BuildAssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp);
     FunctionDefinitionNode *BuildFunctionDefinitionNode(DeclaratorNode *declarator, CompoundStatement *body);
     TypeCastNode *BuildTypeCastNode(SymType *typeName, ExprNode *castExpr);
+    EnumeratorNode *BuildEnumeratorNode(IdNode *enumerator, ExprNode *expr);
+    EnumSpecifierNode *BuildEnumSpecifierNode(IdNode *tag, EnumeratorList *list);
 private:
     void CheckIncDecRules(ExprNode *expr, std::shared_ptr<Token> op);
     bool isArithmeticType(SymType *type);

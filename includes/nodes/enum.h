@@ -9,12 +9,14 @@
 #include "expressions.h"
 #include <list>
 
-class EnumeratorNode: public Node
+class EnumeratorNode: public ExprNode
 {
 public:
-    EnumeratorNode(IdNode *enumerationConstant, ExprNode *value):
-            enumerationConstant(enumerationConstant), value(value) {}
+    EnumeratorNode(IdNode *enumerationConstant, ExprNode *value);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    ExprNode *GetValue() const;
+    void SetValue(ExprNode *);
+    IdNode *GetId();
 private:
     IdNode *enumerationConstant;
     ExprNode *value;
@@ -26,6 +28,7 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(EnumeratorNode *initDeclarator);
     uint64_t Size();
+    std::list<EnumeratorNode *> &List();
 protected:
     std::list<EnumeratorNode *> list;
 };

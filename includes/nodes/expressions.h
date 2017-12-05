@@ -12,6 +12,12 @@
 
 class SymType;
 
+//struct EvaluevaluationResult
+//{
+//    valueType
+//    union value
+//};
+
 class ExprNode: public Node
 {
 public:
