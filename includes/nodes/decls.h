@@ -9,6 +9,7 @@
 #include "node.h"
 #include "pointer.h"
 #include "expressions.h"
+#include "translation_unit.h"
 
 class DirectDeclaratorNode;
 
@@ -61,7 +62,7 @@ protected:
 
 class InitDeclaratorListNode;
 
-class DeclarationNode: public Node
+class DeclarationNode: public ExternalDeclarationNode
 {
 public:
     DeclarationNode(DeclarationSpecifiersNode *declarationSpecifiers, InitDeclaratorListNode *list):

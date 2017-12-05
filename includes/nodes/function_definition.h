@@ -10,7 +10,9 @@
 #include "decls.h"
 #include "statements.h"
 
-class FunctionDefinitionNode: public Node
+class ExternalDeclarationNode;
+
+class FunctionDefinitionNode: public ExternalDeclarationNode
 {
 public:
     FunctionDefinitionNode(DeclaratorNode *declarator, CompoundStatement *compoundStatement):

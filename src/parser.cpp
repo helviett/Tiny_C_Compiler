@@ -870,7 +870,7 @@ InitializerNode *Parser::parseInitializer()
         scanner->Next();
         return il;
     }
-    return (InitializerNode *)parseAssignmentExpr();
+    return new SimpleInitializer(parseAssignmentExpr());
 }
 
 //labeled-statement ::= id : statement
@@ -1172,15 +1172,14 @@ ExternalDeclarationNode *Parser::parseExternalDeclaration()
         res->SetBody(body);
         sematicAnalyzer.GetScopeTree()->EndScope();
         sematicAnalyzer.FinishLastFunctionProcessing();
-        return (ExternalDeclarationNode *)res;
+        return res;
     }
     if (scanner->Current()->type == TokenType::ASSIGNMENT)
     {
         scanner->Next();
-        return (ExternalDeclarationNode *)
-                parseDeclaration(ds, sematicAnalyzer.BuildInitDeclaratorNode(declarator, parseInitializer(), isTypedef));
+        return parseDeclaration(ds, sematicAnalyzer.BuildInitDeclaratorNode(declarator, parseInitializer(), isTypedef));
     }
-    return (ExternalDeclarationNode *)parseDeclaration(ds, sematicAnalyzer.BuildInitDeclaratorNode(declarator, nullptr, isTypedef));
+    return parseDeclaration(ds, sematicAnalyzer.BuildInitDeclaratorNode(declarator, nullptr, isTypedef));
 }
 
 void Parser::require(TokenType typeExpectation)

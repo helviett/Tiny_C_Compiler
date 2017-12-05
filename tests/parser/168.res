@@ -37,7 +37,8 @@
                             │           ├── j
                             │           ├── Qualified 0
                             │           │   └── INT32
-                            │           └── i
+                            │           └── Initializer 
+                            │               └── i
                             ├── for
                             │   ├── ;
                             │   ├── ;

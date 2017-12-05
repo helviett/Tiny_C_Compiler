@@ -1075,3 +1075,23 @@ void TypedefIdentifierNode::Print(std::ostream &os, std::string indent, bool isT
     indent.append(isTail ? "    " : "│   ");
     alias->Print(os, indent, true);
 }
+
+SimpleInitializer::SimpleInitializer(ExprNode *expr): value(expr) {}
+
+void SimpleInitializer::Print(std::ostream &os, std::string indent, bool isTail)
+{
+    os << indent << (isTail ? "└── " : "├── ");
+    os << "Initializer " << std::endl;
+    indent.append(isTail ? "    " : "│   ");
+    value->Print(os, indent, true);
+}
+
+void SimpleInitializer::SetValue(ExprNode *value)
+{
+    this->value = value;
+}
+
+ExprNode *SimpleInitializer::GetValue() const
+{
+    return value;
+}

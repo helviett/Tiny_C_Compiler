@@ -131,7 +131,16 @@ InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *de
         else
             scopeTree.GetActiveScope()->Insert(name, new SymVariable(name, declarator->GetType(), declarator->GetId()));
     // TODO initializer type check
-
+    if (initializer)
+    {
+        auto simple = dynamic_cast<SimpleInitializer *>(initializer);
+        if (simple)
+        {
+            auto value = simple->GetValue();
+            Convert(&value, t);
+            simple->SetValue(value);
+        }
+    }
     return new InitDeclaratorNode(declarator, initializer);
 }
 

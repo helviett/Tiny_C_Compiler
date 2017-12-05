@@ -91,7 +91,7 @@ private:
     InitializerNode *initializer;
 };
 
-class InitializerListNode: public Node
+class InitializerListNode: public InitializerNode
 {
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
@@ -99,6 +99,17 @@ public:
     uint64_t Size();
 protected:
     std::list<DesignatedInitializerNode *> list;
+};
+
+class SimpleInitializer: public InitializerNode
+{
+public:
+    explicit SimpleInitializer(ExprNode *expr);
+    void Print(std::ostream &os, std::string indent, bool isTail) override;
+    ExprNode *GetValue() const;
+    void SetValue(ExprNode *value);
+private:
+    ExprNode *value;
 };
 
 #endif //TINY_C_COMPILER_INITIALIZER_H
