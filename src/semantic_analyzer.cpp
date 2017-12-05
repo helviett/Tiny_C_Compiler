@@ -11,7 +11,6 @@ IdNode *SemanticAnalyzer::BuildIdNode(std::shared_ptr<Token> token)
     {
 
         auto id = new IdNode(token, ((SymVariable *)symbol)->GetType());
-//        std::cout << id->GetName() <<std::endl;
         switch (id->GetType()->GetTypeKind())
         {
             case TypeKind::ARRAY: case TypeKind::FUNCTION ://case TypeKind::STRUCT:
@@ -464,6 +463,8 @@ std::shared_ptr<Token> SemanticAnalyzer::extractArithmeticOperationFromAssignmen
                 return std::make_shared<Token>(TokenType::ASTERIX, assignemtBy->row, assignemtBy->col, "*");
         case TokenType::ASSIGNMENT_BY_BITWISE_OR:
             return std::make_shared<Token>(TokenType::BITWISE_OR, assignemtBy->row, assignemtBy->col, "|");
+        default:
+            throw "";
     }
     throw "";
 }
@@ -516,9 +517,10 @@ SemanticAnalyzer::BuildFunctionDefinitionNode(DeclaratorNode *declarator, Compou
         if (fdeclaration->Defined()) throw "";
         fdeclaration->SetOrderedParams(f->GetOderedParams());
         fdeclaration->SetParamsTable(f->GetParamsTable());
-        f = fdeclaration;
+        f = fdeclaration; // f = sym? TODO
     }
     f->Define();
+    processingFunctions.push(f);
     scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(), f);
     scopeTree.SetActiveScope(f->GetParamsTable());
     auto res = new FunctionDefinitionNode(declarator, nullptr);
@@ -552,18 +554,45 @@ EnumeratorNode *SemanticAnalyzer::BuildEnumeratorNode(IdNode *enumerator, ExprNo
 
 EnumSpecifierNode *SemanticAnalyzer::BuildEnumSpecifierNode(IdNode *tag, EnumeratorList *list)
 {
-    auto prev = -1;
-    for (auto enumerator: list->List())
-    {
-        auto id = enumerator->GetId();
-        auto value = enumerator->GetValue();
-        if (!value)
-        {
-            value = new IntConstNode(std::shared_ptr<Token>()); // do the shit
-            enumerator->SetValue(value);
-        }
-        // prev = value + 1 or so
-
-    } // TOD TODO TODO
+//    auto prev = -1;
+//    for (auto enumerator: list->List())
+//    {
+//        auto id = enumerator->GetId();
+//        auto value = enumerator->GetValue();
+//        if (!value)
+//        {
+//            value = new IntConstNode(std::shared_ptr<Token>()); // do the shit
+//            enumerator->SetValue(value);
+//        }
+//        // prev = value + 1 or so
+//
+//    } // TOD TODO TODO
     return nullptr;
+}
+
+void SemanticAnalyzer::ProcessFunction(SymType *funcType)
+{
+    processingFunctions.push(funcType);
+}
+
+void SemanticAnalyzer::FinishLastFunctionProcessing()
+{
+    processingFunctions.pop();
+}
+
+ReturnStatementNode *SemanticAnalyzer::BuildReturnStatementNode(std::shared_ptr<Token> statement, ExprNode *expr)
+{
+    if (processingFunctions.empty()) throw "";
+    auto type = processingFunctions.top();
+    auto utype = (SymFunction *)unqualify(type);
+    if (expr && isVoidType(utype->GetReturnType())) throw "";
+    if (expr) Convert(&expr, utype->GetReturnType());
+    return new ReturnStatementNode(expr);
+}
+
+bool SemanticAnalyzer::isVoidType(SymType *type)
+{
+    type = unqualify(type);
+    return type->GetTypeKind() == TypeKind::BUILTIN &&
+            ((SymBuiltInType *)type)->GetBuiltIntTypeKind() == BuiltInTypeKind::VOID;
 }

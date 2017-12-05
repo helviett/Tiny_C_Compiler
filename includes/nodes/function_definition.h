@@ -17,6 +17,7 @@ public:
             declarator(declarator), body(compoundStatement) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void SetBody(CompoundStatement *body);
+    SymType *GetType() const;
 private:
     DeclaratorNode *declarator;
     CompoundStatement *body;

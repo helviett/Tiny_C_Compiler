@@ -461,8 +461,9 @@ JumpStatementNode *Parser::parseJumpStatement()
                 js = new BreakStatementNode();
                 break;
             case Keyword::RETURN:
-                js = scanner->Current()->type == TokenType::SEMICOLON ? new ReturnStatementNode(nullptr) :
-                     new ReturnStatementNode(parseExpr());
+                js = scanner->Current()->type == TokenType::SEMICOLON ?
+                     sematicAnalyzer.BuildReturnStatementNode(t, nullptr) :
+                     sematicAnalyzer.BuildReturnStatementNode(t, parseExpr());
                 break;
         }
     require(TokenType::SEMICOLON);
@@ -1145,6 +1146,7 @@ ExternalDeclarationNode *Parser::parseExternalDeclaration()
         auto body = parseCompoundStatement();
         res->SetBody(body);
         sematicAnalyzer.GetScopeTree()->EndScope();
+        sematicAnalyzer.FinishLastFunctionProcessing();
         return (ExternalDeclarationNode *)res;
     }
     if (scanner->Current()->type == TokenType::ASSIGNMENT)

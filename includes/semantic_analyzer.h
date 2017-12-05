@@ -10,6 +10,7 @@
 #include "type_builder.h"
 #include <iostream>
 #include <errors/semantic_errors.h>
+#include <stack>
 
 class SemanticAnalyzer
 {
@@ -42,6 +43,9 @@ public:
     TypeCastNode *BuildTypeCastNode(SymType *typeName, ExprNode *castExpr);
     EnumeratorNode *BuildEnumeratorNode(IdNode *enumerator, ExprNode *expr);
     EnumSpecifierNode *BuildEnumSpecifierNode(IdNode *tag, EnumeratorList *list);
+    ReturnStatementNode *BuildReturnStatementNode(std::shared_ptr<Token> statement, ExprNode *expr);
+    void ProcessFunction(SymType *funcType);
+    void FinishLastFunctionProcessing();
 private:
     void CheckIncDecRules(ExprNode *expr, std::shared_ptr<Token> op);
     bool isArithmeticType(SymType *type);
@@ -54,11 +58,13 @@ private:
     bool isModifiableLvalue(ExprNode *expr);
     bool isConstQualified(ExprNode *expr);
     bool isStructType(SymType *type);
+    bool isVoidType(SymType *type);
     std::shared_ptr<Token> extractArithmeticOperationFromAssignmentBy(const std::shared_ptr<Token> &assignemtBy);
     void ImplicitlyConvert(ExprNode **left, ExprNode **right);
     void Convert(ExprNode **expr, SymType *type);
     SymType *unqualify(SymType *type);
     ScopeTree scopeTree;
+    std::stack<SymType *> processingFunctions;
 };
 
 #endif //TINY_C_COMPILER_SEMANTIC_ANALYZER_H

@@ -967,6 +967,11 @@ void FunctionDefinitionNode::SetBody(CompoundStatement *body)
     this->body = body;
 }
 
+SymType *FunctionDefinitionNode::GetType() const
+{
+    return declarator->GetType();
+}
+
 void TranslationUnitNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     if (list.empty()) return;
