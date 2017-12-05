@@ -30,7 +30,7 @@ protected:
     std::list<EnumeratorNode *> list;
 };
 
-class EnumSpecifierNode: public Node
+class EnumSpecifierNode: public DeclarationSpecifierNode
 {
 public:
     EnumSpecifierNode(IdNode *id, EnumeratorList *enumeratorList): id(id), enumeratorList(enumeratorList) {}

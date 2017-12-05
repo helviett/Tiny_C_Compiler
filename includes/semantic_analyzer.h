@@ -39,6 +39,7 @@ public:
                                                   const std::shared_ptr<Token> &colon);
     AssignmentNode *BuildAssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp);
     FunctionDefinitionNode *BuildFunctionDefinitionNode(DeclaratorNode *declarator, CompoundStatement *body);
+    TypeCastNode *BuildTypeCastNode(SymType *typeName, ExprNode *castExpr);
 private:
     void CheckIncDecRules(ExprNode *expr, std::shared_ptr<Token> op);
     bool isArithmeticType(SymType *type);

@@ -105,14 +105,21 @@ public:
 class InvalidUseOfIncompleteType: public SemanticError
 {
 public:
-    InvalidUseOfIncompleteType(std::shared_ptr<Token> token, SymType *type);
+    explicit InvalidUseOfIncompleteType(std::shared_ptr<Token> token, SymType *type);
     const char *what() const throw() override;
 };
 
 class RequiredScalarTypeError: public SemanticError
 {
 public:
-    RequiredScalarTypeError(std::shared_ptr<Token> token, SymType *got);
+    explicit RequiredScalarTypeError(std::shared_ptr<Token> token, SymType *got);
+    const char *what() const throw() override;
+};
+
+class BadTypeConversionError: public SemanticError
+{
+public:
+    explicit BadTypeConversionError(SymType *type, SymType *castType);
     const char *what() const throw() override;
 };
 

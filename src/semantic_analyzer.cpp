@@ -494,7 +494,7 @@ void SemanticAnalyzer::Convert(ExprNode **expr, SymType *type)
         *expr = new TypeCastNode(type, *expr);
         return;
     }
-    throw "";
+    throw BadTypeConversionError(etype, type);
 }
 
 FunctionDefinitionNode *
@@ -513,4 +513,10 @@ bool SemanticAnalyzer::isStructType(SymType *type)
 {
     type = unqualify(type);
     return type->GetTypeKind() == TypeKind::STRUCT;
+}
+
+TypeCastNode *SemanticAnalyzer::BuildTypeCastNode(SymType *typeName, ExprNode *castExpr)
+{
+    Convert(&castExpr, typeName);
+    return (TypeCastNode *)castExpr;
 }

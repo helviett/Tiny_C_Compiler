@@ -156,8 +156,9 @@ ExprNode *Parser::parseCastExpr()
     {
         scanner->Next();
         auto typName = parseTypeName();
+        require(TokenType::RBRACKET);
         scanner->Next();
-        return new TypeCastNode(typName, parseCastExpr());
+        return sematicAnalyzer.BuildTypeCastNode(typName, parseCastExpr());
     }
     return parseUnaryExpr();
 }
@@ -1027,13 +1028,18 @@ StructDeclaratorListNode *Parser::parseStructDeclaratorList(SymType *baseType)
 DeclarationSpecifiersNode *Parser::parseSpecifierQualifierList()
 {
     auto tnn = new DeclarationSpecifiersNode();
-    auto t = scanner->Current();
     bool spec;
-    while ((spec = isTypeSpecifier(t)) || isTypeQualifier(t))
+    while(isTypeQualifier(scanner->Current()) || isTypeSpecifier(scanner->Current()))
     {
-        tnn->Add(spec ? (TypeSpecifierQualifierNode *)new TypeSpecifierNode(t) :
-                 (TypeSpecifierQualifierNode *)new TypeQualifierNode(t)) ;
-        t = scanner->Next();
+        if (scanner->Current()->keyword == Keyword::STRUCT)
+            tnn->Add(parseStructSpecifier());
+        else if (scanner->Current()->keyword == Keyword::ENUM)
+            tnn->Add(parseEnumSpecifier());
+        else
+        {
+            tnn->Add(new SimpleSpecifier(scanner->Current()));
+            scanner->Next();
+        }
     }
     if (tnn->List().empty()) throw NoDeclarationSpecifiers(scanner->Current());
     return tnn;

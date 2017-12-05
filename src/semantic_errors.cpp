@@ -157,3 +157,13 @@ RequiredScalarTypeError::RequiredScalarTypeError(std::shared_ptr<Token> token, S
     msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
           ") Requaired scalar type in '" + token->stringValue + "'.";
 }
+
+const char *BadTypeConversionError::what() const throw()
+{
+    return msg.c_str();
+}
+
+BadTypeConversionError::BadTypeConversionError(SymType *type, SymType *castType)
+{
+    msg =  "Bad type conversion";
+}
