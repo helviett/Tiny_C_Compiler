@@ -22,7 +22,9 @@ public:
     ScopeTree *GetScopeTree();
     PostfixDecrementNode *BuildPostfixDecrementNode(ExprNode *expr, const std::shared_ptr<Token> &op);
     PostfixIncrementNode *BuildPostfixIncrementNode(ExprNode *expr, const std::shared_ptr<Token> &op);
-    InitDeclaratorNode *BuildInitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer);
+    InitDeclaratorNode *BuildInitDeclaratorNode(DeclaratorNode *declarator,
+                                                InitializerNode *initializer,
+                                                bool isTypedef);
     StructureOrUnionMemberAccessNode *BuildStructureOrUnionMemberAccessNode(ExprNode *structure,
                                                                             IdNode *field,
                                                                             std::shared_ptr<Token> dot);
@@ -46,6 +48,7 @@ public:
     ReturnStatementNode *BuildReturnStatementNode(std::shared_ptr<Token> statement, ExprNode *expr);
     BreakStatementNode *BuildBreakStatementNode(std::shared_ptr<Token> statement);
     ContinueStatementNode *BuildContinueStatementNode(std::shared_ptr<Token> statement);
+    TypedefIdentifierNode *BuildTypedefIdentifierNode(const std::shared_ptr<Token> &id);
     void ProcessFunction(SymType *funcType);
     void FinishLastFunctionProcessing();
     void ProcessLoop(IterationStatementNode *loop);

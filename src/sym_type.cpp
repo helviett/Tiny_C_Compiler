@@ -226,6 +226,31 @@ void SymFunction::SetOrderedParams(std::vector<SymVariable *> &orderedParams)
 SymAlias::SymAlias(std::string name, SymType *type): type(type)
 {
     this->name = std::move(name);
+    this->symbolClass = SymbolClass::TYPE;
+    this->kind = TypeKind::TYPEDEF;
+}
+
+SymType *SymAlias::GetType()
+{
+    return type;
+}
+
+void SymAlias::Print(std::ostream &os, std::string indent, bool isTail)
+{
+    os << indent << (isTail ? "└── " : "├── ");
+    os << name << std::endl;
+    indent.append(isTail ? "    " : "│   ");
+    type->Print(os, indent, true);
+}
+
+bool SymAlias::Equal(SymType *other)
+{
+    return type->Equal(other);
+}
+
+bool SymAlias::IsComplete()
+{
+    return type->IsComplete();
 }
 
 void SymRecord::Print(std::ostream &os, std::string indent, bool isTail)

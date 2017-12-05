@@ -876,7 +876,7 @@ void StructSpecifierNode::SetRecordType(SymRecord *type)
 StructSpecifierNode::StructSpecifierNode(SymRecord *type, std::shared_ptr<Token> structToken) : type(type),
                                                                                                 token(std::move(structToken))
 {
-    kind = SpecifierKind::COMPLEX;
+    kind = SpecifierKind::STRUCT;
 }
 
 std::shared_ptr<Token> StructSpecifierNode::GetToken() const
@@ -1051,4 +1051,27 @@ ConstNode::ConstNode(std::shared_ptr<Token> token) : token(std::move(token)) {}
 void IterationStatementNode::SetBody(StatementNode *body)
 {
     this->body = body;
+}
+
+TypedefIdentifierNode::TypedefIdentifierNode(SymAlias *alias): alias(alias)
+{
+    this->kind = SpecifierKind::TYPEDEF;
+}
+
+std::shared_ptr<Token> TypedefIdentifierNode::GetToken()
+{
+    return id;
+}
+
+SymAlias *TypedefIdentifierNode::GetAlias() const
+{
+    return alias;
+}
+
+void TypedefIdentifierNode::Print(std::ostream &os, std::string indent, bool isTail)
+{
+    os << indent << (isTail ? "└── " : "├── ");
+    os << "Typedef " << std::endl;
+    indent.append(isTail ? "    " : "│   ");
+    alias->Print(os, indent, true);
 }

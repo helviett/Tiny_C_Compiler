@@ -330,7 +330,8 @@ SymType *Parser::parseTypeName()
 
 bool Parser::isTypeSpecifier(std::shared_ptr<Token> token)
 {
-    return token->type == TokenType::KEYWORD ? TypeSpecifiers.find(token->keyword) != TypeSpecifiers.end() : false;
+    return (token->type == TokenType::KEYWORD ? TypeSpecifiers.find(token->keyword) != TypeSpecifiers.end() : false)
+            || isTypedefIdentifier(token);
 }
 
 //unary-op  ::= & | * | + | - | ~ | !
@@ -747,7 +748,12 @@ DeclarationSpecifiersNode *Parser::parseDeclarationSpecifiers()
     auto ds = new DeclarationSpecifiersNode();
     while(isDeclarationSpecifier(scanner->Current()))
     {
-        if (scanner->Current()->keyword == Keyword::STRUCT)
+        if (scanner->Current()->type == TokenType::ID && isTypedefIdentifier(scanner->Current()))
+        {
+            ds->Add(sematicAnalyzer.BuildTypedefIdentifierNode(scanner->Current()));
+            scanner->Next();
+        }
+        else if (scanner->Current()->keyword == Keyword::STRUCT)
             ds->Add((DeclarationSpecifierNode *)parseStructSpecifier());
         else if (scanner->Current()->keyword == Keyword::ENUM)
             ds->Add((DeclarationSpecifierNode *)parseEnumSpecifier());
@@ -799,7 +805,8 @@ bool Parser::isDeclarationSpecifier(std::shared_ptr<Token> token)
 //declaration ::= declaration-specifiers `init-declarator-list ;
 
 DeclarationNode * Parser::parseDeclaration(DeclarationSpecifiersNode *declarationSpecifiers,
-                                           InitDeclaratorNode *declarator)
+                                           InitDeclaratorNode *declarator,
+                                           bool isTypedef)
 {
 
     auto ds = declarationSpecifiers ? declarationSpecifiers : parseDeclarationSpecifiers();
@@ -816,7 +823,9 @@ DeclarationNode * Parser::parseDeclaration(DeclarationSpecifiersNode *declaratio
 
 //init-declarator-list ::= init-declarator | init-declarator-list , init-declarator
 
-InitDeclaratorListNode *Parser::parseInitDeclaratorList(DeclarationSpecifiersNode *declarationSpecifiers, InitDeclaratorNode *declarator)
+InitDeclaratorListNode *Parser::parseInitDeclaratorList(DeclarationSpecifiersNode *declarationSpecifiers,
+                                                        InitDeclaratorNode *declarator,
+                                                        bool isTypeDef)
 {
     auto idl = new InitDeclaratorListNode();
     if (declarator)
@@ -828,14 +837,14 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList(DeclarationSpecifiersNod
     }
     do
     {
-        idl->Add(parseInitDeclarator(declarationSpecifiers));
+        idl->Add(parseInitDeclarator(declarationSpecifiers, isTypeDef));
     } while (scanner->Current()->type == TokenType::COMMA && scanner->Next());
     return idl;
 }
 
 //init-declarator ::= declarator | declaratxor = initializer
 
-InitDeclaratorNode *Parser::parseInitDeclarator(DeclarationSpecifiersNode *declarationSpecifiers)
+InitDeclaratorNode *Parser::parseInitDeclarator(DeclarationSpecifiersNode *declarationSpecifiers, bool isTypeDef)
 {
     // TODO pass built type instead of building every time
     auto declarator = new DeclaratorNode();
@@ -847,7 +856,7 @@ InitDeclaratorNode *Parser::parseInitDeclarator(DeclarationSpecifiersNode *decla
         scanner->Next();
         initializer = parseInitializer();
     }
-    return sematicAnalyzer.BuildInitDeclaratorNode(declarator, initializer);
+    return sematicAnalyzer.BuildInitDeclaratorNode(declarator, initializer, isTypeDef);
 }
 
 //initializer ::= assignment-expr | {initializer-list} | {initializer-list , }
@@ -1146,7 +1155,8 @@ TranslationUnitNode *Parser::parseTranslationUnit()
 ExternalDeclarationNode *Parser::parseExternalDeclaration()
 {
     auto ds = parseDeclarationSpecifiers();
-    auto type = TypeBuilder::Build(ds);
+    auto isTypedef = false;
+    auto type = TypeBuilder::Build(ds, isTypedef);
     if (scanner->Current()->type == TokenType::SEMICOLON)
     {
         scanner->Next();
@@ -1168,9 +1178,9 @@ ExternalDeclarationNode *Parser::parseExternalDeclaration()
     {
         scanner->Next();
         return (ExternalDeclarationNode *)
-                parseDeclaration(ds, sematicAnalyzer.BuildInitDeclaratorNode(declarator, parseInitializer()));
+                parseDeclaration(ds, sematicAnalyzer.BuildInitDeclaratorNode(declarator, parseInitializer(), isTypedef));
     }
-    return (ExternalDeclarationNode *)parseDeclaration(ds, sematicAnalyzer.BuildInitDeclaratorNode(declarator, nullptr));
+    return (ExternalDeclarationNode *)parseDeclaration(ds, sematicAnalyzer.BuildInitDeclaratorNode(declarator, nullptr, isTypedef));
 }
 
 void Parser::require(TokenType typeExpectation)
@@ -1209,4 +1219,12 @@ bool Parser::maybe(TokenType typeExpectation)
 bool Parser::maybeNext(TokenType typeExpectation)
 {
     return maybe(typeExpectation) && scanner->Next();
+}
+
+bool Parser::isTypedefIdentifier(const std::shared_ptr<Token> &token)
+{
+    if (token->type != TokenType::ID) return false;
+    auto sym = sematicAnalyzer.GetScopeTree()->Find(token->text);
+    auto debug = dynamic_cast<SymAlias *>(sym);
+    return dynamic_cast<SymAlias *>(sym);
 }

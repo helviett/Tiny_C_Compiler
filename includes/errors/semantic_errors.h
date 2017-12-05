@@ -66,6 +66,7 @@ class Symbol;
 class SymType;
 class SymRecord;
 class IdNode;
+class SymAlias;
 
 class InvalidOperandError: public SemanticError
 {
@@ -135,6 +136,59 @@ class RedeclarationError: public SemanticError
 {
 public:
     RedeclarationError(IdNode *id, Symbol *symbol);
+    const char *what() const throw() override;
+};
+
+class SymFunction;
+
+class MismatchNumberOfArguments: public SemanticError
+{
+public:
+    explicit MismatchNumberOfArguments(SymFunction *function);
+    const char *what() const throw() override;
+};
+
+class BadCalledObjectError: public SemanticError
+{
+
+public:
+    BadCalledObjectError();
+    explicit BadCalledObjectError(IdNode *obj);
+    const char *what() const throw() override;
+};
+
+class BadJumpStatementError: public SemanticError
+{
+public:
+    explicit BadJumpStatementError(std::shared_ptr<Token> statement);
+    const char *what() const throw() override;
+};
+
+class VoidFunctionBadReturnError: public SemanticError
+{
+public:
+    explicit VoidFunctionBadReturnError(std::shared_ptr<Token> statement);
+    const char *what() const throw() override;
+};
+
+class DefinitionDoesntMatchDeclarationError: public SemanticError
+{
+public:
+    explicit DefinitionDoesntMatchDeclarationError();
+    const char *what() const throw() override;
+};
+
+class RedifinitionError: public SemanticError
+{
+public:
+    explicit RedifinitionError(IdNode *id);
+    const char *what() const throw() override;
+};
+
+class BadTypedefUsageError: public SemanticError
+{
+public:
+    explicit BadTypedefUsageError(SymAlias *typeDef);
     const char *what() const throw() override;
 };
 

@@ -8,10 +8,11 @@
 #include "node.h"
 #include "../token.h"
 #include <list>
+#include <symbols.h>
 
 enum class SpecifierKind
 {
-    SIMPLE, COMPLEX, UNDEFINED
+    SIMPLE, STRUCT, ENUM, TYPEDEF
 };
 
 class TypeSpecifiers;
@@ -85,5 +86,19 @@ private:
     std::list<DeclarationSpecifierNode *> list;
 };
 
+class SymAlias;
+
+class TypedefIdentifierNode: public DeclarationSpecifierNode
+{
+public:
+    TypedefIdentifierNode() = default;
+    TypedefIdentifierNode(SymAlias *alias);
+    void Print(std::ostream &os, std::string indent, bool isTail) override;
+    std::shared_ptr<Token> GetToken();
+    SymAlias *GetAlias() const;
+private:
+    SymAlias *alias{nullptr};
+    std::shared_ptr<Token> id;
+};
 
 #endif //TINY_C_COMPILER_DECLARATION_SPECIFIERS_NODES_H

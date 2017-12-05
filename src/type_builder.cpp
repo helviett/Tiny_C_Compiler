@@ -2,7 +2,7 @@
 #include "../includes/nodes/struct.h"
 #include "../includes/symbol_table.h"
 
-SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
+SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers, bool &isTypedef)
 {
     Singed isSinged = Singed::DEFAULT;
     TypeKind kind = TypeKind::NONE;
@@ -10,6 +10,7 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
     int longTimes = 0;
     SymType *type = nullptr;
     uint32_t typeQuals = 0;
+    isTypedef = false;
     for (auto it: declarationSpecifiers->List())
     {
         if (it->Kind() == SpecifierKind::SIMPLE)
@@ -74,20 +75,31 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
                     if (scalarKind != ScalaraKind::UNKNOWN) throw ManyDataTypesError(simple->Value());
                     scalarKind = ScalaraKind::CHAR;
                     kind = TypeKind::SCALAR;
+                    break;
                 case Keyword::CONST:
                     typeQuals |= (uint32_t)TypeQualifier::CONST;
                     break;
                 case Keyword::VOLATILE:
                     typeQuals |= (uint32_t)TypeQualifier::VOLATILE;
                     break;
+                case Keyword::TYPEDEF:
+                    if (isTypedef) throw DuplicateError(simple->Value());
+                    isTypedef = true;
+                    break;
             }
         }
-        else
+        else if ((*it).Kind() == SpecifierKind::STRUCT)
         {
             if (kind != TypeKind ::NONE) throw ManyDataTypesError(((StructSpecifierNode *)it)->GetToken());
             kind = TypeKind::STRUCT;
             type = ((StructSpecifierNode *)it)->GetRecordType();
             // TODO struct and enum
+        }
+        else if ((*it).Kind() == SpecifierKind::TYPEDEF)
+        {
+            if (kind != TypeKind ::NONE) throw ManyDataTypesError(((TypedefIdentifierNode *)it)->GetToken());
+            kind = TypeKind::TYPEDEF;
+            type = ((TypedefIdentifierNode *)it)->GetAlias()->GetType();
         }
     }
     if (kind == TypeKind::NONE) kind = TypeKind::SCALAR;
@@ -134,6 +146,7 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
         case TypeKind::VOID:
             return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::VOID), typeQuals);
         case TypeKind::STRUCT:
+        case TypeKind::TYPEDEF:
             if (typeQuals) return new SymQualifiedType(type, typeQuals);
             return type;
     }
@@ -163,4 +176,10 @@ bool TypeBuilder::isTypeQualifier(SimpleSpecifier *simpleSpecifier)
 {
     auto k = simpleSpecifier->Value()->keyword;
     return k == Keyword::CONST || k == Keyword::VOLATILE || k == Keyword::REGISTER;
+}
+
+SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
+{
+    bool fake;
+    return TypeBuilder::Build(declarationSpecifiers, fake);
 }

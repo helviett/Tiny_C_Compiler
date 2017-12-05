@@ -36,6 +36,9 @@ do
 	pj=$(($pj + 1))
 	prefix=$( echo "$file" | sed -e "s/\.cpp//g" )
 	eval "./$tccpath -p tests/parser/$file > tests/parser/temp.txt"
+	# if [ "$prefix" -gt "152" ]; then
+	# 	eval "./$tccpath -p tests/parser/$file > tests/parser/$prefix.res"
+	# fi
 	cmp -s "tests/parser/$prefix.res" "tests/parser/temp.txt"
 	if [ $? -eq 1 ]; then
 		echo "$file test failed"

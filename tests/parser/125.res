@@ -15,12 +15,12 @@
                 │   └── InitDeclaratorList
                 │       ├── InitDeclarator
                 │       │   ├── a
-                │       │   └── Qualified 1
+                │       │   └── Qualified 0
                 │       │       └── INT8
                 │       └── InitDeclarator
                 │           ├── b
                 │           └── Pointer to
-                │               └── Qualified 1
+                │               └── Qualified 0
                 │                   └── INT8
                 ├── Decl
                 │   └── InitDeclaratorList

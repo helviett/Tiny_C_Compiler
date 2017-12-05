@@ -102,10 +102,13 @@ private:
     ParameterList              *parseParameterList();
     ParameterList               *parseParameterTypeList();
     DeclarationNode            *parseDeclaration(DeclarationSpecifiersNode *declarationSpecifiers = nullptr,
-                                                 InitDeclaratorNode *declarator = nullptr);
+                                                 InitDeclaratorNode *declarator = nullptr,
+                                                 bool isTypedef = false);
     InitDeclaratorListNode     *parseInitDeclaratorList(DeclarationSpecifiersNode *declarationSpecifiers,
-                                                        InitDeclaratorNode *declarator = nullptr);
-    InitDeclaratorNode         *parseInitDeclarator(DeclarationSpecifiersNode *declarationSpecifiers);
+                                                        InitDeclaratorNode *declarator = nullptr,
+                                                        bool isTypeDef = false);
+    InitDeclaratorNode         *parseInitDeclarator(DeclarationSpecifiersNode *declarationSpecifiers,
+                                                    bool isTypeDef);
     InitializerNode            *parseInitializer();
     LabelStatementNode         *parseLabelStatement();
     CompoundStatement          *parseCompoundStatement();
@@ -138,6 +141,7 @@ private:
     bool isDeclarationSpecifier(std::shared_ptr<Token> token);
     bool isSimpleSpecifier(std::shared_ptr<Token> token);
     bool isProperFunctionDeclaration(SymFunction *definition, SymFunction *declaration);
+    bool isTypedefIdentifier(const std::shared_ptr<Token> &token);
     void require(TokenType typeExpectation);
     void requierKeyword(Keyword expectedKeyword);
     void requireNext(TokenType typeExpectation);

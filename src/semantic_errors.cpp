@@ -202,3 +202,88 @@ RedeclarationError::RedeclarationError(IdNode *id, Symbol *symbol)
             }
     }
 }
+
+const char *MismatchNumberOfArguments::what() const throw()
+{
+    return msg.c_str();
+}
+
+MismatchNumberOfArguments::MismatchNumberOfArguments(SymFunction *function)
+{
+    msg = "Mismatch of number of arguments in function call of '" + function->GetName() + "'.";
+}
+
+BadCalledObjectError::BadCalledObjectError(IdNode *obj)
+{
+    auto pos = obj->GetPosition();
+    msg = "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) +
+          "): called object '" + obj->GetName() + "' is not a function.";
+}
+
+const char *BadCalledObjectError::what() const throw()
+{
+    return msg.c_str();
+}
+
+BadCalledObjectError::BadCalledObjectError()
+{
+    msg = "Called object is not a function";
+}
+
+BadJumpStatementError::BadJumpStatementError(std::shared_ptr<Token> statement)
+{
+    msg = "(" + std::to_string(statement->row) + ", " + std::to_string(statement->col) +
+          "): ";
+    if (statement->keyword == Keyword::RETURN)
+        msg += "return statement is out of function.";
+    else
+        msg += statement->text + " statement is out of loop.";
+}
+
+const char *BadJumpStatementError::what() const throw()
+{
+    return msg.c_str();
+}
+
+const char *VoidFunctionBadReturnError::what() const throw()
+{
+    return msg.c_str();
+}
+
+VoidFunctionBadReturnError::VoidFunctionBadReturnError(std::shared_ptr<Token> statement)
+{
+    msg = "(" + std::to_string(statement->row) + ", " + std::to_string(statement->col) +
+          "): reurn with value if function returning void.";
+}
+
+const char *DefinitionDoesntMatchDeclarationError::what() const throw()
+{
+    return msg.c_str();
+}
+
+DefinitionDoesntMatchDeclarationError::DefinitionDoesntMatchDeclarationError()
+{
+    msg = "Definition doesn't match it's declaration";
+}
+
+const char *RedifinitionError::what() const throw()
+{
+    return msg.c_str();
+}
+
+RedifinitionError::RedifinitionError(IdNode *id)
+{
+    auto pos = id->GetPosition();
+    msg = "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) +
+          "): redifinition of '" + id->GetName() + "'.";
+}
+
+BadTypedefUsageError::BadTypedefUsageError(SymAlias *typeDef)
+{
+    msg = "Wrong typedef usage.";
+}
+
+const char *BadTypedefUsageError::what() const throw()
+{
+    return msg.c_str();
+}

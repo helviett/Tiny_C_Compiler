@@ -28,6 +28,8 @@ IdNode *SemanticAnalyzer::BuildIdNode(std::shared_ptr<Token> token)
         {
             case TypeKind::FUNCTION:
                 return new IdNode(token, t);
+            case TypeKind::TYPEDEF:
+                throw BadTypedefUsageError((SymAlias *)symbol);
         }
     }
     throw ""; // Unreachable
@@ -55,7 +57,8 @@ StructSpecifierNode *SemanticAnalyzer::BuildStructSpecifierNode(IdNode *tag,
             auto record = (SymRecord *)s;
             if (structDeclarationList)
             {
-                if (!record->GetOrderedFields().empty()) throw "";
+                if (!((SymRecord *)unqualify(record))->GetOrderedFields().empty())
+                    throw RedifinitionError(tag);
             }
             if (rt)
                 *record = *rt;
@@ -106,16 +109,27 @@ bool SemanticAnalyzer::isPointerType(SymType *type)
     return type->GetTypeKind() == TypeKind::POINTER;
 }
 
-InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer)
+InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer, bool isTypedef)
 {
     auto prev = scopeTree.GetActiveScope()->Find(declarator->GetId()->GetName()); // TODO FUNCTIONS
     if (prev) throw RedeclarationError(declarator->GetId(), prev);
+    auto name = declarator->GetId()->GetName();
     auto t = declarator->GetType();
     if (t->GetTypeKind() == TypeKind::FUNCTION)
-        scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(), t);
+    {
+        if (isTypedef)
+            scopeTree.GetActiveScope()->Insert(name, new SymAlias(name, t));
+        else
+        {
+            ((SymFunction *)t)->SetName(declarator->GetId()->GetName());
+            scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(), t);
+        }
+    }
     else
-        scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(),
-                                           new SymVariable(declarator->GetId()->GetName(), declarator->GetType(), declarator->GetId()));
+        if (isTypedef)
+            scopeTree.GetActiveScope()->Insert(name, new SymAlias(name, t));
+        else
+            scopeTree.GetActiveScope()->Insert(name, new SymVariable(name, declarator->GetType(), declarator->GetId()));
     // TODO initializer type check
 
     return new InitDeclaratorNode(declarator, initializer);
@@ -209,14 +223,14 @@ bool SemanticAnalyzer::isIntegerType(SymType *type)
 
 FunctionCallNode *SemanticAnalyzer::BuildFunctionCallNode(ExprNode *func, ArgumentExprListNode *args)
 {
-    if (func->GetType()->GetTypeKind() != TypeKind::FUNCTION) throw "";
-    auto ftype = (SymFunction *)func->GetType();
+    if (func->GetType()->GetTypeKind() != TypeKind::FUNCTION) throw BadCalledObjectError();
+    auto ftype = (SymFunction *)unqualify(func->GetType());
     size_t i = 0;
     if (args->List().size() != ftype->GetOderedParams().size())
     {
         if (ftype->GetOderedParams().size() != 1 || !isVoidType(ftype->GetOderedParams()[0]->GetType())
             || !args->List().empty())
-            throw "";
+                throw MismatchNumberOfArguments((SymFunction *)unqualify(ftype));
     }
     for (auto &arg : args->List())
     {
@@ -350,7 +364,7 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
             }
             if (isPointerType(ltype) && isIntegerType(rtype))
                 return new BinOpNode(left, right, binOp);
-            throw "";
+            throw InvalidOperandError(binOp, ltype, rtype);
         case TokenType::BITWISE_LSHIFT: case TokenType::BITWISE_RSHIFT:
         case TokenType::BITWISE_AND: case TokenType::BITWISE_XOR: case TokenType::BITWISE_OR:
             if (!isIntegerType(ltype) || !isIntegerType(rtype)) throw InvalidOperandError(binOp, ltype, rtype);
@@ -508,22 +522,23 @@ FunctionDefinitionNode *
 SemanticAnalyzer::BuildFunctionDefinitionNode(DeclaratorNode *declarator, CompoundStatement *body)
 {
     // TODO check qualifiers equality
-    if (declarator->GetType()->GetTypeKind() != TypeKind::FUNCTION) throw "";
+    if (declarator->GetType()->GetTypeKind() != TypeKind::FUNCTION) throw BadCalledObjectError();
     auto f = (SymFunction *)unqualify(declarator->GetType());
     auto sym = scopeTree.Find(declarator->GetId()->GetName());
     SymFunction *fdeclaration = nullptr;
     if (sym)
     {
-        if (sym->GetSymbolClass() != SymbolClass::TYPE) throw "";
+        if (sym->GetSymbolClass() != SymbolClass::TYPE) throw RedeclarationError(declarator->GetId(), sym);
         fdeclaration = (SymFunction *)unqualify((SymType *)sym);
-        if (fdeclaration->GetTypeKind() != TypeKind::FUNCTION) throw "";
-        if (!(fdeclaration->Equal(f))) throw "";
-        if (fdeclaration->Defined()) throw "";
+        if (fdeclaration->GetTypeKind() != TypeKind::FUNCTION) throw RedeclarationError(declarator->GetId(), sym);
+        if (!(fdeclaration->Equal(f))) throw DefinitionDoesntMatchDeclarationError();
+        if (fdeclaration->Defined()) throw RedifinitionError(declarator->GetId());
         fdeclaration->SetOrderedParams(f->GetOderedParams());
         fdeclaration->SetParamsTable(f->GetParamsTable());
         f = fdeclaration; // f = sym? TODO
     }
     f->Define();
+    f->SetName(declarator->GetId()->GetName());
     processingFunctions.push(f);
     scopeTree.GetActiveScope()->Insert(declarator->GetId()->GetName(), f);
     scopeTree.SetActiveScope(f->GetParamsTable());
@@ -586,10 +601,10 @@ void SemanticAnalyzer::FinishLastFunctionProcessing()
 
 ReturnStatementNode *SemanticAnalyzer::BuildReturnStatementNode(std::shared_ptr<Token> statement, ExprNode *expr)
 {
-    if (processingFunctions.empty()) throw "";
+    if (processingFunctions.empty()) throw BadJumpStatementError(std::move(statement));
     auto type = processingFunctions.top();
     auto utype = (SymFunction *)unqualify(type);
-    if (expr && isVoidType(utype->GetReturnType())) throw "";
+    if (expr && isVoidType(utype->GetReturnType())) throw VoidFunctionBadReturnError(statement);
     if (expr) Convert(&expr, utype->GetReturnType());
     return new ReturnStatementNode(expr);
 }
@@ -613,12 +628,18 @@ void SemanticAnalyzer::FinishLastLoopProcessing()
 
 ContinueStatementNode *SemanticAnalyzer::BuildContinueStatementNode(std::shared_ptr<Token> statement)
 {
-    if (processingLoops.empty()) throw "";
+    if (processingLoops.empty()) throw BadJumpStatementError(std::move(statement));
     return new ContinueStatementNode();
 }
 
 BreakStatementNode *SemanticAnalyzer::BuildBreakStatementNode(std::shared_ptr<Token> statement)
 {
-    if (processingLoops.empty()) throw "";
+    if (processingLoops.empty()) throw BadJumpStatementError(std::move(statement));
     return new BreakStatementNode();
+}
+
+TypedefIdentifierNode *SemanticAnalyzer::BuildTypedefIdentifierNode(const std::shared_ptr<Token> &id)
+{
+    auto t = dynamic_cast<SymAlias *>(scopeTree.Find(id->text));
+    return new TypedefIdentifierNode(t);
 }

@@ -15,11 +15,11 @@
                 │   └── InitDeclaratorList
                 │       ├── InitDeclarator
                 │       │   ├── a
-                │       │   └── Qualified 1
+                │       │   └── Qualified 0
                 │       │       └── INT8
                 │       └── InitDeclarator
                 │           ├── b
-                │           └── Qualified 1
+                │           └── Qualified 0
                 │               └── INT8
                 └── ;
                     └── &

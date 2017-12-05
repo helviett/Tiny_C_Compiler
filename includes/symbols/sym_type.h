@@ -21,7 +21,7 @@ enum class BuiltInTypeKind
 
 enum class TypeKind
 {
-    ENUM, STRUCT, POINTER, BUILTIN, ARRAY, FUNCTION
+    ENUM, STRUCT, POINTER, BUILTIN, ARRAY, FUNCTION, TYPEDEF
 };
 
 enum class TypeQualifier
@@ -143,6 +143,10 @@ class SymAlias: public SymType
 {
 public:
     SymAlias(std::string name, SymType *type);
+    SymType *GetType();
+    void Print(std::ostream &os, std::string indent, bool isTail) override;
+    bool Equal(SymType *other) override;
+    bool IsComplete() override;
 private:
     SymType *type;
 };
