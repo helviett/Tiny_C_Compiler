@@ -92,39 +92,39 @@ class IterationStatementNode: public StatementNode
 {
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
+    void SetBody(StatementNode *body);
+protected:
+    StatementNode *body;
 };
 
 class WhileStatementNode: public IterationStatementNode
 {
 public:
-    WhileStatementNode(ExprNode *condition, StatementNode *body): condition(condition), body(body) {}
+    WhileStatementNode(ExprNode *condition, StatementNode *body);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    ExprNode *condition;
-    StatementNode *body;
+    ExprNode *condition{};
 };
 
 class DoWhileStatementNode: public IterationStatementNode
 {
 public:
-    DoWhileStatementNode(ExprNode *condition, StatementNode *body): condition(condition), body(body) {}
+    DoWhileStatementNode(ExprNode *condition, StatementNode *body);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    void SetCondition(ExprNode *condition);
 private:
     ExprNode *condition;
-    StatementNode *body;
 };
 
 class ForStatementNode: public IterationStatementNode
 {
 public:
     ForStatementNode(ExprStatmentNode *init, ExprStatmentNode *condition,
-                     ExprNode *iteration, StatementNode *body):
-            init(init), condition(condition), iteration(iteration), body(body) {}
+                     ExprNode *iteration, StatementNode *body);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     ExprStatmentNode *init, *condition;
-    ExprNode *iteration;
-    StatementNode *body;
+    ExprNode *iteration{};
 };
 
 class LabeledStatementNode: public StatementNode

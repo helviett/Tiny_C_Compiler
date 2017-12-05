@@ -455,10 +455,10 @@ JumpStatementNode *Parser::parseJumpStatement()
                 scanner->Next();
                 break;
             case Keyword::CONTINUE:
-                js = new ContinueStatementNode();
+                js = sematicAnalyzer.BuildContinueStatementNode(t);
                 break;
             case Keyword::BREAK:
-                js = new BreakStatementNode();
+                js = sematicAnalyzer.BuildBreakStatementNode(t);
                 break;
             case Keyword::RETURN:
                 js = scanner->Current()->type == TokenType::SEMICOLON ?
@@ -498,16 +498,25 @@ ForStatementNode *Parser::parseForStatement()
     scanner->Next();
     require(TokenType::LBRACKET);
     scanner->Next();
+    ForStatementNode *res = nullptr;
     auto init = parseExprStatement(), condition = parseExprStatement();
     if (scanner->Current()->type == TokenType::RBRACKET)
     {
         scanner->Next();
-        return new ForStatementNode(init, condition, nullptr, parseStatement());
+        res = new ForStatementNode(init, condition, nullptr, nullptr);
+        sematicAnalyzer.ProcessLoop(res);
+        res->SetBody(parseStatement());
+        sematicAnalyzer.FinishLastLoopProcessing();
+        return res;
     }
     auto iteration = parseExpr();
     require(TokenType::RBRACKET);
     scanner->Next();
-    return new ForStatementNode(init, condition, iteration, parseStatement());
+    res = new ForStatementNode(init, condition, iteration, nullptr);
+    sematicAnalyzer.ProcessLoop(res);
+    res->SetBody(parseStatement());
+    sematicAnalyzer.FinishLastLoopProcessing();
+    return res;
 }
 
 //while (expr) statement
@@ -521,7 +530,11 @@ WhileStatementNode *Parser::parseWhileStatement()
     auto condition = parseExpr();
     require(TokenType::RBRACKET);
     scanner->Next();
-    return new WhileStatementNode(condition, parseStatement());
+    auto res = new WhileStatementNode(condition, nullptr);
+    sematicAnalyzer.ProcessLoop(res);
+    res->SetBody(parseStatement());
+    sematicAnalyzer.FinishLastLoopProcessing();
+    return res;
 }
 
 //do statement while (expr) ;
@@ -530,17 +543,19 @@ DoWhileStatementNode *Parser::parseDoWhileStatement()
 {
     requierKeyword(Keyword::DO);
     scanner->Next();
-    auto body = parseStatement();
+    auto res = new DoWhileStatementNode(nullptr, nullptr);
+    sematicAnalyzer.ProcessLoop(res);
+    res->SetBody(parseStatement());
     requierKeyword(Keyword::WHILE);
     scanner->Next();
     require(TokenType::LBRACKET);
     scanner->Next();
-    auto condition = parseExpr();
+    res->SetCondition(parseExpr());
     require(TokenType::RBRACKET);
     scanner->Next();
     require(TokenType::SEMICOLON);
     scanner->Next();
-    return new DoWhileStatementNode(condition, body);
+    return res;
 }
 
 void Parser::parsePointer(DeclaratorNode *declarator)

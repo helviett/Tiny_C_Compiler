@@ -44,8 +44,12 @@ public:
     EnumeratorNode *BuildEnumeratorNode(IdNode *enumerator, ExprNode *expr);
     EnumSpecifierNode *BuildEnumSpecifierNode(IdNode *tag, EnumeratorList *list);
     ReturnStatementNode *BuildReturnStatementNode(std::shared_ptr<Token> statement, ExprNode *expr);
+    BreakStatementNode *BuildBreakStatementNode(std::shared_ptr<Token> statement);
+    ContinueStatementNode *BuildContinueStatementNode(std::shared_ptr<Token> statement);
     void ProcessFunction(SymType *funcType);
     void FinishLastFunctionProcessing();
+    void ProcessLoop(IterationStatementNode *loop);
+    void FinishLastLoopProcessing();
 private:
     void CheckIncDecRules(ExprNode *expr, std::shared_ptr<Token> op);
     bool isArithmeticType(SymType *type);
@@ -65,6 +69,7 @@ private:
     SymType *unqualify(SymType *type);
     ScopeTree scopeTree;
     std::stack<SymType *> processingFunctions;
+    std::stack<IterationStatementNode *> processingLoops;
 };
 
 #endif //TINY_C_COMPILER_SEMANTIC_ANALYZER_H

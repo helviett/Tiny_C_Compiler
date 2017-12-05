@@ -41,7 +41,7 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
                     break;
                 case Keyword::UNSIGNED:
                     if (isSinged == Singed::SINGED)
-                        throw IncompatibleDeclarationSpecifiersError(simple->Value(), "signed");;
+                        throw IncompatibleDeclarationSpecifiersError(simple->Value(), "signed");
                     if (isSinged == Singed::UNSIGNED) throw DuplicateError(simple->Value());
                     isSinged = Singed::UNSIGNED;
                     kind = TypeKind::SCALAR;

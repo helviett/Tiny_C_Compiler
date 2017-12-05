@@ -596,3 +596,25 @@ bool SemanticAnalyzer::isVoidType(SymType *type)
     return type->GetTypeKind() == TypeKind::BUILTIN &&
             ((SymBuiltInType *)type)->GetBuiltIntTypeKind() == BuiltInTypeKind::VOID;
 }
+
+void SemanticAnalyzer::ProcessLoop(IterationStatementNode *loop)
+{
+    processingLoops.push(loop);
+}
+
+void SemanticAnalyzer::FinishLastLoopProcessing()
+{
+    processingLoops.pop();
+}
+
+ContinueStatementNode *SemanticAnalyzer::BuildContinueStatementNode(std::shared_ptr<Token> statement)
+{
+    if (processingLoops.empty()) throw "";
+    return new ContinueStatementNode();
+}
+
+BreakStatementNode *SemanticAnalyzer::BuildBreakStatementNode(std::shared_ptr<Token> statement)
+{
+    if (processingLoops.empty()) throw "";
+    return new BreakStatementNode();
+}

@@ -336,6 +336,11 @@ void WhileStatementNode::Print(std::ostream &os, std::string indent, bool isTail
     body->Print(os, indent, true);
 }
 
+WhileStatementNode::WhileStatementNode(ExprNode *condition, StatementNode *body): condition(condition)
+{
+    this->body = body;
+}
+
 void DoWhileStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -343,6 +348,16 @@ void DoWhileStatementNode::Print(std::ostream &os, std::string indent, bool isTa
     indent.append(isTail ? "    " : "│   ");
     body->Print(os, indent, false);
     condition->Print(os, indent, true);
+}
+
+DoWhileStatementNode::DoWhileStatementNode(ExprNode *condition, StatementNode *body): condition(condition)
+{
+    this->body = body;
+}
+
+void DoWhileStatementNode::SetCondition(ExprNode *condition)
+{
+    this->condition = condition;
 }
 
 void ForStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -360,6 +375,13 @@ void ForStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
     body->Print(os, indent, true);
 
 }
+
+ForStatementNode::ForStatementNode(ExprStatmentNode *init, ExprStatmentNode *condition, ExprNode *iteration,
+                                   StatementNode *body) : init(init), condition(condition), iteration(iteration)
+{
+    this->body = body;
+}
+
 
 void LabelStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -1021,3 +1043,8 @@ ValueCategory ExprNode::GetValueCategory() const
 }
 
 ConstNode::ConstNode(std::shared_ptr<Token> token) : token(std::move(token)) {}
+
+void IterationStatementNode::SetBody(StatementNode *body)
+{
+    this->body = body;
+}
