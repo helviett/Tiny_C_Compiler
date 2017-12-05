@@ -822,14 +822,14 @@ void StructSpecifierNode::SetRecordType(SymRecord *type)
 }
 
 StructSpecifierNode::StructSpecifierNode(SymRecord *type, std::shared_ptr<Token> structToken) : type(type),
-                                                                                                token(structToken)
+                                                                                                token(std::move(structToken))
 {
     kind = SpecifierKind::COMPLEX;
 }
 
 std::shared_ptr<Token> StructSpecifierNode::GetToken() const
 {
-    return std::shared_ptr<Token>();
+    return token;
 }
 
 void StructDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)

@@ -134,6 +134,7 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
         case TypeKind::VOID:
             return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::VOID), typeQuals);
         case TypeKind::STRUCT:
+            if (typeQuals) return new SymQualifiedType(type, typeQuals);
             return type;
     }
     throw ""; // Unreachable

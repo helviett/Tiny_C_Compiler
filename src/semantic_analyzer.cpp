@@ -134,13 +134,19 @@ SemanticAnalyzer::BuildStructureOrUnionMemberAccessNode(ExprNode *structure, IdN
 {
     auto type = structure->GetType();
     if (type->GetTypeKind() != TypeKind::STRUCT) throw BadMemberAccessError(type, field);
-    auto stype = (SymRecord *)type;
-    if (!stype->IsComplete()) throw BadMemberAccessError(structure->GetType());
+    auto stype = (SymRecord *)unqualify(type);
+    if (!stype->IsComplete()) throw BadMemberAccessError(stype);
     SymVariable *sfield;
     if (!(sfield = (SymVariable *)stype->GetFieldsTable()->Find(field->GetName())))
         throw NonexistentMemberError(stype, field);
     auto res = new StructureOrUnionMemberAccessNode(structure, field);
-    res->SetType(sfield->GetType());
+    uint32_t squals = type->IsQualified() ? ((SymQualifiedType *)type)->GetQualifiers() : 0;
+    auto rest = sfield->GetType();
+    if (rest->IsQualified())
+        ((SymQualifiedType *)rest)->SetQualifiers(((SymQualifiedType *)rest)->GetQualifiers() | squals);
+    else
+        rest = new SymQualifiedType(rest, squals);
+    res->SetType(rest);
     res->SetValueCategory(structure->GetValueCategory());
     return res;
 }
@@ -148,13 +154,13 @@ SemanticAnalyzer::BuildStructureOrUnionMemberAccessNode(ExprNode *structure, IdN
 StructureOrUnionMemberAccessByPointerNode *
 SemanticAnalyzer::BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, IdNode *field, std::shared_ptr<Token> arrow)
 {
-// TODO if IsConstQualified() ..
+    if (isConstQualified(ptr)) throw InvalidOperandError(arrow, nullptr);
     if (ptr->GetType()->GetTypeKind() == TypeKind::ARRAY)
-        ptr->SetType(((SymArray *)ptr->GetType())->ToPointer());
+        ptr->SetType(((SymArray *)unqualify(ptr->GetType()))->ToPointer());
     if (!isPointerType(ptr->GetType())) throw InvalidOperandError(std::move(arrow), ptr->GetType());
-    auto ptype = (SymPointer *)ptr->GetType();
+    auto ptype = (SymPointer *)unqualify(ptr->GetType());
     if (ptype->GetTarget()->GetTypeKind() != TypeKind::STRUCT) throw BadMemberAccessError(ptype, field);
-    auto stype = (SymRecord *)ptype->GetTarget();
+    auto stype = (SymRecord *)unqualify(ptype->GetTarget());
     if (!stype->IsComplete()) throw BadMemberAccessError(stype); // TODO InvalidUseOfIncompleteTypeError
     SymVariable *sfield;
     if (!(sfield = (SymVariable *)stype->GetFieldsTable()->Find(field->GetName())))
@@ -162,8 +168,12 @@ SemanticAnalyzer::BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, 
     auto res = new StructureOrUnionMemberAccessByPointerNode(ptr, field);
     res->SetValueCategory(ValueCategory::LVAVLUE);
     auto rest = sfield->GetType();
-//    rest->SetTypeQualifiers(rest->GetTypeQualifiers() | stype->GetTypeQualifiers());
-    res->SetType(sfield->GetType());
+    uint32_t squals = ptype->GetTarget()->IsQualified() ? ((SymQualifiedType *)ptype->GetTarget())->GetQualifiers() : 0;
+    if (rest->IsQualified())
+        ((SymQualifiedType *)rest)->SetQualifiers(((SymQualifiedType *)rest)->GetQualifiers() | squals);
+    else
+        rest = new SymQualifiedType(rest, squals);
+    res->SetType(rest);
     return res;
 }
 

@@ -41,7 +41,7 @@ const char *NonexistentMemberError::what() const throw()
 
 RequiredModifiableLvalueError::RequiredModifiableLvalueError()
 {
-    msg =  "Required lvalue";
+    msg =  "Required modifiable lvalue";
 }
 
 const char *RequiredModifiableLvalueError::what() const throw()
