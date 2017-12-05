@@ -392,6 +392,8 @@ void LabelStatementNode::Print(std::ostream &os, std::string indent, bool isTail
     statement->Print(os, indent, true);
 }
 
+LabelStatementNode::LabelStatementNode(IdNode *labelName, StatementNode *statement) : labelName(labelName), statement(statement) {}
+
 void DeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -614,6 +616,8 @@ void BlockItemNode::Print(std::ostream &os, std::string indent, bool isTail)
     indent.append(isTail ? "    " : "│   ");
     declOrStatement->Print(os, indent, true);
 }
+
+BlockItemNode::BlockItemNode(Node *declOrStatement) : declOrStatement(declOrStatement) {}
 
 uint64_t BlockItemListNode::Size()
 {

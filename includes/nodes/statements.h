@@ -136,10 +136,10 @@ public:
 class LabelStatementNode: public LabeledStatementNode
 {
 public:
-    LabelStatementNode(IdNode *labelName, StatementNode *statement): labelName(labelName), statement(statement) {}
+    LabelStatementNode(IdNode *labelName, StatementNode *statement);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    IdNode *labelName;
+    IdNode *labelName{};
     StatementNode *statement;
 };
 
@@ -157,7 +157,7 @@ private:
 class BlockItemNode: public Node
 {
 public:
-    explicit BlockItemNode(Node *declOrStatement): declOrStatement(declOrStatement) {}
+    explicit BlockItemNode(Node *declOrStatement);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
     Node *declOrStatement;

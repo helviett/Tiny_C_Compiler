@@ -212,7 +212,12 @@ FunctionCallNode *SemanticAnalyzer::BuildFunctionCallNode(ExprNode *func, Argume
     if (func->GetType()->GetTypeKind() != TypeKind::FUNCTION) throw "";
     auto ftype = (SymFunction *)func->GetType();
     size_t i = 0;
-    if (args->List().size() != ftype->GetOderedParams().size()) throw "";
+    if (args->List().size() != ftype->GetOderedParams().size())
+    {
+        if (ftype->GetOderedParams().size() != 1 || !isVoidType(ftype->GetOderedParams()[0]->GetType())
+            || !args->List().empty())
+            throw "";
+    }
     for (auto &arg : args->List())
     {
         // TODO TypeConversions
@@ -466,7 +471,6 @@ std::shared_ptr<Token> SemanticAnalyzer::extractArithmeticOperationFromAssignmen
         default:
             throw "";
     }
-    throw "";
 }
 
 void SemanticAnalyzer::ImplicitlyConvert(ExprNode **left, ExprNode **right)
