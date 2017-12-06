@@ -413,3 +413,30 @@ void SymEnumerator::Print(std::ostream &os, std::string indent, bool isTail)
     indent.append(isTail ? "    " : "│   ");
     value->Print(os, indent, true);
 }
+
+bool SymEnum::Defined() const
+{
+    return defined;
+}
+
+void SymEnum::Define()
+{
+    defined = true;
+}
+
+SymEnum::SymEnum(IdNode *tag): tag(tag) {}
+
+void SymEnum::Print(std::ostream &os, std::string indent, bool isTail)
+{
+
+}
+
+bool SymEnum::Equal(SymType *other)
+{
+    return false;
+}
+
+bool SymEnum::IsComplete()
+{
+    return defined;
+}

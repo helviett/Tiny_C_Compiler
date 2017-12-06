@@ -21,7 +21,7 @@ enum class BuiltInTypeKind
 
 enum class TypeKind
 {
-    ENUMERATOR, STRUCT, POINTER, BUILTIN, ARRAY, FUNCTION, TYPEDEF
+    ENUM, ENUMERATOR, STRUCT, POINTER, BUILTIN, ARRAY, FUNCTION, TYPEDEF
 };
 
 enum class TypeQualifier
@@ -169,6 +169,20 @@ private:
     IdNode *tag{nullptr};
     SymbolTable *fields{nullptr};
     std::vector<SymVariable *> orderedFields;
+};
+
+class SymEnum: public SymType
+{
+public:
+    explicit SymEnum(IdNode *tag);
+    void Define();
+    bool Defined() const;
+    void Print(std::ostream &os, std::string indent, bool isTail) override;
+    bool Equal(SymType *other) override;
+    bool IsComplete() override;
+private:
+    IdNode *tag{nullptr};
+    bool defined{false};
 };
 
 class SymEnumerator: public SymType

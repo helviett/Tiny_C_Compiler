@@ -572,40 +572,44 @@ TypeCastNode *SemanticAnalyzer::BuildTypeCastNode(SymType *typeName, ExprNode *c
 
 EnumeratorNode *SemanticAnalyzer::BuildEnumeratorNode(IdNode *enumerator, ExprNode *expr)
 {
-    if (!expr) return new EnumeratorNode(enumerator, expr);
-    if (!isIntegerType(expr->GetType())) throw EnumeratorConstantTypeError(enumerator, expr->GetType());
-    Convert(&expr, new SymBuiltInType(BuiltInTypeKind::INT32));
+    auto prev = -1;
+    Evaluator evaluator;
+    if (!expr)
+    {
+        auto token = std::make_shared<Token>(TokenType::NUM_INT, -1, -1, std::to_string(prev + 1));
+        token->intValue = ++prev;
+        expr = new IntConstNode(token);
+    }
+    else
+    {
+        expr = evaluator.Eval(expr);
+        if (!expr) throw RequiredConstantExpression(enumerator);
+        auto intconst = dynamic_cast<IntConstNode *>(expr);
+        if (!intconst) throw RequiredConstantExpression(enumerator);
+        prev = intconst->GetValue()->intValue;
+    }
+    auto symenumerator = scopeTree.GetActiveScope()->Find(enumerator->GetName());
+    if (symenumerator) throw RedeclarationError(enumerator, symenumerator);
+    scopeTree.GetActiveScope()->Insert(enumerator->GetName(), new SymEnumerator(enumerator->GetName(), expr));
     return new EnumeratorNode(enumerator, expr);
 }
 
 EnumSpecifierNode *SemanticAnalyzer::BuildEnumSpecifierNode(IdNode *tag, EnumeratorList *list)
 {
-    auto prev = -1;
-    Evaluator evaler;
-    if (!list) return new EnumSpecifierNode(tag, list);
-    for (auto enumerator: list->List())
+    if (!tag) return new EnumSpecifierNode(tag, list);
+    auto declaration = scopeTree.GetActiveScope()->Find("enum " + tag->GetName());
+    if (declaration)
     {
-        auto id = enumerator->GetId();
-        auto value = enumerator->GetValue();
-        if (!value)
-        {
-            auto token = std::make_shared<Token>(TokenType::NUM_INT, -1, -1, std::to_string(prev + 1));
-            token->intValue = ++prev;
-            value = new IntConstNode(token);
-            enumerator->SetValue(value);
-        }
-        else
-        {
-            value = evaler.Eval(value);
-            if (!value) throw RequiredConstantExpression(id);
-            auto intconst = dynamic_cast<IntConstNode *>(value);
-            if (!intconst) throw RequiredConstantExpression(id);
-            enumerator->SetValue(value);
-            prev = intconst->GetValue()->intValue;
-        }
-        auto symenumerator = scopeTree.GetActiveScope()->Find(id->GetName());
-        if (symenumerator) throw RedeclarationError(id, symenumerator);
-        scopeTree.GetActiveScope()->Insert(id->GetName(), new SymEnumerator(id->GetName(), value));
+        auto symenum = dynamic_cast<SymEnum *>(declaration);
+        if (!symenum) throw RedeclarationError(tag, declaration);
+        if (symenum->Defined() && list) throw RedeclarationError(tag, symenum);
+        if (list) symenum->Define();
+    }
+    else
+    {
+        auto symenum = new SymEnum(tag);
+        if (list) symenum->Define();
+        scopeTree.GetActiveScope()->Insert("enum " + tag->GetName(), symenum);
     }
     return new EnumSpecifierNode(tag, list);
 }

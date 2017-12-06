@@ -38,6 +38,15 @@ ExprNode *Evaluator::Eval(BinOpNode *node)
     FloatConstNode *fleft = dynamic_cast<FloatConstNode *>(left), *fright = dynamic_cast<FloatConstNode *>(right);
     std::shared_ptr<Token> t;
     double value = 0;
+#define EVAL(OP)\
+    if (ileft && iright)\
+    {\
+        value = ileft->GetValue()->intValue OP iright->GetValue()->intValue;\
+        t = std::make_shared<Token>(TokenType::NUM_INT, -1, -1, std::to_string((int)value));\
+        t->intValue = value;\
+        return new IntConstNode(t);\
+    }
+
     switch (node->GetOperation()->type)
     {
         case TokenType::PLUS:
@@ -48,6 +57,26 @@ ExprNode *Evaluator::Eval(BinOpNode *node)
                 t->intValue = value;
                 return new IntConstNode(t);
             }
+        case TokenType::MINUS:
+            if (ileft && iright)
+            {
+                value = ileft->GetValue()->intValue - iright->GetValue()->intValue;
+                t = std::make_shared<Token>(TokenType::NUM_INT, -1, -1, std::to_string((int)value));
+                t->intValue = value;
+                return new IntConstNode(t);
+            }
+        case TokenType::ASTERIX:
+            if (ileft && iright)
+            {
+                value = ileft->GetValue()->intValue * iright->GetValue()->intValue;
+                t = std::make_shared<Token>(TokenType::NUM_INT, -1, -1, std::to_string((int)value));
+                t->intValue = value;
+                return new IntConstNode(t);
+            }
+        case TokenType::BITWISE_AND:
+            EVAL(&);
+        case TokenType::BITWISE_OR:
+            EVAL(|)
 
     }
     return nullptr;
