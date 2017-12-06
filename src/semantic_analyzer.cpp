@@ -277,7 +277,7 @@ PrefixDecrementNode *SemanticAnalyzer::BuildPrefixDecrementNode(ExprNode *expr, 
 UnaryOpNode *SemanticAnalyzer::BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, ExprNode *expr)
 {
     UnaryOpNode *res = nullptr;
-    SymType *t = unqualify(expr->GetType());\
+    SymType *t = unqualify(expr->GetType());
     switch (unaryOp->type)
     {
         case TokenType::BITWISE_AND:
@@ -468,28 +468,29 @@ bool SemanticAnalyzer::isConstQualified(ExprNode *expr)
 
 std::shared_ptr<Token> SemanticAnalyzer::extractArithmeticOperationFromAssignmentBy(const std::shared_ptr<Token> &assignemtBy)
 {
+    auto pos = assignemtBy->position;
     switch (assignemtBy->type)
     {
         case TokenType::ASSIGNMENT_BY_REMINDER:
-            return std::make_shared<Token>(TokenType::REMINDER, assignemtBy->row, assignemtBy->col, "%");
+            return std::make_shared<Token>(TokenType::REMINDER, pos.row, pos.col, "%");
         case TokenType::ASSIGNMENT_BY_BITWISE_XOR:
-            return std::make_shared<Token>(TokenType::BITWISE_XOR, assignemtBy->row, assignemtBy->col, "^");
+            return std::make_shared<Token>(TokenType::BITWISE_XOR, pos.row, pos.col, "^");
         case TokenType::ASSIGNMENT_BY_BITWISE_AND:
-            return std::make_shared<Token>(TokenType::BITWISE_AND, assignemtBy->row, assignemtBy->col, "&");
+            return std::make_shared<Token>(TokenType::BITWISE_AND, pos.row, pos.col, "&");
         case TokenType::ASSIGNMENT_BY_BITWISE_RSHIFT:
-            return std::make_shared<Token>(TokenType::BITWISE_RSHIFT, assignemtBy->row, assignemtBy->col, ">>");
+            return std::make_shared<Token>(TokenType::BITWISE_RSHIFT, pos.row, pos.col, ">>");
         case TokenType::ASSIGNMENT_BY_BITWISE_LSHIFT:
-            return std::make_shared<Token>(TokenType::BITWISE_LSHIFT, assignemtBy->row, assignemtBy->col, "<<");
+            return std::make_shared<Token>(TokenType::BITWISE_LSHIFT, pos.row, pos.col, "<<");
         case TokenType::ASSIGNMENT_BY_DIFFERENCE:
-            return std::make_shared<Token>(TokenType::MINUS, assignemtBy->row, assignemtBy->col, "-");
+            return std::make_shared<Token>(TokenType::MINUS, pos.row, pos.col, "-");
         case TokenType::ASSIGNMENT_BY_SUM:
-            return std::make_shared<Token>(TokenType::PLUS, assignemtBy->row, assignemtBy->col, "+");
+            return std::make_shared<Token>(TokenType::PLUS, pos.row, pos.col, "+");
         case TokenType::ASSIGNMENT_BY_QUOTIENT:
-            return std::make_shared<Token>(TokenType::FORWARD_SLASH, assignemtBy->row, assignemtBy->col, "/");
+            return std::make_shared<Token>(TokenType::FORWARD_SLASH, pos.row, pos.col, "/");
         case TokenType::ASSIGNMENT_BY_PRODUCT:
-                return std::make_shared<Token>(TokenType::ASTERIX, assignemtBy->row, assignemtBy->col, "*");
+                return std::make_shared<Token>(TokenType::ASTERIX, pos.row, pos.col, "*");
         case TokenType::ASSIGNMENT_BY_BITWISE_OR:
-            return std::make_shared<Token>(TokenType::BITWISE_OR, assignemtBy->row, assignemtBy->col, "|");
+            return std::make_shared<Token>(TokenType::BITWISE_OR, pos.row, pos.col, "|");
         default:
             throw UnknownError();
     }
@@ -540,6 +541,7 @@ SemanticAnalyzer::BuildFunctionDefinitionNode(DeclaratorNode *declarator, Compou
         if (fdeclaration->GetTypeKind() != TypeKind::FUNCTION) throw RedeclarationError(declarator->GetId(), sym);
         if (!(fdeclaration->Equal(f))) throw DefinitionDoesntMatchDeclarationError();
         if (fdeclaration->Defined()) throw RedifinitionError(declarator->GetId());
+        if (!equalQualifiers(f->GetReturnType(), fdeclaration->GetReturnType())) throw ConfclitingTypesError(f);
         fdeclaration->SetOrderedParams(f->GetOderedParams());
         fdeclaration->SetParamsTable(f->GetParamsTable());
         f = fdeclaration; // f = sym? TODO
@@ -583,9 +585,9 @@ EnumeratorNode *SemanticAnalyzer::BuildEnumeratorNode(IdNode *enumerator, ExprNo
     else
     {
         expr = evaluator.Eval(expr);
-        if (!expr) throw RequiredConstantExpression(enumerator);
+        if (!expr) throw RequiredConstantExpressionError(enumerator);
         auto intconst = dynamic_cast<IntConstNode *>(expr);
-        if (!intconst) throw RequiredConstantExpression(enumerator);
+        if (!intconst) throw RequiredConstantExpressionError(enumerator);
         prev = intconst->GetValue()->intValue;
     }
     auto symenumerator = scopeTree.GetActiveScope()->Find(enumerator->GetName());
@@ -667,4 +669,14 @@ TypedefIdentifierNode *SemanticAnalyzer::BuildTypedefIdentifierNode(const std::s
 {
     auto t = dynamic_cast<SymAlias *>(scopeTree.Find(id->text));
     return new TypedefIdentifierNode(t);
+}
+
+bool SemanticAnalyzer::equalQualifiers(SymType *one, SymType *other)
+{
+    if (one->IsQualified() && other->IsQualified())
+    {
+        auto q1 = ((SymQualifiedType *)one)->GetQualifiers(), q2 = ((SymQualifiedType *)other)->GetQualifiers();
+        return  !(q1 ^ q2);
+    }
+    return !one->IsQualified() && !other->IsQualified();
 }

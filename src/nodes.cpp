@@ -61,9 +61,9 @@ IdNode::IdNode(std::shared_ptr<Token> token, SymType *type): IdNode(token)
     this->type = type;
 }
 
-std::pair<int, int> IdNode::GetPosition() const
+Position IdNode::GetPosition() const
 {
-    return std::make_pair(token->row, token->col);
+    return token->position;
 }
 
 ExprNode *IdNode::Eval(Evaluator *evaluator)

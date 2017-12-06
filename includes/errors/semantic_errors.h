@@ -199,10 +199,17 @@ public:
     const char *what() const throw() override;
 };
 
-class RequiredConstantExpression: public  SemanticError
+class RequiredConstantExpressionError: public  SemanticError
 {
 public:
-    RequiredConstantExpression(IdNode *id);
+    explicit RequiredConstantExpressionError(IdNode *id);
+    const char *what() const throw() override;
+};
+
+class ConfclitingTypesError: public SemanticError
+{
+public:
+    explicit ConfclitingTypesError(SymFunction *func);
     const char *what() const throw() override;
 };
 

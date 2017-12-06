@@ -16,24 +16,27 @@ void TokenizeOnly()
     tok.OpenFile(sourceFile.Get());
     std::shared_ptr<Token> t;
     while ((t = tok.Next())->type != TokenType::END_OF_FILE)
+    {
+        auto pos = t->position;
         switch (t->type)
         {
             case TokenType::NUM_INT:case TokenType::CHARACTER:
-                printf("(%d, %d)\t\t\t%s\t\t\t%llu\t\t\t\t  %s\n", t->row, t->col,
+                printf("(%d, %d)\t\t\t%s\t\t\t%llu\t\t\t\t  %s\n", pos.row, pos.col,
                        TokenTypeToString[t->type].c_str(), t->intValue,t->text.c_str());
                 break;
             case TokenType::NUM_FLOAT:
-                printf("(%d, %d)\t\t\t%s\t\t\t%llf\t\t\t\t  %s\n", t->row,
-                       t->col, TokenTypeToString[t->type].c_str(), t->floatValue, t->text.c_str());
+                printf("(%d, %d)\t\t\t%s\t\t\t%llf\t\t\t\t  %s\n", pos.row,
+                       pos.col, TokenTypeToString[t->type].c_str(), t->floatValue, t->text.c_str());
                 break;
             case TokenType::KEYWORD:
-                printf("(%d, %d)\t\t\t%s\t\t\t%d\t\t\t\t  %s\n", t->row, t->col,
+                printf("(%d, %d)\t\t\t%s\t\t\t%d\t\t\t\t  %s\n", pos.row, pos.col,
                        TokenTypeToString[t->type].c_str(), (int)t->keyword,t->text.c_str());
                 break;
             default:
-                printf("(%d, %d)\t\t\t%s\t\t\t%s\t\t\t\t  %s\n", t->row, t->col,
+                printf("(%d, %d)\t\t\t%s\t\t\t%s\t\t\t\t  %s\n", pos.row, pos.col,
                        TokenTypeToString[t->type].c_str(), t->stringValue,t->text.c_str());
         }
+    }
 
 }
 

@@ -366,7 +366,6 @@ DeclarationSpecifiersNode *Parser::parseTypeQualifierList()
     auto t = scanner->Current();
     while (isTypeQualifier(t))
     {
-
         tql->Add(new TypeQualifierNode(t));
         t = scanner->Next();
     }
@@ -534,8 +533,11 @@ DoWhileStatementNode *Parser::parseDoWhileStatement()
 void Parser::parsePointer(DeclaratorNode *declarator)
 {
     if (!maybeNext(TokenType::ASTERIX)) return;
-    auto tql = parseTypeQualifierList(); // TODO that's what SymPointer gonna store
-    declarator->SetType(new SymPointer(declarator->GetType()));
+    auto quals = TypeBuilder::BuildTypeQualifiers(parseTypeQualifierList()); // TODO that's what SymPointer gonna store
+    if (quals)
+        declarator->SetType(new SymQualifiedType(new SymPointer(declarator->GetType()), quals));
+    else
+        declarator->SetType(new SymPointer(declarator->GetType()));
     parsePointer(declarator);
 }
 

@@ -3,7 +3,8 @@
 
 InvalidOperandError::InvalidOperandError(std::shared_ptr<Token> op, SymType *ltype, SymType *rtype)
 {
-    msg = "(" + std::to_string(op->col) + ", " + std::to_string(op->row) +
+    auto pos = op->position;
+    msg = "(" + std::to_string(pos.col) + ", " + std::to_string(pos.row) +
           "): Invalid iperands for '" + op->text + "'";
 }
 
@@ -30,7 +31,7 @@ BadIndexingError::BadIndexingError(SymType *type)
 NonexistentMemberError::NonexistentMemberError(SymRecord *record, IdNode *field)
 {
     auto pos = field->GetPosition();
-    msg = "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) +
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): nonexistent member '" + field->GetName() + "'.";
 }
 
@@ -57,7 +58,8 @@ const char *IncompatibleDeclarationSpecifiersError::what() const throw()
 IncompatibleDeclarationSpecifiersError::IncompatibleDeclarationSpecifiersError(std::shared_ptr<Token> token,
                                                                                std::string spec)
 {
-    msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
+    auto pos = token->position;
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): both " + token->text + " and " + spec + " presented.";
 }
 
@@ -68,7 +70,8 @@ const char *ManyDataTypesError::what() const throw()
 
 ManyDataTypesError::ManyDataTypesError(std::shared_ptr<Token> token)
 {
-    msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
+    auto pos = token->position;
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): two or more data types in declaration specifiers. ";
 }
 
@@ -79,7 +82,8 @@ const char *DuplicateError::what() const throw()
 
 DuplicateError::DuplicateError(std::shared_ptr<Token> token)
 {
-    msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
+    auto pos = token->position;
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): duplicate " + token->text + ".";
 }
 
@@ -90,7 +94,8 @@ const char *UnsupportedTypeError::what() const throw()
 
 UnsupportedTypeError::UnsupportedTypeError(std::shared_ptr<Token> token)
 {
-    msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
+    auto pos = token->position;
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): Unsupported combination of declaration specifiers. ";
 }
 
@@ -101,13 +106,15 @@ const char *TooLongError::what() const throw()
 
 TooLongError::TooLongError(std::shared_ptr<Token> token, int longtimes)
 {
-    msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
+    auto pos = token->position;
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): " + std::to_string(longtimes) + "is too long for tcc.";
 }
 
 UndeclaredIdentifierError::UndeclaredIdentifierError(std::shared_ptr<Token> token)
 {
-    msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
+    auto pos = token->position;
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           ") UndeclaredIdentifierError: " + token->stringValue + ".";
 }
 
@@ -124,7 +131,7 @@ const char *BadMemberAccessError::what() const throw()
 BadMemberAccessError::BadMemberAccessError(SymType *notrecord, IdNode *field)
 {
     auto pos = field->GetPosition();
-    msg = "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) +
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): request for member '" + field->GetName() + "' in something not a structure or union.";
 }
 
@@ -132,13 +139,14 @@ BadMemberAccessError::BadMemberAccessError(SymType *record)
 {
     auto rec = (SymRecord *) record;
     auto pos = rec->GetTag()->GetPosition();
-    msg = "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) +
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): invalid use of undefined type: '" + rec->GetName() + "'";
 }
 
 InvalidUseOfIncompleteType::InvalidUseOfIncompleteType(std::shared_ptr<Token> token, SymType *type)
 {
-    msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
+    auto pos = token->position;
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           ") InvalidUseOfIncompleteType in '" + token->stringValue + "'.";
 }
 
@@ -154,7 +162,8 @@ const char *RequiredScalarTypeError::what() const throw()
 
 RequiredScalarTypeError::RequiredScalarTypeError(std::shared_ptr<Token> token, SymType *got)
 {
-    msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
+    auto pos = token->position;
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           ") Requaired scalar type in '" + token->stringValue + "'.";
 }
 
@@ -176,7 +185,7 @@ const char *EnumeratorConstantTypeError::what() const throw()
 EnumeratorConstantTypeError::EnumeratorConstantTypeError(IdNode *enumerator, SymType *exprType)
 {
     auto pos = enumerator->GetPosition();
-    msg = "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) +
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): enumerator value for '" + enumerator->GetName() + "' is not an integer constant.";
 }
 
@@ -188,7 +197,7 @@ const char *RedeclarationError::what() const throw()
 RedeclarationError::RedeclarationError(IdNode *id, Symbol *symbol)
 {
     auto pos = id->GetPosition();
-    msg = "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) +
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): redeclaration of '" + id->GetName() + "'.\n";
     IdNode *prev = nullptr;
     switch (symbol->GetSymbolClass())
@@ -198,7 +207,7 @@ RedeclarationError::RedeclarationError(IdNode *id, Symbol *symbol)
             {
                 auto pos = prev->GetPosition();
                 msg += "Previous declaration of '" + id->GetName() + "' was at " +
-                        "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) + ")";
+                        "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) + ")";
             }
     }
 }
@@ -216,7 +225,7 @@ MismatchNumberOfArguments::MismatchNumberOfArguments(SymFunction *function)
 BadCalledObjectError::BadCalledObjectError(IdNode *obj)
 {
     auto pos = obj->GetPosition();
-    msg = "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) +
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): called object '" + obj->GetName() + "' is not a function.";
 }
 
@@ -232,7 +241,8 @@ BadCalledObjectError::BadCalledObjectError()
 
 BadJumpStatementError::BadJumpStatementError(std::shared_ptr<Token> statement)
 {
-    msg = "(" + std::to_string(statement->row) + ", " + std::to_string(statement->col) +
+    auto pos = statement->position;
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): ";
     if (statement->keyword == Keyword::RETURN)
         msg += "return statement is out of function.";
@@ -252,7 +262,8 @@ const char *VoidFunctionBadReturnError::what() const throw()
 
 VoidFunctionBadReturnError::VoidFunctionBadReturnError(std::shared_ptr<Token> statement)
 {
-    msg = "(" + std::to_string(statement->row) + ", " + std::to_string(statement->col) +
+    auto pos = statement->position;
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): reurn with value if function returning void.";
 }
 
@@ -274,7 +285,7 @@ const char *RedifinitionError::what() const throw()
 RedifinitionError::RedifinitionError(IdNode *id)
 {
     auto pos = id->GetPosition();
-    msg = "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) +
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): redifinition of '" + id->GetName() + "'.";
 }
 
@@ -298,14 +309,24 @@ UnknownError::UnknownError()
     msg = "Unknown error";
 }
 
-const char *RequiredConstantExpression::what() const throw()
+const char *RequiredConstantExpressionError::what() const throw()
 {
     return msg.c_str();
 }
 
-RequiredConstantExpression::RequiredConstantExpression(IdNode *id)
+RequiredConstantExpressionError::RequiredConstantExpressionError(IdNode *id)
 {
     auto pos = id->GetPosition();
-    msg = "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) +
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): value of '" + id->GetName() + "' is not constant.";
+}
+
+const char *ConfclitingTypesError::what() const throw()
+{
+    return msg.c_str();
+}
+
+ConfclitingTypesError::ConfclitingTypesError(SymFunction *func)
+{
+    msg = "Confclicting types for '" + func->GetName() + "'.";
 }

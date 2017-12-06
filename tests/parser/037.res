@@ -28,14 +28,16 @@
             └── InitDeclarator
                 ├── d
                 ├── Pointer to
-                │   └── Pointer to
-                │       └── Qualified 1
-                │           └── INT32
+                │   └── Qualified 1
+                │       └── Pointer to
+                │           └── Qualified 1
+                │               └── INT32
                 └── Initializer 
                     └── typcast
                         ├── Pointer to
-                        │   └── Pointer to
-                        │       └── Qualified 1
-                        │           └── INT32
+                        │   └── Qualified 1
+                        │       └── Pointer to
+                        │           └── Qualified 1
+                        │               └── INT32
                         └── 0
 

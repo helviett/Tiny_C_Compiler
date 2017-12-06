@@ -21,7 +21,8 @@ class UnexpectedTokenError: public SyntaxError
 public:
     UnexpectedTokenError(std::shared_ptr<Token> token, TokenType expectation): SyntaxError(token), expectation(expectation)
     {
-        msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
+        auto pos = token->position;
+        msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
               ") SyntaxError: expected " + TokenTypeToString[expectation] + ", got " + token->text + ".";
     }
 
@@ -38,7 +39,8 @@ class UnexpectedKeywordError: public SyntaxError
 public:
     UnexpectedKeywordError(std::shared_ptr<Token> token, Keyword expectation): SyntaxError(token)
     {
-        msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
+        auto pos = token->position;
+        msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
               ") SyntaxError: expected " + std::to_string((int)expectation) + ", got " + token->text + ".";
     }
 
@@ -53,7 +55,8 @@ class NoDeclarationSpecifiers: public SyntaxError
 public:
     NoDeclarationSpecifiers(std::shared_ptr<Token> token): SyntaxError(token)
     {
-        msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
+        auto pos = token->position;
+        msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
               ") SyntaxError: missing declaration specifiers";
     }
 
@@ -67,12 +70,13 @@ class EmptyEnumeratorListError: public SyntaxError
 {
 public:
     EmptyEnumeratorListError(std::shared_ptr<Token> token): SyntaxError(token)
-            {
-                    msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
-                          ") SyntaxError: empty enumerator list";
-            }
+    {
+            auto pos = token->position;
+            msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
+                  ") SyntaxError: empty enumerator list";
+    }
 
-            const char * what() const throw() override
+    const char * what() const throw() override
     {
         return msg.c_str();
     }
@@ -82,12 +86,13 @@ class InvalidExpression: public SyntaxError
 {
 public:
     InvalidExpression(std::shared_ptr<Token> token): SyntaxError(token)
-            {
-                    msg = "(" + std::to_string(token->row) + ", " + std::to_string(token->col) +
-                          ") SyntaxError: invalid expression";
-            }
+    {
+        auto pos = token->position;
+        msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
+                  ") SyntaxError: invalid expression";
+    }
 
-            const char * what() const throw() override
+    const char * what() const throw() override
     {
         return msg.c_str();
     }

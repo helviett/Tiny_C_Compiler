@@ -216,7 +216,7 @@ public:
     IdNode(std::shared_ptr<Token> token, SymType *type);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     std::string GetName() const;
-    std::pair<int, int> GetPosition() const;
+    Position GetPosition() const;
     ExprNode * Eval(Evaluator *evaluator) override;
 private:
     std::shared_ptr<Token> token;

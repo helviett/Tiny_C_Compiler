@@ -120,10 +120,19 @@ static std::unordered_map<std::string, Keyword> StringToKeyword
     {"do", Keyword::DO}
 };
 
+struct Position
+{
+    Position(int row, int col): row(row), col(col) {}
+
+    Position() = default;
+
+    int row, col;
+};
+
 struct Token
 {
     TokenType type;
-    int row, col;
+    Position position;
     std::string text;
     union
     {
@@ -132,7 +141,11 @@ struct Token
         long double floatValue;
         Keyword keyword;
     };
-    Token(TokenType type, int row, int col, std::string text): type(type), row(row), col(col), text(std::move(text)) {}
+    Token(TokenType type, int row, int col, std::string text): type(type), text(std::move(text))
+    {
+        position.row = row;
+        position.col = col;
+    }
 };
 
 #endif //TINY_C_COMPILER_TOKEN_H

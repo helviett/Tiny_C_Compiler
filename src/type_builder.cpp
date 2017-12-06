@@ -192,3 +192,21 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers)
     bool fake;
     return TypeBuilder::Build(declarationSpecifiers, fake);
 }
+
+uint32_t TypeBuilder::BuildTypeQualifiers(DeclarationSpecifiersNode *declarationSpecifiers)
+{
+    uint32_t res = 0;
+    for (auto it: declarationSpecifiers->List())
+    {
+        switch (dynamic_cast<SimpleSpecifier *>(it)->Value()->keyword)
+        {
+            case Keyword::CONST:
+                res |= (uint32_t)TypeQualifier::CONST;
+                break;
+            case Keyword::VOLATILE:
+                res |= (uint32_t)TypeQualifier::VOLATILE;
+                break;
+        }
+    }
+    return res;
+}

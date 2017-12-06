@@ -18,6 +18,7 @@ public:
     static SymType *Build(DeclarationSpecifiersNode *declarationSpecifiers, bool &isTypedef);
     static SymType *Build(DeclarationSpecifiersNode *declarationSpecifiers);
     static SymRecord *Build(StructDeclarationListNode *structDeclarationList, IdNode *tag);
+    static uint32_t BuildTypeQualifiers(DeclarationSpecifiersNode *declarationSpecifiers);
 private:
     enum class Singed { SINGED, UNSIGNED, DEFAULT};
     enum class ScalaraKind { INTEGER, FLOAT, DOUBLE, UNKNOWN, CHAR };

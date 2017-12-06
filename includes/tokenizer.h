@@ -25,13 +25,6 @@ static std::unordered_set<std::string> Keywords =
     "signed", "sizeof", "static", "struct", "typedef", "union", "unsigned", "void", "volatile", "while"
 };
 
-struct Position
-{
-    Position() {}
-    Position(int row, int col): row(row), col(col) {}
-    int row, col;
-};
-
 class Tokenizer
 {
 public:
