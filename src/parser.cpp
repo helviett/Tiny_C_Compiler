@@ -156,8 +156,7 @@ ExprNode *Parser::parseCastExpr()
     {
         scanner->Next();
         auto typName = parseTypeName();
-        require(TokenType::RBRACKET);
-        scanner->Next();
+        requireNext(TokenType::RBRACKET);
         return sematicAnalyzer.BuildTypeCastNode(typName, parseCastExpr());
     }
     return parseUnaryExpr();
@@ -304,11 +303,8 @@ ExprNode *Parser::parseAssignmentExpr()
 ExprNode *Parser::parseExpr()
 {
     ExprNode *ae = parseAssignmentExpr();
-    while (scanner->Current()->type == TokenType::COMMA)
-    {
-        scanner->Next();
+    while (maybeNext(TokenType::COMMA))
         ae = new CommaSeparatedExprs(ae, parseExpr());
-    }
     return ae;
 }
 
@@ -405,14 +401,10 @@ StatementNode *Parser::parseStatement()
 
 ExprStatmentNode *Parser::parseExprStatement()
 {
-    if (scanner->Current()->type == TokenType::SEMICOLON)
-    {
-        scanner->Next();
+    if (maybeNext(TokenType::SEMICOLON))
         return new ExprStatmentNode(nullptr);
-    }
     auto et = new ExprStatmentNode(parseExpr());
-    require(TokenType::SEMICOLON);
-    scanner->Next();
+    requireNext(TokenType::SEMICOLON);
     return et;
 }
 
@@ -421,19 +413,13 @@ ExprStatmentNode *Parser::parseExprStatement()
 
 SelectionStatementNode *Parser::parseSelectionStatement()
 {
-    requierKeyword(Keyword::IF);
-    scanner->Next();
-    require(TokenType::LBRACKET);
-    scanner->Next();
+    requireKeywordNext(Keyword::IF);
+    requireNext(TokenType::LBRACKET);
     auto expr = parseExpr();
-    require(TokenType::RBRACKET);
-    scanner->Next();
+    requireNext(TokenType::RBRACKET);
     auto then = parseStatement();
-    if (scanner->Current()->type == TokenType::KEYWORD && scanner->Current()->keyword == Keyword::ELSE)
-    {
-        scanner->Next();
+    if (maybeKeywordNext(Keyword::ELSE))
         return new IfElseStatementNode(expr, then, parseStatement());
-    }
     return new IfStatementNode(expr, then);
 }
 
@@ -451,9 +437,8 @@ JumpStatementNode *Parser::parseJumpStatement()
         switch (t->keyword)
         {
             case Keyword::GOTO:
-                require(TokenType::ID);
+                requireNext(TokenType::ID);
                 js = new GotoStatementNode(new IdNode(scanner->Current()));
-                scanner->Next();
                 break;
             case Keyword::CONTINUE:
                 js = sematicAnalyzer.BuildContinueStatementNode(t);
@@ -467,8 +452,7 @@ JumpStatementNode *Parser::parseJumpStatement()
                      sematicAnalyzer.BuildReturnStatementNode(t, parseExpr());
                 break;
         }
-    require(TokenType::SEMICOLON);
-    scanner->Next();
+    requireNext(TokenType::SEMICOLON);
     return js;
 }
 
@@ -495,15 +479,12 @@ IterationStatementNode *Parser::parseIterationStatement()
 
 ForStatementNode *Parser::parseForStatement()
 {
-    requierKeyword(Keyword::FOR);
-    scanner->Next();
-    require(TokenType::LBRACKET);
-    scanner->Next();
+    requireKeywordNext(Keyword::FOR);
+    requireNext(TokenType::LBRACKET);
     ForStatementNode *res = nullptr;
     auto init = parseExprStatement(), condition = parseExprStatement();
-    if (scanner->Current()->type == TokenType::RBRACKET)
+    if (maybeNext(TokenType::RBRACKET))
     {
-        scanner->Next();
         res = new ForStatementNode(init, condition, nullptr, nullptr);
         sematicAnalyzer.ProcessLoop(res);
         res->SetBody(parseStatement());
@@ -511,8 +492,7 @@ ForStatementNode *Parser::parseForStatement()
         return res;
     }
     auto iteration = parseExpr();
-    require(TokenType::RBRACKET);
-    scanner->Next();
+    requireNext(TokenType::RBRACKET);
     res = new ForStatementNode(init, condition, iteration, nullptr);
     sematicAnalyzer.ProcessLoop(res);
     res->SetBody(parseStatement());
@@ -524,13 +504,10 @@ ForStatementNode *Parser::parseForStatement()
 
 WhileStatementNode *Parser::parseWhileStatement()
 {
-    requierKeyword(Keyword::WHILE);
-    scanner->Next();
-    require(TokenType::LBRACKET);
-    scanner->Next();
+    requireKeywordNext(Keyword::WHILE);
+    requireNext(TokenType::LBRACKET);
     auto condition = parseExpr();
-    require(TokenType::RBRACKET);
-    scanner->Next();
+    requireNext(TokenType::RBRACKET);
     auto res = new WhileStatementNode(condition, nullptr);
     sematicAnalyzer.ProcessLoop(res);
     res->SetBody(parseStatement());
@@ -542,27 +519,21 @@ WhileStatementNode *Parser::parseWhileStatement()
 
 DoWhileStatementNode *Parser::parseDoWhileStatement()
 {
-    requierKeyword(Keyword::DO);
-    scanner->Next();
+    requireKeywordNext(Keyword::DO);
     auto res = new DoWhileStatementNode(nullptr, nullptr);
     sematicAnalyzer.ProcessLoop(res);
     res->SetBody(parseStatement());
-    requierKeyword(Keyword::WHILE);
-    scanner->Next();
-    require(TokenType::LBRACKET);
-    scanner->Next();
+    requireKeywordNext(Keyword::WHILE);
+    requireNext(TokenType::LBRACKET);
     res->SetCondition(parseExpr());
-    require(TokenType::RBRACKET);
-    scanner->Next();
-    require(TokenType::SEMICOLON);
-    scanner->Next();
+    requireNext(TokenType::RBRACKET);
+    requireNext(TokenType::SEMICOLON);
     return res;
 }
 
 void Parser::parsePointer(DeclaratorNode *declarator)
 {
-    if (scanner->Current()->type != TokenType::ASTERIX) return;
-    scanner->Next();
+    if (!maybeNext(TokenType::ASTERIX)) return;
     auto tql = parseTypeQualifierList(); // TODO that's what SymPointer gonna store
     declarator->SetType(new SymPointer(declarator->GetType()));
     parsePointer(declarator);
@@ -585,9 +556,8 @@ void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarat
     bool gotId = false;
     SymType *lastType = nullptr;
     DeclaratorNode *newDecl = nullptr;
-    if (scanner->Current()->type == TokenType::LBRACKET)
+    if (maybeNext(TokenType::LBRACKET))
     {
-        scanner->Next();
         newDecl = new DeclaratorNode();
         parseDeclarator(kind, newDecl);
         auto type = newDecl->GetType();
@@ -612,19 +582,18 @@ void Parser::parseDirectDeclarator(DeclaratorKind kind, DeclaratorNode *declarat
         }
         gotId = true;
         if (newDecl) declarator->SetId(newDecl->GetId());
-        require(TokenType::RBRACKET);
-        scanner->Next();
+        requireNext(TokenType::RBRACKET);
     }
 
     if (kind == DeclaratorKind::NORMAL && !gotId) require(TokenType::ID);
-    if (kind != DeclaratorKind::ABSTRACT && scanner->Current()->type == TokenType::ID)
+    if (kind != DeclaratorKind::ABSTRACT && maybe(TokenType::ID))
     {
         declarator->SetId(new IdNode(scanner->Current()));
         scanner->Next();
     }
-    while (scanner->Current()->type == TokenType::LSQUARE_BRACKET || scanner->Current()->type == TokenType::LBRACKET)
+    while (maybe(TokenType::LSQUARE_BRACKET) || maybe(TokenType::LBRACKET))
     {
-        if (scanner->Current()->type == TokenType::LSQUARE_BRACKET)
+        if (maybe(TokenType::LSQUARE_BRACKET))
             parseArrayDeclarator(declarator);
         else
             parseFunctionDeclarator(declarator);
@@ -666,24 +635,20 @@ void Parser::parseFunctionDeclarator(DeclaratorNode *declarator)
         table->Insert(name, var);
     }
     table->SetParent(sematicAnalyzer.GetScopeTree()->GetActiveScope());
-    require(TokenType::RBRACKET);
+    requireNext(TokenType::RBRACKET);
     declarator->SetType(new SymFunction(declarator->GetType(), table, orderedParamTypes));
-    scanner->Next();
 }
 
 void Parser::parseArrayDeclarator(DeclaratorNode *declarator)
 {
-    require(TokenType::LSQUARE_BRACKET);
-    scanner->Next();
-    if (scanner->Current()->type == TokenType::RSQUARE_BRACKET)
+    requireNext(TokenType::LSQUARE_BRACKET);
+    if (maybeNext(TokenType::RSQUARE_BRACKET))
     {
-        scanner->Next();
         declarator->SetType(new SymArray(declarator->GetType(), nullptr));
         return;
     }
     auto ce = parseConstantExpr();
-    require(TokenType::RSQUARE_BRACKET);
-    scanner->Next();
+    requireNext(TokenType::RSQUARE_BRACKET);
     declarator->SetType(new SymArray(declarator->GetType(), ce));
 }
 
@@ -691,8 +656,7 @@ void Parser::parseArrayDeclarator(DeclaratorNode *declarator)
 
 PointerNode *Parser::parsePointer()
 {
-    if (scanner->Current()->type != TokenType::ASTERIX) return nullptr;
-    scanner->Next();
+    if (!maybeNext(TokenType::ASTERIX)) return nullptr;
     return new PointerNode(parseTypeQualifierList(), parsePointer());
 }
 
@@ -701,14 +665,11 @@ PointerNode *Parser::parsePointer()
 ArgumentExprListNode *Parser::parseArgumentExprList()
 {
     auto ael = new ArgumentExprListNode();
-    while (scanner->Current()->type != TokenType::RBRACKET)
+    while (!maybe(TokenType::RBRACKET))
     {
         ael->Add(parseAssignmentExpr());
-        if (scanner->Current()->type != TokenType::RBRACKET)
-        {
-            require(TokenType::COMMA);
-            scanner->Next();
-        }
+        if (!maybe(TokenType::RBRACKET))
+            requireNext(TokenType::COMMA);
     }
     return ael;
 }
@@ -725,7 +686,7 @@ bool Parser::isStorageClassSpecifier(std::shared_ptr<Token> token)
 
 bool Parser::isFunctionSpecifier(std::shared_ptr<Token> token)
 {
-    return token->type == TokenType::KEYWORD && token->keyword == Keyword::INLINE;
+    return maybeKeyword(Keyword::INLINE);
 }
 
 //parameter-declaration ::= declaration-specifiers declarator | declaration-specifiers `abstract-declarator
@@ -748,14 +709,14 @@ DeclarationSpecifiersNode *Parser::parseDeclarationSpecifiers()
     auto ds = new DeclarationSpecifiersNode();
     while(isDeclarationSpecifier(scanner->Current()))
     {
-        if (scanner->Current()->type == TokenType::ID && isTypedefIdentifier(scanner->Current()))
+        if (maybe(TokenType::ID) && isTypedefIdentifier(scanner->Current()))
         {
             ds->Add(sematicAnalyzer.BuildTypedefIdentifierNode(scanner->Current()));
             scanner->Next();
         }
-        else if (scanner->Current()->keyword == Keyword::STRUCT)
+        else if (maybeKeyword(Keyword::STRUCT))
             ds->Add((DeclarationSpecifierNode *)parseStructSpecifier());
-        else if (scanner->Current()->keyword == Keyword::ENUM)
+        else if (maybeKeyword(Keyword::ENUM))
             ds->Add((DeclarationSpecifierNode *)parseEnumSpecifier());
         else
         {
@@ -772,14 +733,11 @@ DeclarationSpecifiersNode *Parser::parseDeclarationSpecifiers()
 ParameterList *Parser::parseParameterList()
 {
     auto pl = new ParameterList();
-    while (scanner->Current()->type != TokenType::RBRACKET)
+    while (!maybe(TokenType::RBRACKET))
     {
         pl->Add(parseParameterDeclaration());
-        if (scanner->Current()->type != TokenType::RBRACKET)
-        {
-            require(TokenType::COMMA);
-            scanner->Next();
-        }
+        if (!maybe(TokenType::RBRACKET))
+            requireNext(TokenType::COMMA);
     }
     return pl;
 }
@@ -810,14 +768,13 @@ DeclarationNode * Parser::parseDeclaration(DeclarationSpecifiersNode *declaratio
 {
 
     auto ds = declarationSpecifiers ? declarationSpecifiers : parseDeclarationSpecifiers();
-    if (scanner->Current()->type == TokenType::SEMICOLON && !declarator)
+    if (maybe(TokenType::SEMICOLON) && !declarator)
     {
         scanner->Next();
         return new DeclarationNode(ds, nullptr);
     }
     auto idl = parseInitDeclaratorList(ds, declarator);
-    require(TokenType::SEMICOLON);
-    scanner->Next();
+    requireNext(TokenType::SEMICOLON);
     return new DeclarationNode(ds, idl);
 }
 
@@ -832,13 +789,13 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList(DeclarationSpecifiersNod
     {
 
         idl->Add(declarator);
-        if (scanner->Current()->type != TokenType::COMMA) return idl;
+        if (!maybe(TokenType::COMMA)) return idl;
         scanner->Next();
     }
     do
     {
         idl->Add(parseInitDeclarator(declarationSpecifiers, isTypeDef));
-    } while (scanner->Current()->type == TokenType::COMMA && scanner->Next());
+    } while (maybeNext(TokenType::COMMA));
     return idl;
 }
 
@@ -851,11 +808,8 @@ InitDeclaratorNode *Parser::parseInitDeclarator(DeclarationSpecifiersNode *decla
     declarator->SetType(TypeBuilder::Build(declarationSpecifiers));
     parseDeclarator(DeclaratorKind::NORMAL, declarator);
     InitializerNode *initializer = nullptr;
-    if (scanner->Current()->type == TokenType::ASSIGNMENT)
-    {
-        scanner->Next();
+    if (maybeNext(TokenType::ASSIGNMENT))
         initializer = parseInitializer();
-    }
     return sematicAnalyzer.BuildInitDeclaratorNode(declarator, initializer, isTypeDef);
 }
 
@@ -863,11 +817,10 @@ InitDeclaratorNode *Parser::parseInitDeclarator(DeclarationSpecifiersNode *decla
 
 InitializerNode *Parser::parseInitializer()
 {
-    if (scanner->Current()->type == TokenType::LCURLY_BRACKET)
+    if (maybe(TokenType::LCURLY_BRACKET))
     {
         auto il =  (InitializerNode *)parseInitializerList();
-        require(TokenType::RCURLY_BRACKET);
-        scanner->Next();
+        requireNext(TokenType::RCURLY_BRACKET);
         return il;
     }
     return new SimpleInitializer(parseAssignmentExpr());
@@ -880,7 +833,7 @@ LabelStatementNode *Parser::parseLabelStatement()
     require(TokenType::ID);
     auto id = new IdNode(scanner->Current());
     scanner->Next();
-    require(TokenType::COLON);
+    requireNext(TokenType::COLON);
     scanner->Next();
     return new LabelStatementNode(id, parseStatement());
 }
@@ -898,9 +851,8 @@ CompoundStatement *Parser::parseCompoundStatement()
         return new CompoundStatement(nullptr);
     }
     auto blockItemList = parseBlockItemList();
-    require(TokenType::RCURLY_BRACKET);
+    requireNext(TokenType::RCURLY_BRACKET);
     sematicAnalyzer.GetScopeTree()->EndScope();
-    scanner->Next();
     return new CompoundStatement(blockItemList);
 }
 
@@ -909,7 +861,7 @@ CompoundStatement *Parser::parseCompoundStatement()
 BlockItemListNode *Parser::parseBlockItemList()
 {
     auto blockItemList = new BlockItemListNode();
-    while (scanner->Current()->type != TokenType::RCURLY_BRACKET)
+    while (!maybe(TokenType::RCURLY_BRACKET))
     {
         blockItemList->Add(parseBlockItem());
     }
@@ -931,19 +883,18 @@ EnumSpecifierNode *Parser::parseEnumSpecifier()
 {
     IdNode *id = nullptr;
     EnumeratorList *list = nullptr;
-    requierKeyword(Keyword::ENUM);
+    requireKeyword(Keyword::ENUM);
     if (scanner->Next()->type == TokenType::ID)
     {
         id = new IdNode(scanner->Current());
         scanner->Next();
     }
     if (!id) require(TokenType::LCURLY_BRACKET);
-    if (scanner->Current()->type == TokenType::LCURLY_BRACKET && scanner->Next())
+    if (maybeNext(TokenType::LCURLY_BRACKET))
     {
         list = parseEnumeratorList();
         if (!list->Size()) throw EmptyEnumeratorListError(scanner->Current());
-        require(TokenType::RCURLY_BRACKET);
-        scanner->Next();
+        requireNext(TokenType::RCURLY_BRACKET);
     }
     return sematicAnalyzer.BuildEnumSpecifierNode(id, list);
 }
@@ -955,9 +906,9 @@ EnumeratorList *Parser::parseEnumeratorList()
     auto list = new EnumeratorList();
     do
     {
-        if (scanner->Current()->type == TokenType::RCURLY_BRACKET) break;
+        if (maybe(TokenType::RCURLY_BRACKET)) break;
         list->Add(parseEnumerator());
-    } while(scanner->Current()->type == TokenType::COMMA && scanner->Next());
+    } while(maybeNext(TokenType::COMMA));
     return list;
 }
 
@@ -968,7 +919,7 @@ EnumeratorNode *Parser::parseEnumerator()
     require(TokenType::ID);
     auto id = new IdNode(scanner->Current());
     scanner->Next();
-    if (scanner->Current()->type == TokenType::ASSIGNMENT && scanner->Next())
+    if (maybeNext(TokenType::ASSIGNMENT))
         return sematicAnalyzer.BuildEnumeratorNode(id, parseConstantExpr());
     return sematicAnalyzer.BuildEnumeratorNode(id, nullptr);
 }
@@ -988,8 +939,7 @@ bool Parser::isSimpleSpecifier(std::shared_ptr<Token> token)
 StructSpecifierNode *Parser::parseStructSpecifier()
 {
     auto stoken = scanner->Current();
-    requierKeyword(Keyword::STRUCT);
-    scanner->Next();
+    requireKeywordNext(Keyword::STRUCT);
     IdNode *id = maybe(TokenType::ID) ? new IdNode(scanner->Current()) : nullptr;
     if (!id)
     {
@@ -1030,12 +980,12 @@ StructDeclarationNode *Parser::parseStructDeclaration()
 StructDeclaratorNode *Parser::parseStructDeclarator(SymType *baseType)
 {
     if (maybeNext(TokenType::COLON))
-        return new StructDeclaratorNode(nullptr, (ExprNode *)parseConstantExpr());
+        return new StructDeclaratorNode(nullptr, parseConstantExpr());
     auto declarator = new DeclaratorNode();
     declarator->SetType(baseType);
     parseDeclarator(DeclaratorKind::NORMAL, declarator);
-    if (scanner->Current()->type == TokenType::COLON && scanner->Next())
-        return new StructDeclaratorNode(declarator, (ExprNode *)parseConstantExpr());
+    if (maybeNext(TokenType::COLON))
+        return new StructDeclaratorNode(declarator, parseConstantExpr());
     return new StructDeclaratorNode(declarator, nullptr);
 }
 
@@ -1060,9 +1010,9 @@ DeclarationSpecifiersNode *Parser::parseSpecifierQualifierList()
     bool spec;
     while(isTypeQualifier(scanner->Current()) || isTypeSpecifier(scanner->Current()))
     {
-        if (scanner->Current()->keyword == Keyword::STRUCT)
+        if (maybeKeyword(Keyword::STRUCT))
             tnn->Add(parseStructSpecifier());
-        else if (scanner->Current()->keyword == Keyword::ENUM)
+        else if (maybeKeyword(Keyword::ENUM))
             tnn->Add(parseEnumSpecifier());
         else
         {
@@ -1083,9 +1033,9 @@ InitializerListNode *Parser::parseInitializerList()
     auto il = new InitializerListNode();
     do
     {
-        if (scanner->Current()->type == TokenType::RCURLY_BRACKET) break;
+        if (maybe(TokenType::RCURLY_BRACKET)) break;
         il->Add(parseDesignatedInitializer());
-    } while (scanner->Current()->type == TokenType::COMMA && scanner->Next());
+    } while (maybeNext(TokenType::COMMA));
     return il;
 }
 
@@ -1094,8 +1044,7 @@ InitializerListNode *Parser::parseInitializerList()
 DesignationNode *Parser::parseDesignation()
 {
     auto designatorList = parseDesignatorList();
-    require(TokenType::ASSIGNMENT);
-    scanner->Next();
+    requireNext(TokenType::ASSIGNMENT);
     return new DesignationNode(designatorList);
 }
 
@@ -1107,7 +1056,7 @@ DesignatorListNode *Parser::parseDesignatorList()
     do
     {
         dl->Add(parseDesignator());
-    } while(scanner->Current()->type == TokenType::LSQUARE_BRACKET || scanner->Current()->type == TokenType::DOT);
+    } while(maybe(TokenType::LSQUARE_BRACKET) || maybe(TokenType::DOT));
     return dl;
 }
 
@@ -1115,16 +1064,13 @@ DesignatorListNode *Parser::parseDesignatorList()
 
 DesignatorNode *Parser::parseDesignator()
 {
-    if (scanner->Current()->type == TokenType::LSQUARE_BRACKET)
+    if (maybeNext(TokenType::LSQUARE_BRACKET))
     {
-        scanner->Next();
         auto constExpr = parseConstantExpr();
-        require(TokenType::RSQUARE_BRACKET);
-        scanner->Next();
+        requireNext(TokenType::RSQUARE_BRACKET);
         return new ArrayDesignator((ExprNode *)constExpr);
     }
-    require(TokenType::DOT);
-    scanner->Next();
+    requireNext(TokenType::DOT);
     require(TokenType::ID);
     auto smd = new StructMemberDesignator(new IdNode(scanner->Current()));
     scanner->Next();
@@ -1135,7 +1081,7 @@ DesignatorNode *Parser::parseDesignator()
 
 DesignatedInitializerNode *Parser::parseDesignatedInitializer()
 {
-    if (scanner->Current()->type == TokenType::DOT || scanner->Current()->type == TokenType::LSQUARE_BRACKET)
+    if (maybe(TokenType::DOT) || maybe(TokenType::LSQUARE_BRACKET))
         return new DesignatedInitializerNode(parseDesignation(), parseInitializer());
     return new DesignatedInitializerNode(nullptr, parseInitializer());
 }
@@ -1145,7 +1091,7 @@ DesignatedInitializerNode *Parser::parseDesignatedInitializer()
 TranslationUnitNode *Parser::parseTranslationUnit()
 {
     auto tu = new TranslationUnitNode();
-    while (scanner->Current()->type != TokenType::END_OF_FILE)
+    while (!maybe(TokenType::END_OF_FILE))
         tu->Add(parseExternalDeclaration());
     return tu;
 }
@@ -1157,15 +1103,12 @@ ExternalDeclarationNode *Parser::parseExternalDeclaration()
     auto ds = parseDeclarationSpecifiers();
     auto isTypedef = false;
     auto type = TypeBuilder::Build(ds, isTypedef);
-    if (scanner->Current()->type == TokenType::SEMICOLON)
-    {
-        scanner->Next();
+    if (maybeNext(TokenType::SEMICOLON))
         return (ExternalDeclarationNode *)new DeclarationNode(ds, nullptr);
-    }
     auto declarator = new DeclaratorNode();
     declarator->SetType(type);
     parseDeclarator(DeclaratorKind::NORMAL, declarator);
-    if (scanner->Current()->type == TokenType::LCURLY_BRACKET)
+    if (maybe(TokenType::LCURLY_BRACKET))
     {
         auto res = sematicAnalyzer.BuildFunctionDefinitionNode(declarator, nullptr);
         auto body = parseCompoundStatement();
@@ -1174,11 +1117,8 @@ ExternalDeclarationNode *Parser::parseExternalDeclaration()
         sematicAnalyzer.FinishLastFunctionProcessing();
         return res;
     }
-    if (scanner->Current()->type == TokenType::ASSIGNMENT)
-    {
-        scanner->Next();
+    if (maybeNext(TokenType::ASSIGNMENT))
         return parseDeclaration(ds, sematicAnalyzer.BuildInitDeclaratorNode(declarator, parseInitializer(), isTypedef));
-    }
     return parseDeclaration(ds, sematicAnalyzer.BuildInitDeclaratorNode(declarator, nullptr, isTypedef));
 }
 
@@ -1187,15 +1127,10 @@ void Parser::require(TokenType typeExpectation)
     if (scanner->Current()->type != typeExpectation) throw UnexpectedTokenError(scanner->Current(), typeExpectation);
 }
 
-void Parser::requierKeyword(Keyword expectedKeyword)
+void Parser::requireKeyword(Keyword expectedKeyword)
 {
     if (scanner->Current()->type != TokenType::KEYWORD || scanner->Current()->keyword != expectedKeyword)
         throw UnexpectedKeywordError(scanner->Current(), expectedKeyword);
-}
-
-bool Parser::isProperFunctionDeclaration(SymFunction *definition, SymFunction *declaration)
-{
-    return definition == declaration;
 }
 
 void Parser::requireNext(TokenType typeExpectation)
@@ -1206,7 +1141,7 @@ void Parser::requireNext(TokenType typeExpectation)
 
 void Parser::requireKeywordNext(Keyword expectedKeyword)
 {
-    requierKeyword(expectedKeyword);
+    requireKeyword(expectedKeyword);
     scanner->Next();
 }
 
@@ -1224,6 +1159,15 @@ bool Parser::isTypedefIdentifier(const std::shared_ptr<Token> &token)
 {
     if (token->type != TokenType::ID) return false;
     auto sym = sematicAnalyzer.GetScopeTree()->Find(token->text);
-    auto debug = dynamic_cast<SymAlias *>(sym);
     return dynamic_cast<SymAlias *>(sym);
+}
+
+bool Parser::maybeKeywordNext(Keyword keyword)
+{
+    return maybeKeyword(keyword) && scanner->Next();
+}
+
+bool Parser::maybeKeyword(Keyword keyword)
+{
+    return scanner->Current()->type == TokenType::KEYWORD && scanner->Current()->keyword == keyword;
 }

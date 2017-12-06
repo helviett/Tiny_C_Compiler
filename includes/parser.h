@@ -140,14 +140,16 @@ private:
     bool isFunctionSpecifier(std::shared_ptr<Token> token);
     bool isDeclarationSpecifier(std::shared_ptr<Token> token);
     bool isSimpleSpecifier(std::shared_ptr<Token> token);
-    bool isProperFunctionDeclaration(SymFunction *definition, SymFunction *declaration);
+
     bool isTypedefIdentifier(const std::shared_ptr<Token> &token);
     void require(TokenType typeExpectation);
-    void requierKeyword(Keyword expectedKeyword);
+    void requireKeyword(Keyword expectedKeyword);
     void requireNext(TokenType typeExpectation);
     void requireKeywordNext(Keyword expectedKeyword);
     bool maybe(TokenType typeExpectation);
     bool maybeNext(TokenType typeExpectation);
+    bool maybeKeyword(Keyword keyword);
+    bool maybeKeywordNext(Keyword keyword);
 
     Tokenizer *scanner;
     SyntaxTree tree;
