@@ -282,7 +282,10 @@ void AssignmentNode::Print(std::ostream &os, std::string indent, bool isTail)
 }
 
 AssignmentNode::AssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp) : left(left), right(right),
-                                                                                                       assignmentOp(assignmentOp) {}
+                                                                                                       assignmentOp(assignmentOp)
+{
+    this->type = left->GetType();
+}
 
 ExprNode *AssignmentNode::Eval(Evaluator *evaluator)
 {
@@ -803,6 +806,11 @@ void EnumSpecifierNode::Print(std::ostream &os, std::string indent, bool isTail)
         return;
     }
     enumeratorList->Print(os, indent, true);
+}
+
+EnumSpecifierNode::EnumSpecifierNode(IdNode *id, EnumeratorList *enumeratorList) : id(id), enumeratorList(enumeratorList)
+{
+    this->kind = SpecifierKind::ENUM;
 }
 
 void EnumeratorNode::Print(std::ostream &os, std::string indent, bool isTail)

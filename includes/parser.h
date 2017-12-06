@@ -107,7 +107,7 @@ private:
     InitDeclaratorListNode     *parseInitDeclaratorList(DeclarationSpecifiersNode *declarationSpecifiers,
                                                         InitDeclaratorNode *declarator = nullptr,
                                                         bool isTypeDef = false);
-    InitDeclaratorNode         *parseInitDeclarator(DeclarationSpecifiersNode *declarationSpecifiers,
+    InitDeclaratorNode         *parseInitDeclarator(SymType *type,
                                                     bool isTypeDef);
     InitializerNode            *parseInitializer();
     LabelStatementNode         *parseLabelStatement();

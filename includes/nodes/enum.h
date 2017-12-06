@@ -37,10 +37,10 @@ protected:
 class EnumSpecifierNode: public DeclarationSpecifierNode
 {
 public:
-    EnumSpecifierNode(IdNode *id, EnumeratorList *enumeratorList): id(id), enumeratorList(enumeratorList) {}
+    EnumSpecifierNode(IdNode *id, EnumeratorList *enumeratorList);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
 private:
-    IdNode *id;
+    IdNode *id{};
     EnumeratorList *enumeratorList;
 };
 

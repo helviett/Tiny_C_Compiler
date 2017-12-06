@@ -3,21 +3,25 @@
     │   ├── Declarator
     │   │   ├── swap
     │   │   └── Function returning
-    │   │       ├── VOID
+    │   │       ├── Qualified 0
+    │   │       │   └── VOID
     │   │       └── Params
     │   │           ├── x
     │   │           │   └── Pointer to
-    │   │           │       └── INT32
+    │   │           │       └── Qualified 0
+    │   │           │           └── INT32
     │   │           └── y
     │   │               └── Pointer to
-    │   │                   └── INT32
+    │   │                   └── Qualified 0
+    │   │                       └── INT32
     │   └── {}
     │       └── BlockItemList
     │           ├── Decl
     │           │   └── InitDeclaratorList
     │           │       └── InitDeclarator
     │           │           ├── temp
-    │           │           └── INT32
+    │           │           └── Qualified 0
+    │           │               └── INT32
     │           ├── ;
     │           │   └── =
     │           │       ├── temp
@@ -38,12 +42,15 @@
     │   ├── Declarator
     │   │   ├── choose_pivot
     │   │   └── Function returning
-    │   │       ├── INT32
+    │   │       ├── Qualified 0
+    │   │       │   └── INT32
     │   │       └── Params
     │   │           ├── i
-    │   │           │   └── INT32
+    │   │           │   └── Qualified 0
+    │   │           │       └── INT32
     │   │           └── j
-    │   │               └── INT32
+    │   │               └── Qualified 0
+    │   │                   └── INT32
     │   └── {}
     │       └── BlockItemList
     │           └── return
@@ -56,31 +63,39 @@
         ├── Declarator
         │   ├── quicksort
         │   └── Function returning
-        │       ├── VOID
+        │       ├── Qualified 0
+        │       │   └── VOID
         │       └── Params
         │           ├── list
         │           │   └── Array of
-        │           │       └── INT32
+        │           │       └── Qualified 0
+        │           │           └── INT32
         │           ├── m
-        │           │   └── INT32
+        │           │   └── Qualified 0
+        │           │       └── INT32
         │           └── n
-        │               └── INT32
+        │               └── Qualified 0
+        │                   └── INT32
         └── {}
             └── BlockItemList
                 ├── Decl
                 │   └── InitDeclaratorList
                 │       ├── InitDeclarator
                 │       │   ├── key
-                │       │   └── INT32
+                │       │   └── Qualified 0
+                │       │       └── INT32
                 │       ├── InitDeclarator
                 │       │   ├── i
-                │       │   └── INT32
+                │       │   └── Qualified 0
+                │       │       └── INT32
                 │       ├── InitDeclarator
                 │       │   ├── j
-                │       │   └── INT32
+                │       │   └── Qualified 0
+                │       │       └── INT32
                 │       └── InitDeclarator
                 │           ├── k
-                │           └── INT32
+                │           └── Qualified 0
+                │               └── INT32
                 └── if
                     ├── <
                     │   ├── m

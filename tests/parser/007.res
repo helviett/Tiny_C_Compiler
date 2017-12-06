@@ -3,20 +3,24 @@
         ├── Declarator
         │   ├── main
         │   └── Function returning
-        │       ├── INT32
+        │       ├── Qualified 0
+        │       │   └── INT32
         │       └── Params
         │           └── #0
-        │               └── VOID
+        │               └── Qualified 0
+        │                   └── VOID
         └── {}
             └── BlockItemList
                 ├── Decl
                 │   └── InitDeclaratorList
                 │       ├── InitDeclarator
                 │       │   ├── sum
-                │       │   └── INT32
+                │       │   └── Qualified 0
+                │       │       └── INT32
                 │       └── InitDeclarator
                 │           ├── count
-                │           └── INT32
+                │           └── Qualified 0
+                │               └── INT32
                 ├── ;
                 │   └── /
                 │       ├── sum

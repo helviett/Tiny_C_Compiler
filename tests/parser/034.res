@@ -3,38 +3,44 @@
     │   └── InitDeclaratorList
     │       └── InitDeclarator
     │           ├── a
-    │           └── INT32
+    │           └── Qualified 0
+    │               └── INT32
     ├── Decl
     │   └── InitDeclaratorList
     │       ├── InitDeclarator
     │       │   ├── b
-    │       │   └── INT32
+    │       │   └── Qualified 0
+    │       │       └── INT32
     │       └── InitDeclarator
     │           ├── c
-    │           └── INT32
+    │           └── Qualified 0
+    │               └── INT32
     ├── Decl
     │   └── InitDeclaratorList
     │       └── InitDeclarator
     │           ├── d
-    │           ├── INT32
-    │           └── 10
+    │           ├── Qualified 0
+    │           │   └── INT32
+    │           └── Initializer 
+    │               └── 10
     ├── Decl
     │   └── InitDeclaratorList
     │       ├── InitDeclarator
     │       │   ├── e
-    │       │   ├── INT32
-    │       │   └── typcast
-    │       │       ├── TypeName
-    │       │       │   └── INT32
+    │       │   ├── Qualified 0
+    │       │   │   └── INT32
+    │       │   └── Initializer 
     │       │       └── 40
     │       └── InitDeclarator
     │           ├── f
-    │           ├── INT32
-    │           └── -
-    │               ├── =
-    │               │   ├── b
-    │               │   └── 17
-    │               └── 12
+    │           ├── Qualified 0
+    │           │   └── INT32
+    │           └── Initializer 
+    │               └── -
+    │                   ├── =
+    │                   │   ├── b
+    │                   │   └── 17
+    │                   └── 12
     ├── Decl
     │   └── InitDeclaratorList
     │       └── InitDeclarator
@@ -42,7 +48,8 @@
     │           └── Array of
     │               ├── Array of
     │               │   ├── Array of
-    │               │   │   ├── FLOAT
+    │               │   │   ├── Qualified 0
+    │               │   │   │   └── FLOAT
     │               │   │   └── 50
     │               │   └── 60
     │               └── 70
@@ -52,47 +59,57 @@
     │           ├── array2
     │           └── Pointer to
     │               └── Pointer to
-    │                   └── INT32
+    │                   └── Qualified 0
+    │                       └── INT32
     ├── Decl
     │   └── InitDeclaratorList
     │       └── InitDeclarator
     │           ├── array3
     │           ├── Array of
-    │           │   ├── INT32
+    │           │   ├── Qualified 0
+    │           │   │   └── INT32
     │           │   └── 3
     │           └── InitializerList
     │               ├── DesignatedInitializer
-    │               │   └── 1
+    │               │   └── Initializer 
+    │               │       └── 1
     │               ├── DesignatedInitializer
-    │               │   └── 2
+    │               │   └── Initializer 
+    │               │       └── 2
     │               └── DesignatedInitializer
     │                   ├── 
     │                   │   └── DesignatorList
     │                   │       └── []
     │                   │           └── 2
-    │                   └── 3
+    │                   └── Initializer 
+    │                       └── 3
     └── Decl
         └── InitDeclaratorList
             └── InitDeclarator
                 ├── array4
                 ├── Array of
-                │   ├── INT32
+                │   ├── Qualified 0
+                │   │   └── INT32
                 │   └── 4
                 └── InitializerList
                     ├── DesignatedInitializer
-                    │   └── 1
+                    │   └── Initializer 
+                    │       └── 1
                     ├── DesignatedInitializer
-                    │   └── 2
+                    │   └── Initializer 
+                    │       └── 2
                     ├── DesignatedInitializer
                     │   ├── 
                     │   │   └── DesignatorList
                     │   │       └── []
                     │   │           └── 2
-                    │   └── 3
+                    │   └── Initializer 
+                    │       └── 3
                     └── DesignatedInitializer
                         ├── 
                         │   └── DesignatorList
                         │       └── []
                         │           └── 3
-                        └── 4
+                        └── Initializer 
+                            └── 4
 

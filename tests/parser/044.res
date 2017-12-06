@@ -3,17 +3,20 @@
         ├── Declarator
         │   ├── main
         │   └── Function returning
-        │       ├── VOID
+        │       ├── Qualified 0
+        │       │   └── VOID
         │       └── Params
         │           └── #0
-        │               └── VOID
+        │               └── Qualified 0
+        │                   └── VOID
         └── {}
             └── BlockItemList
                 ├── Decl
                 │   └── InitDeclaratorList
                 │       └── InitDeclarator
                 │           ├── a
-                │           └── INT32
+                │           └── Qualified 0
+                │               └── INT32
                 └── if else
                     ├── &&
                     │   ├── <=
@@ -32,6 +35,8 @@
                         │       └── ;
                         │           └── -=
                         │               ├── a
-                        │               └── 12
+                        │               └── -
+                        │                   ├── a
+                        │                   └── 12
                         └── ;
 

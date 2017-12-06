@@ -1,1 +1,1 @@
-(1, 17) SyntaxError: expected ID, got ;.
+(1, 17) SyntaxError: missing declaration specifiers

@@ -192,4 +192,18 @@ public:
     const char *what() const throw() override;
 };
 
+class UnknownError: public SemanticError
+{
+public:
+    UnknownError();
+    const char *what() const throw() override;
+};
+
+class RequiredConstantExpression: public  SemanticError
+{
+public:
+    RequiredConstantExpression(IdNode *id);
+    const char *what() const throw() override;
+};
+
 #endif //TINY_C_COMPILER_SEMANTIC_ERRORS_H

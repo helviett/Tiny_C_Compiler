@@ -6,7 +6,7 @@ IdNode *SemanticAnalyzer::BuildIdNode(std::shared_ptr<Token> token)
 {
     auto symbol = scopeTree.Find(token->text);
     if (!symbol) throw UndeclaredIdentifierError(token);
-    if (symbol->GetSymbolClass() == SymbolClass::UNDEFINED) throw ""; // Unreachable
+    if (symbol->GetSymbolClass() == SymbolClass::UNDEFINED) throw UnknownError(); // Unreachable
     if (symbol->GetSymbolClass() == SymbolClass::VARIABLE)
     {
 
@@ -34,14 +34,14 @@ IdNode *SemanticAnalyzer::BuildIdNode(std::shared_ptr<Token> token)
                 return (IdNode *)((SymEnumerator *)symbol)->GetValue();
         }
     }
-    throw ""; // Unreachable
+    throw UnknownError(); // Unreachable
 }
 
 StructSpecifierNode *SemanticAnalyzer::BuildStructSpecifierNode(IdNode *tag,
                                                                 StructDeclarationListNode *structDeclarationList,
                                                                 std::shared_ptr<Token> structToken)
 {
-    if (!tag && !structDeclarationList) throw "";
+    if (!tag && !structDeclarationList) throw UnknownError();
     SymRecord *rt = nullptr;
     if (structDeclarationList)
     {
@@ -54,8 +54,8 @@ StructSpecifierNode *SemanticAnalyzer::BuildStructSpecifierNode(IdNode *tag,
         s = scopeTree.GetActiveScope()->Find("struct " + tag->GetName());
         if (s)
         {
-            if (s->GetSymbolClass() != SymbolClass::TYPE) throw ""; // Unreachable
-            if (((SymType *)s)->GetTypeKind() != TypeKind::STRUCT) throw ""; // Unreachable
+            if (s->GetSymbolClass() != SymbolClass::TYPE) throw UnknownError(); // Unreachable
+            if (((SymType *)s)->GetTypeKind() != TypeKind::STRUCT) throw UnknownError(); // Unreachable
             auto record = (SymRecord *)s;
             if (structDeclarationList)
             {
@@ -132,7 +132,6 @@ InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *de
             scopeTree.GetActiveScope()->Insert(name, new SymAlias(name, t));
         else
             scopeTree.GetActiveScope()->Insert(name, new SymVariable(name, declarator->GetType(), declarator->GetId()));
-    // TODO initializer type check
     if (initializer)
     {
         auto simple = dynamic_cast<SimpleInitializer *>(initializer);
@@ -215,7 +214,7 @@ ArrayAccessNode *SemanticAnalyzer::BuildArrayAccessNode(ExprNode *array, ExprNod
     if (array->GetType()->GetTypeKind() == TypeKind::ARRAY)
         array->SetType(((SymArray *)array->GetType())->ToPointer());
     if (array->GetType()->GetTypeKind() != TypeKind::POINTER) throw BadIndexingError();
-    array->SetValueCategory(ValueCategory::LVAVLUE); // ?
+    array->SetValueCategory(ValueCategory::LVAVLUE);
     if (!isIntegerType(index->GetType())) throw BadIndexingError(index->GetType());
     auto res = new ArrayAccessNode(array, index);
     res->SetValueCategory(ValueCategory::LVAVLUE);
@@ -245,7 +244,6 @@ FunctionCallNode *SemanticAnalyzer::BuildFunctionCallNode(ExprNode *func, Argume
     }
     for (auto &arg : args->List())
     {
-        // TODO TypeConversions
         if (!arg->GetType()->Equal(ftype->GetOderedParams()[i]->GetType()))
         {
             Convert(&arg, ftype->GetOderedParams()[i]->GetType());
@@ -445,7 +443,6 @@ AssignmentNode *SemanticAnalyzer::BuildAssignmentNode(ExprNode *left, ExprNode *
     }
     if (isPointerType(ltype) && isPointerType(rtype))
     {
-        // TODO type qualifiers checking
         if (ltype->Equal(rtype) || isVoidPointer(ltype) || isVoidPointer(rtype))
             return new AssignmentNode(left, right, assignmentOp);
     }
@@ -494,7 +491,7 @@ std::shared_ptr<Token> SemanticAnalyzer::extractArithmeticOperationFromAssignmen
         case TokenType::ASSIGNMENT_BY_BITWISE_OR:
             return std::make_shared<Token>(TokenType::BITWISE_OR, assignemtBy->row, assignemtBy->col, "|");
         default:
-            throw "";
+            throw UnknownError();
     }
 }
 
@@ -532,7 +529,6 @@ void SemanticAnalyzer::Convert(ExprNode **expr, SymType *type)
 FunctionDefinitionNode *
 SemanticAnalyzer::BuildFunctionDefinitionNode(DeclaratorNode *declarator, CompoundStatement *body)
 {
-    // TODO check qualifiers equality
     if (declarator->GetType()->GetTypeKind() != TypeKind::FUNCTION) throw BadCalledObjectError();
     auto f = (SymFunction *)unqualify(declarator->GetType());
     auto sym = scopeTree.Find(declarator->GetId()->GetName());
@@ -586,6 +582,7 @@ EnumSpecifierNode *SemanticAnalyzer::BuildEnumSpecifierNode(IdNode *tag, Enumera
 {
     auto prev = -1;
     Evaluator evaler;
+    if (!list) return new EnumSpecifierNode(tag, list);
     for (auto enumerator: list->List())
     {
         auto id = enumerator->GetId();
@@ -594,15 +591,15 @@ EnumSpecifierNode *SemanticAnalyzer::BuildEnumSpecifierNode(IdNode *tag, Enumera
         {
             auto token = std::make_shared<Token>(TokenType::NUM_INT, -1, -1, std::to_string(prev + 1));
             token->intValue = ++prev;
-            value = new IntConstNode(token); // do the shit
+            value = new IntConstNode(token);
             enumerator->SetValue(value);
         }
         else
         {
             value = evaler.Eval(value);
-            if (!value) throw "";
+            if (!value) throw RequiredConstantExpression(id);
             auto intconst = dynamic_cast<IntConstNode *>(value);
-            if (!intconst) throw "";
+            if (!intconst) throw RequiredConstantExpression(id);
             enumerator->SetValue(value);
             prev = intconst->GetValue()->intValue;
         }

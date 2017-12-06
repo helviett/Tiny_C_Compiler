@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(Tiny_C_Compiler)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 set(SOURCE_FILES
         includes/args.hxx

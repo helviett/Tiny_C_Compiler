@@ -3,26 +3,33 @@
     │   ├── Declarator
     │   │   ├── gcd
     │   │   └── Function returning
-    │   │       ├── INT32
+    │   │       ├── Qualified 0
+    │   │       │   └── INT32
     │   │       └── Params
     │   │           ├── x
-    │   │           │   └── INT32
+    │   │           │   └── Qualified 0
+    │   │           │       └── INT32
     │   │           └── y
-    │   │               └── INT32
+    │   │               └── Qualified 0
+    │   │                   └── INT32
     │   └── {}
     │       └── BlockItemList
     │           ├── Decl
     │           │   └── InitDeclaratorList
     │           │       ├── InitDeclarator
     │           │       │   ├── r
-    │           │       │   ├── INT32
-    │           │       │   └── 0
+    │           │       │   ├── Qualified 0
+    │           │       │   │   └── INT32
+    │           │       │   └── Initializer 
+    │           │       │       └── 0
     │           │       ├── InitDeclarator
     │           │       │   ├── a
-    │           │       │   └── INT32
+    │           │       │   └── Qualified 0
+    │           │       │       └── INT32
     │           │       └── InitDeclarator
     │           │           ├── b
-    │           │           └── INT32
+    │           │           └── Qualified 0
+    │           │               └── INT32
     │           ├── ;
     │           │   └── =
     │           │       ├── a
@@ -73,19 +80,23 @@
         ├── Declarator
         │   ├── lcm
         │   └── Function returning
-        │       ├── INT32
+        │       ├── Qualified 0
+        │       │   └── INT32
         │       └── Params
         │           ├── x
-        │           │   └── INT32
+        │           │   └── Qualified 0
+        │           │       └── INT32
         │           └── y
-        │               └── INT32
+        │               └── Qualified 0
+        │                   └── INT32
         └── {}
             └── BlockItemList
                 ├── Decl
                 │   └── InitDeclaratorList
                 │       └── InitDeclarator
                 │           ├── a
-                │           └── INT32
+                │           └── Qualified 0
+                │               └── INT32
                 ├── ;
                 │   └── =
                 │       ├── a

@@ -3,29 +3,36 @@
         ├── Declarator
         │   ├── main
         │   └── Function returning
-        │       ├── INT32
+        │       ├── Qualified 0
+        │       │   └── INT32
         │       └── Params
         │           └── #0
-        │               └── VOID
+        │               └── Qualified 0
+        │                   └── VOID
         └── {}
             └── BlockItemList
                 ├── Decl
                 │   └── InitDeclaratorList
                 │       ├── InitDeclarator
                 │       │   ├── a
-                │       │   └── FLOAT
+                │       │   └── Qualified 0
+                │       │       └── FLOAT
                 │       ├── InitDeclarator
                 │       │   ├── b
-                │       │   └── FLOAT
+                │       │   └── Qualified 0
+                │       │       └── FLOAT
                 │       ├── InitDeclarator
                 │       │   ├── c
-                │       │   └── FLOAT
+                │       │   └── Qualified 0
+                │       │       └── FLOAT
                 │       ├── InitDeclarator
                 │       │   ├── y2
-                │       │   └── FLOAT
+                │       │   └── Qualified 0
+                │       │       └── FLOAT
                 │       └── InitDeclarator
                 │           ├── l
-                │           └── FLOAT
+                │           └── Qualified 0
+                │               └── FLOAT
                 ├── ;
                 │   └── /
                 │       ├── *
@@ -35,12 +42,18 @@
                 │       │   │   │   └── b
                 │       │   │   └── /
                 │       │   │       ├── c
-                │       │   │       └── 3
-                │       │   └── 9
+                │       │   │       └── typcast
+                │       │   │           ├── FLOAT
+                │       │   │           └── 3
+                │       │   └── typcast
+                │       │       ├── FLOAT
+                │       │       └── 9
                 │       └── *
                 │           ├── y2
                 │           └── -
-                │               ├── 2
+                │               ├── typcast
+                │               │   ├── FLOAT
+                │               │   └── 2
                 │               └── l
                 └── return
                     └── 0

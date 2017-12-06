@@ -11,6 +11,7 @@
 #include <iostream>
 #include <errors/semantic_errors.h>
 #include <stack>
+#include <algorithm>
 #include "evaluator.h"
 
 class SemanticAnalyzer

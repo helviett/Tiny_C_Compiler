@@ -3,20 +3,25 @@
         ├── Declarator
         │   ├── binpow
         │   └── Function returning
-        │       ├── INT32
+        │       ├── Qualified 0
+        │       │   └── INT32
         │       └── Params
         │           ├── a
-        │           │   └── INT32
+        │           │   └── Qualified 0
+        │           │       └── INT32
         │           └── n
-        │               └── INT32
+        │               └── Qualified 0
+        │                   └── INT32
         └── {}
             └── BlockItemList
                 ├── Decl
                 │   └── InitDeclaratorList
                 │       └── InitDeclarator
                 │           ├── res
-                │           ├── INT32
-                │           └── 1
+                │           ├── Qualified 0
+                │           │   └── INT32
+                │           └── Initializer 
+                │               └── 1
                 ├── while
                 │   ├── n
                 │   └── {}
@@ -28,15 +33,21 @@
                 │           │   └── ;
                 │           │       └── *=
                 │           │           ├── res
-                │           │           └── a
+                │           │           └── *
+                │           │               ├── res
+                │           │               └── a
                 │           ├── ;
                 │           │   └── *=
                 │           │       ├── a
-                │           │       └── a
+                │           │       └── *
+                │           │           ├── a
+                │           │           └── a
                 │           └── ;
                 │               └── >>=
                 │                   ├── n
-                │                   └── 1
+                │                   └── >>
+                │                       ├── n
+                │                       └── 1
                 └── return
                     └── res
 

@@ -3,23 +3,28 @@
         ├── Declarator
         │   ├── main
         │   └── Function returning
-        │       ├── INT32
+        │       ├── Qualified 0
+        │       │   └── INT32
         │       └── Params
         │           └── #0
-        │               └── VOID
+        │               └── Qualified 0
+        │                   └── VOID
         └── {}
             └── BlockItemList
                 ├── Decl
                 │   └── InitDeclaratorList
                 │       ├── InitDeclarator
                 │       │   ├── E1
-                │       │   └── FLOAT
+                │       │   └── Qualified 0
+                │       │       └── FLOAT
                 │       ├── InitDeclarator
                 │       │   ├── E2
-                │       │   └── FLOAT
+                │       │   └── Qualified 0
+                │       │       └── FLOAT
                 │       └── InitDeclarator
                 │           ├── h
-                │           └── FLOAT
+                │           └── Qualified 0
+                │               └── FLOAT
                 ├── ;
                 │   └── /
                 │       ├── -

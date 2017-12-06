@@ -3,10 +3,12 @@
         ├── Declarator
         │   ├── eternalforloop
         │   └── Function returning
-        │       ├── VOID
+        │       ├── Qualified 0
+        │       │   └── VOID
         │       └── Params
         │           └── #0
-        │               └── VOID
+        │               └── Qualified 0
+        │                   └── VOID
         └── {}
             └── BlockItemList
                 └── for

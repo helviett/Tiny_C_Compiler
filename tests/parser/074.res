@@ -1,1 +1,1 @@
-(6, 15) SyntaxError: expected RBRACKET, got ;.
+(5, 9) UndeclaredIdentifierError: dosmth.

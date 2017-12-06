@@ -3,26 +3,32 @@
         ├── Declarator
         │   ├── main
         │   └── Function returning
-        │       ├── INT32
+        │       ├── Qualified 0
+        │       │   └── INT32
         │       └── Params
         │           └── #0
-        │               └── VOID
+        │               └── Qualified 0
+        │                   └── VOID
         └── {}
             └── BlockItemList
                 ├── Decl
                 │   └── InitDeclaratorList
                 │       ├── InitDeclarator
                 │       │   ├── A
-                │       │   └── FLOAT
+                │       │   └── Qualified 0
+                │       │       └── FLOAT
                 │       ├── InitDeclarator
                 │       │   ├── B
-                │       │   └── FLOAT
+                │       │   └── Qualified 0
+                │       │       └── FLOAT
                 │       ├── InitDeclarator
                 │       │   ├── C
-                │       │   └── FLOAT
+                │       │   └── Qualified 0
+                │       │       └── FLOAT
                 │       └── InitDeclarator
                 │           ├── k
-                │           └── FLOAT
+                │           └── Qualified 0
+                │               └── FLOAT
                 ├── ;
                 │   └── *
                 │       ├── /
@@ -32,14 +38,22 @@
                 │       │       │   ├── A
                 │       │       │   └── B
                 │       │       └── +
-                │       │           ├── 2
+                │       │           ├── typcast
+                │       │           │   ├── FLOAT
+                │       │           │   └── 2
                 │       │           └── *
-                │       │               ├── 4
+                │       │               ├── typcast
+                │       │               │   ├── FLOAT
+                │       │               │   └── 4
                 │       │               └── -
                 │       │                   ├── /
                 │       │                   │   ├── 123.32
-                │       │                   │   └── 9
-                │       │                   └── 123
+                │       │                   │   └── typcast
+                │       │                   │       ├── FLOAT
+                │       │                   │       └── 9
+                │       │                   └── typcast
+                │       │                       ├── FLOAT
+                │       │                       └── 123
                 │       └── k
                 └── return
                     └── 0

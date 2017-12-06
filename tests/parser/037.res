@@ -3,27 +3,39 @@
     │   └── InitDeclaratorList
     │       └── InitDeclarator
     │           ├── a
-    │           └── INT32
+    │           └── Qualified 0
+    │               └── INT32
     ├── Decl
     │   └── InitDeclaratorList
     │       ├── InitDeclarator
     │       │   ├── b
-    │       │   └── INT32
+    │       │   └── Qualified 0
+    │       │       └── INT32
     │       └── InitDeclarator
     │           ├── c
-    │           └── INT32
+    │           └── Qualified 0
+    │               └── INT32
     ├── Decl
     │   └── InitDeclaratorList
     │       └── InitDeclarator
     │           ├── N
-    │           ├── INT32
-    │           └── 10
+    │           ├── Qualified 1
+    │           │   └── INT32
+    │           └── Initializer 
+    │               └── 10
     └── Decl
         └── InitDeclaratorList
             └── InitDeclarator
                 ├── d
                 ├── Pointer to
                 │   └── Pointer to
-                │       └── INT32
-                └── 0
+                │       └── Qualified 1
+                │           └── INT32
+                └── Initializer 
+                    └── typcast
+                        ├── Pointer to
+                        │   └── Pointer to
+                        │       └── Qualified 1
+                        │           └── INT32
+                        └── 0
 

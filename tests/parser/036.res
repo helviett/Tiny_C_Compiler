@@ -1,0 +1,19 @@
+└── Unit
+    ├── Decl
+    ├── Decl
+    ├── Decl
+    ├── Decl
+    ├── Decl
+    ├── Decl
+    ├── Decl
+    ├── Decl
+    ├── Decl
+    ├── Decl
+    └── Decl
+        └── InitDeclaratorList
+            └── InitDeclarator
+                ├── g
+                ├── INT32
+                └── Initializer 
+                    └── 1
+

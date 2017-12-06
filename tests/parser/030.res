@@ -3,48 +3,59 @@
         ├── Declarator
         │   ├── main
         │   └── Function returning
-        │       ├── INT32
+        │       ├── Qualified 0
+        │       │   └── INT32
         │       └── Params
         │           └── #0
-        │               └── VOID
+        │               └── Qualified 0
+        │                   └── VOID
         └── {}
             └── BlockItemList
                 ├── Decl
                 │   └── InitDeclaratorList
                 │       ├── InitDeclarator
                 │       │   ├── a
-                │       │   └── INT32
+                │       │   └── Qualified 0
+                │       │       └── INT32
                 │       ├── InitDeclarator
                 │       │   ├── b
-                │       │   └── INT32
+                │       │   └── Qualified 0
+                │       │       └── INT32
                 │       ├── InitDeclarator
                 │       │   ├── c
-                │       │   └── INT32
+                │       │   └── Qualified 0
+                │       │       └── INT32
                 │       ├── InitDeclarator
                 │       │   ├── d
-                │       │   └── INT32
+                │       │   └── Qualified 0
+                │       │       └── INT32
                 │       ├── InitDeclarator
                 │       │   ├── e
-                │       │   └── INT32
+                │       │   └── Qualified 0
+                │       │       └── INT32
                 │       ├── InitDeclarator
                 │       │   ├── f
-                │       │   └── INT32
+                │       │   └── Qualified 0
+                │       │       └── INT32
                 │       └── InitDeclarator
                 │           ├── g
                 │           └── Array of
-                │               ├── INT32
+                │               ├── Qualified 0
+                │               │   └── INT32
                 │               └── 5
                 ├── Decl
                 │   └── InitDeclaratorList
                 │       └── InitDeclarator
                 │           ├── max
-                │           ├── INT32
-                │           └── ?:
-                │               ├── >
-                │               │   ├── c
-                │               │   └── d
-                │               ├── c
-                │               └── d
+                │           ├── Qualified 0
+                │           │   └── INT32
+                │           └── Initializer 
+                │               └── ?:
+                │                   ├── >
+                │                   │   ├── c
+                │                   │   └── d
+                │                   ├── c
+                │                   └── d
                 ├── ;
                 │   └── ?:
                 │       ├── |

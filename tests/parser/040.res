@@ -4,36 +4,45 @@
     │       └── InitDeclarator
     │           ├── f
     │           └── Function returning
-    │               ├── VOID
+    │               ├── Qualified 0
+    │               │   └── VOID
     │               └── Params
     │                   └── #0
-    │                       └── VOID
+    │                       └── Qualified 0
+    │                           └── VOID
     ├── Decl
     │   └── InitDeclaratorList
     │       └── InitDeclarator
     │           ├── a
     │           └── Function returning
-    │               ├── INT32
+    │               ├── Qualified 0
+    │               │   └── INT32
     │               └── Params
     │                   ├── #0
-    │                   │   └── INT32
+    │                   │   └── Qualified 0
+    │                   │       └── INT32
     │                   └── #1
-    │                       └── INT32
+    │                       └── Qualified 0
+    │                           └── INT32
     └── Decl
         └── InitDeclaratorList
             └── InitDeclarator
                 ├── b
                 └── Function returning
-                    ├── FLOAT
+                    ├── Qualified 0
+                    │   └── FLOAT
                     └── Params
                         ├── c
-                        │   └── FLOAT
+                        │   └── Qualified 0
+                        │       └── FLOAT
                         ├── b
                         │   └── Pointer to
                         │       └── Pointer to
-                        │           └── INT8
+                        │           └── Qualified 0
+                        │               └── INT8
                         └── a
                             └── Array of
-                                ├── INT32
+                                ├── Qualified 0
+                                │   └── INT32
                                 └── 50
 

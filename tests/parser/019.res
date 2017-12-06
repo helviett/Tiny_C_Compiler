@@ -3,46 +3,53 @@
         ├── Declarator
         │   ├── main
         │   └── Function returning
-        │       ├── INT32
+        │       ├── Qualified 0
+        │       │   └── INT32
         │       └── Params
         │           └── #0
-        │               └── VOID
+        │               └── Qualified 0
+        │                   └── VOID
         └── {}
             └── BlockItemList
                 ├── Decl
                 │   └── InitDeclaratorList
                 │       └── InitDeclarator
                 │           ├── b
-                │           ├── INT32
-                │           └── 10
+                │           ├── Qualified 0
+                │           │   └── INT32
+                │           └── Initializer 
+                │               └── 10
                 ├── Decl
                 │   └── InitDeclaratorList
                 │       └── InitDeclarator
                 │           ├── a
                 │           ├── Pointer to
-                │           │   └── INT32
-                │           └── &
-                │               └── b
+                │           │   └── Qualified 0
+                │           │       └── INT32
+                │           └── Initializer 
+                │               └── &
+                │                   └── b
                 ├── ;
                 │   └── typcast
-                │       ├── TypeName
-                │       │   └── Pointer to
+                │       ├── Pointer to
+                │       │   └── Qualified 0
                 │       │       └── INT32
                 │       └── 10
                 ├── ;
                 │   └── typcast
-                │       ├── TypeName
-                │       │   └── Pointer to
+                │       ├── Pointer to
+                │       │   └── Qualified 0
                 │       │       └── VOID
                 │       └── a
                 ├── ;
                 │   └── typcast
-                │       ├── TypeName
-                │       │   └── Pointer to
-                │       │       └── Function returning
-                │       │           ├── INT32
-                │       │           └── Params
-                │       │               └── #0
+                │       ├── Pointer to
+                │       │   └── Function returning
+                │       │       ├── Qualified 0
+                │       │       │   └── INT32
+                │       │       └── Params
+                │       │           └── #0
+                │       │               └── Qualified 0
                 │       │                   └── VOID
                 │       └── a
                 └── return

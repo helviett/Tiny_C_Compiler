@@ -4,28 +4,34 @@
     │       └── InitDeclarator
     │           ├── e
     │           └── Array of
-    │               ├── FLOAT
+    │               ├── Qualified 0
+    │               │   └── FLOAT
     │               └── 50
     ├── Decl
     │   └── InitDeclaratorList
     │       └── InitDeclarator
     │           ├── f
     │           ├── Array of
-    │           │   ├── FLOAT
+    │           │   ├── Qualified 0
+    │           │   │   └── FLOAT
     │           │   └── 3
     │           └── InitializerList
     │               ├── DesignatedInitializer
-    │               │   └── 1
+    │               │   └── Initializer 
+    │               │       └── 1
     │               ├── DesignatedInitializer
-    │               │   └── 2
+    │               │   └── Initializer 
+    │               │       └── 2
     │               └── DesignatedInitializer
-    │                   └── 3
+    │                   └── Initializer 
+    │                       └── 3
     ├── Decl
     │   └── InitDeclaratorList
     │       └── InitDeclarator
     │           ├── g
     │           ├── Array of
-    │           │   ├── FLOAT
+    │           │   ├── Qualified 0
+    │           │   │   └── FLOAT
     │           │   └── 50
     │           └── InitializerList
     │               ├── DesignatedInitializer
@@ -37,15 +43,51 @@
     │               │   │       │   └── 1
     │               │   │       └── []
     │               │   │           └── 3
-    │               │   └── 0
+    │               │   └── Initializer 
+    │               │       └── 0
     │               └── DesignatedInitializer
     │                   ├── 
     │                   │   └── DesignatorList
     │                   │       └── []
     │                   │           └── 12
-    │                   └── 12
+    │                   └── Initializer 
+    │                       └── 12
     └── Decl
         └── InitDeclaratorList
             └── InitDeclarator
                 ├── h
                 ├── Array of
+                │   ├── struct 
+                │   │   ├── a
+                │   │   │   └── Qualified 0
+                │   │   │       └── INT32
+                │   │   └── b
+                │   │       └── Qualified 0
+                │   │           └── FLOAT
+                │   └── 2
+                └── InitializerList
+                    ├── DesignatedInitializer
+                    │   └── InitializerList
+                    │       ├── DesignatedInitializer
+                    │       │   ├── 
+                    │       │   │   └── DesignatorList
+                    │       │   │       └── .
+                    │       │   │           └── a
+                    │       │   └── Initializer 
+                    │       │       └── 12
+                    │       └── DesignatedInitializer
+                    │           ├── 
+                    │           │   └── DesignatorList
+                    │           │       └── .
+                    │           │           └── b
+                    │           └── Initializer 
+                    │               └── 0.001
+                    └── DesignatedInitializer
+                        └── InitializerList
+                            ├── DesignatedInitializer
+                            │   └── Initializer 
+                            │       └── 13
+                            └── DesignatedInitializer
+                                └── Initializer 
+                                    └── 12
+

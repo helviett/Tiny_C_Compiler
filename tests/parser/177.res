@@ -3,12 +3,10 @@
     │   └── InitDeclaratorList
     │       ├── InitDeclarator
     │       │   ├── c
-    │       │   └── Qualified 0
-    │       │       └── INT32
+    │       │   └── INT32
     │       └── InitDeclarator
     │           ├── d
-    │           ├── Qualified 0
-    │           │   └── INT32
+    │           ├── INT32
     │           └── Initializer 
     │               └── 23
     └── Decl

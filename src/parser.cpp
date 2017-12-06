@@ -792,20 +792,21 @@ InitDeclaratorListNode *Parser::parseInitDeclaratorList(DeclarationSpecifiersNod
         if (!maybe(TokenType::COMMA)) return idl;
         scanner->Next();
     }
+    auto type = TypeBuilder::Build(declarationSpecifiers);
     do
     {
-        idl->Add(parseInitDeclarator(declarationSpecifiers, isTypeDef));
+        idl->Add(parseInitDeclarator(type, isTypeDef));
     } while (maybeNext(TokenType::COMMA));
     return idl;
 }
 
 //init-declarator ::= declarator | declaratxor = initializer
 
-InitDeclaratorNode *Parser::parseInitDeclarator(DeclarationSpecifiersNode *declarationSpecifiers, bool isTypeDef)
+InitDeclaratorNode *Parser::parseInitDeclarator(SymType *type, bool isTypeDef)
 {
     // TODO pass built type instead of building every time
     auto declarator = new DeclaratorNode();
-    declarator->SetType(TypeBuilder::Build(declarationSpecifiers));
+    declarator->SetType(type);
     parseDeclarator(DeclaratorKind::NORMAL, declarator);
     InitializerNode *initializer = nullptr;
     if (maybeNext(TokenType::ASSIGNMENT))

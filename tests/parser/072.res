@@ -1,1 +1,1 @@
-(7, 1) SyntaxError: expected SEMICOLON, got }.
+(5, 9) UndeclaredIdentifierError: dosmth.

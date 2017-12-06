@@ -287,3 +287,25 @@ const char *BadTypedefUsageError::what() const throw()
 {
     return msg.c_str();
 }
+
+const char *UnknownError::what() const throw()
+{
+    return msg.c_str();
+}
+
+UnknownError::UnknownError()
+{
+    msg = "Unknown error";
+}
+
+const char *RequiredConstantExpression::what() const throw()
+{
+    return msg.c_str();
+}
+
+RequiredConstantExpression::RequiredConstantExpression(IdNode *id)
+{
+    auto pos = id->GetPosition();
+    msg = "(" + std::to_string(pos.first) + ", " + std::to_string(pos.second) +
+          "): value of '" + id->GetName() + "' is not constant.";
+}
