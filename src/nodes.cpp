@@ -8,13 +8,15 @@
 void IntConstNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
-    os << token->intValue << std::endl;
+    os << value << std::endl;
 }
 
-IntConstNode::IntConstNode(std::shared_ptr<Token> token): ConstNode(token)
+IntConstNode::IntConstNode(std::shared_ptr<Token> token)
 {
     if (token->type != TokenType::NUM_INT) throw "";
     type = new SymBuiltInType(BuiltInTypeKind::INT32, 0);
+    position = token->position;
+    value = token->intValue;
 }
 
 ExprNode *IntConstNode::Eval(Evaluator *evaluator)
@@ -22,21 +24,33 @@ ExprNode *IntConstNode::Eval(Evaluator *evaluator)
     return evaluator->Eval(this);
 }
 
+int32_t IntConstNode::GetValue() const
+{
+    return value;
+}
+
 void FloatConstNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
-    os << token->floatValue << std::endl;
+    os << value << std::endl;
 }
 
-FloatConstNode::FloatConstNode(std::shared_ptr<Token> token): ConstNode(token)
+FloatConstNode::FloatConstNode(std::shared_ptr<Token> token)
 {
     if (token->type != TokenType::NUM_FLOAT) throw "";
     type = new SymBuiltInType(BuiltInTypeKind::FLOAT, 0);
+    position = token->position;
+    value = token->floatValue;
 }
 
 ExprNode *FloatConstNode::Eval(Evaluator *evaluator)
 {
     return evaluator->Eval(this);
+}
+
+float FloatConstNode::GetValue() const
+{
+    return value;
 }
 
 void IdNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -49,6 +63,7 @@ IdNode::IdNode(std::shared_ptr<Token> token): token(token)
 {
     if (token->type != TokenType::ID) throw "";
     category = ValueCategory::LVAVLUE;
+    position = token->position;
 }
 
 std::string IdNode::GetName() const
@@ -59,11 +74,7 @@ std::string IdNode::GetName() const
 IdNode::IdNode(std::shared_ptr<Token> token, SymType *type): IdNode(token)
 {
     this->type = type;
-}
-
-Position IdNode::GetPosition() const
-{
-    return token->position;
+    position = token->position;
 }
 
 ExprNode *IdNode::Eval(Evaluator *evaluator)
@@ -80,6 +91,7 @@ void StringLiteralNode::Print(std::ostream &os, std::string indent, bool isTail)
 StringLiteralNode::StringLiteralNode(std::shared_ptr<Token> token): token(token)
 {
     if (token->type != TokenType::STRING) throw "";
+    position = token->position;
 }
 
 ExprNode *StringLiteralNode::Eval(Evaluator *evaluator)
@@ -132,8 +144,8 @@ void StructureOrUnionMemberAccessNode::Print(std::ostream &os, std::string inden
     member->Print(os, indent, true);
 }
 
-StructureOrUnionMemberAccessNode::StructureOrUnionMemberAccessNode(ExprNode *structureOrUnion, IdNode *member) : member(member),
-                                                                                                                 structureOrUnion(structureOrUnion) {}
+StructureOrUnionMemberAccessNode::StructureOrUnionMemberAccessNode(ExprNode *structureOrUnion, IdNode *member) :
+        member(member), structureOrUnion(structureOrUnion) {}
 
 ExprNode *StructureOrUnionMemberAccessNode::Eval(Evaluator *evaluator)
 {
@@ -203,9 +215,10 @@ void BinOpNode::Print(std::ostream &os, std::string indent, bool isTail)
     right->Print(os, indent, true);
 }
 
-BinOpNode::BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op) : left(left), right(right), op(op)
+BinOpNode::BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op) : left(left), right(right), op(std::move(op))
 {
     this->type = left->GetType();
+    this->position = this->op->position;
 }
 
 BinOpNode::BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op, SymType *resultType):
@@ -319,7 +332,10 @@ void UnaryOpNode::Print(std::ostream &os, std::string indent, bool isTail)
     expr->Print(os, indent, true);
 }
 
-UnaryOpNode::UnaryOpNode(std::shared_ptr<Token> unaryOp, ExprNode *expr) : unaryOp(unaryOp), expr(expr) {}
+UnaryOpNode::UnaryOpNode(std::shared_ptr<Token> unaryOp, ExprNode *expr) : unaryOp(unaryOp), expr(expr)
+{
+    position = unaryOp->position;
+}
 
 ExprNode *UnaryOpNode::Eval(Evaluator *evaluator)
 {
@@ -1047,9 +1063,14 @@ void InitializerListNode::Print(std::ostream &os, std::string indent, bool isTai
     (*it)->Print(os, indent, true);
 }
 
-void InitializerListNode::Add(DesignatedInitializerNode *initializer)
+void InitializerListNode::Add(InitializerNode *initializer)
 {
     list.push_back(initializer);
+}
+
+std::list<InitializerNode *> &InitializerListNode::List()
+{
+    return list;
 }
 
 void DesignatorListNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1075,12 +1096,24 @@ uint64_t DesignatorListNode::Size()
     return list.size();
 }
 
+std::list<DesignatorNode *> &DesignatorListNode::List()
+{
+    return list;
+}
+
 void ArrayDesignator::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << "[]" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    constantExpr->Print(os, indent, true);
+    index->Print(os, indent, true);
+}
+
+ArrayDesignator::ArrayDesignator(ExprNode *index) : index(index) {}
+
+ExprNode *ArrayDesignator::GetIndex() const
+{
+    return index;
 }
 
 void DesignationNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1091,12 +1124,26 @@ void DesignationNode::Print(std::ostream &os, std::string indent, bool isTail)
     designatorList->Print(os, indent, true);
 }
 
+DesignationNode::DesignationNode(DesignatorListNode *designatorList) : designatorList(designatorList) {}
+
+std::list<DesignatorNode *> &DesignationNode::List()
+{
+    return designatorList->List();
+}
+
 void StructMemberDesignator::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << "." << std::endl;
     indent.append(isTail ? "    " : "│   ");
     id->Print(os, indent, true);
+}
+
+StructMemberDesignator::StructMemberDesignator(IdNode *id) : id(id) {}
+
+IdNode *StructMemberDesignator::GetMemberId() const
+{
+    return id;
 }
 
 void DesignatedInitializerNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1106,6 +1153,19 @@ void DesignatedInitializerNode::Print(std::ostream &os, std::string indent, bool
     indent.append(isTail ? "    " : "│   ");
     if (designation) designation->Print(os, indent, false);
     initializer->Print(os, indent, true);
+}
+
+DesignatedInitializerNode::DesignatedInitializerNode(DesignationNode *designation, InitializerNode *initializer) :
+        designation(designation), initializer(initializer) {}
+
+DesignationNode *DesignatedInitializerNode::GetDesignation() const
+{
+    return designation;
+}
+
+InitializerNode *DesignatedInitializerNode::GetInitializer() const
+{
+    return initializer;
 }
 
 void FunctionDefinitionNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1175,11 +1235,24 @@ ValueCategory ExprNode::GetValueCategory() const
     return category;
 }
 
-ConstNode::ConstNode(std::shared_ptr<Token> token) : token(std::move(token)) {}
-
-std::shared_ptr<Token> ConstNode::GetValue()
+void ExprNode::SetPosition(int row, int col)
 {
-    return token;
+    position = Position(row, col);
+}
+
+void ExprNode::SetPosition(Position position)
+{
+    this->position = position;
+}
+
+Position ExprNode::GetPosition() const
+{
+    return position;
+}
+
+void ExprNode::SetPosition(std::shared_ptr<Token> token)
+{
+    position = token->position;
 }
 
 void IterationStatementNode::SetBody(StatementNode *body)
@@ -1228,4 +1301,9 @@ void SimpleInitializer::SetValue(ExprNode *value)
 ExprNode *SimpleInitializer::GetValue() const
 {
     return value;
+}
+
+void DesignatorNode::SetValue(InitializerNode *value)
+{
+    this->value = value;
 }

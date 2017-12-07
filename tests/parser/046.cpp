@@ -1,3 +1,4 @@
+void invalidate(void);
 void dowhile (void)
 {
     do

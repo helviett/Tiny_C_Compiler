@@ -1,11 +1,12 @@
 #include "../includes/errors/semantic_errors.h"
 #include "../includes/symbols/sym_type.h"
+#include "../includes/nodes/initializer.h"
 
 InvalidOperandError::InvalidOperandError(std::shared_ptr<Token> op, SymType *ltype, SymType *rtype)
 {
     auto pos = op->position;
     msg = "(" + std::to_string(pos.col) + ", " + std::to_string(pos.row) +
-          "): Invalid iperands for '" + op->text + "'";
+          "): Invalid operands for '" + op->text + "'";
 }
 
 const char *InvalidOperandError::what() const throw()
@@ -15,7 +16,7 @@ const char *InvalidOperandError::what() const throw()
 
 InvalidOperandError::InvalidOperandError(std::shared_ptr<Token> op, SymType *type)
 {
-    msg =  "Invalid iperands for '" + op->text + "'";
+    msg =  "Invalid operands for '" + op->text + "'";
 }
 
 BadIndexingError::BadIndexingError()
@@ -23,9 +24,11 @@ BadIndexingError::BadIndexingError()
     msg =  "Subscripted value is neither array nor pointer nor vector.";
 }
 
-BadIndexingError::BadIndexingError(SymType *type)
+BadIndexingError::BadIndexingError(ExprNode *index)
 {
-    msg =  "Array subscript is not an integer.";
+    auto pos = index->GetPosition();
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
+          "): Array subscript is not an integer.";
 }
 
 NonexistentMemberError::NonexistentMemberError(SymRecord *record, IdNode *field)
@@ -40,9 +43,11 @@ const char *NonexistentMemberError::what() const throw()
     return msg.c_str();
 }
 
-RequiredModifiableLvalueError::RequiredModifiableLvalueError()
+RequiredModifiableLvalueError::RequiredModifiableLvalueError(ExprNode *expr)
 {
-    msg =  "Required modifiable lvalue";
+    auto pos = expr->GetPosition();
+    msg =  "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
+           "): Required modifiable lvalue";
 }
 
 const char *RequiredModifiableLvalueError::what() const throw()
@@ -172,9 +177,11 @@ const char *BadTypeConversionError::what() const throw()
     return msg.c_str();
 }
 
-BadTypeConversionError::BadTypeConversionError(SymType *type, SymType *castType)
+BadTypeConversionError::BadTypeConversionError(ExprNode *expr, SymType *castType)
 {
-    msg =  "Bad type conversion";
+    auto pos = expr->GetPosition();
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
+          "): Bad type conversion";
 }
 
 const char *EnumeratorConstantTypeError::what() const throw()
@@ -217,9 +224,11 @@ const char *MismatchNumberOfArguments::what() const throw()
     return msg.c_str();
 }
 
-MismatchNumberOfArguments::MismatchNumberOfArguments(SymFunction *function)
+MismatchNumberOfArguments::MismatchNumberOfArguments(ExprNode *function)
 {
-    msg = "Mismatch of number of arguments in function call of '" + function->GetName() + "'.";
+    auto pos = function->GetPosition();
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
+          "): Mismatch of number of arguments in function call of '" + function->GetType()->GetName() + "'.";
 }
 
 BadCalledObjectError::BadCalledObjectError(IdNode *obj)
@@ -321,6 +330,13 @@ RequiredConstantExpressionError::RequiredConstantExpressionError(IdNode *id)
           "): value of '" + id->GetName() + "' is not constant.";
 }
 
+RequiredConstantExpressionError::RequiredConstantExpressionError(ExprNode *expr)
+{
+    auto pos = expr->GetPosition();
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
+          "): value of expression is not constant.";
+}
+
 const char *ConfclitingTypesError::what() const throw()
 {
     return msg.c_str();
@@ -329,4 +345,52 @@ const char *ConfclitingTypesError::what() const throw()
 ConfclitingTypesError::ConfclitingTypesError(SymFunction *func)
 {
     msg = "Confclicting types for '" + func->GetName() + "'.";
+}
+
+const char *RequiredConstantIntegerExpressionError::what() const throw()
+{
+    return msg.c_str();
+}
+
+RequiredConstantIntegerExpressionError::RequiredConstantIntegerExpressionError(ExprNode *expr)
+{
+    auto pos = expr->GetPosition();
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
+          "): value of expression is not integer constant.";
+}
+
+RequiredConstantIntegerExpressionError::RequiredConstantIntegerExpressionError(IdNode *id)
+{
+    auto pos = id->GetPosition();
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
+          "): value of '" + id->GetName() + "' is not integer constant.";
+}
+
+const char *ExcessElementsInStructInitializerError::what() const throw()
+{
+    return msg.c_str();
+}
+
+ExcessElementsInStructInitializerError::ExcessElementsInStructInitializerError()
+{
+    msg = "Excess elements in struct initializer.";
+}
+
+const char *BadDesignatorError::what() const throw()
+{
+    return msg.c_str();
+}
+
+BadDesignatorError::BadDesignatorError(StructMemberDesignator *designator)
+{
+    auto pos = designator->GetMemberId()->GetPosition();
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
+          "): Field name not in record or union initializer.";
+}
+
+BadDesignatorError::BadDesignatorError(ArrayDesignator *designator)
+{
+    auto pos = designator->GetIndex()->GetPosition();
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
+            "): Array index in non-array initializer.";
 }

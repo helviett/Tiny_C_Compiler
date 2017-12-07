@@ -127,7 +127,7 @@ private:
     DesignationNode            *parseDesignation();
     DesignatorListNode         *parseDesignatorList();
     DesignatorNode             *parseDesignator();
-    DesignatedInitializerNode  *parseDesignatedInitializer();
+    InitializerNode            *parseDesignatedInitializer();
     TranslationUnitNode        *parseTranslationUnit();
     ExternalDeclarationNode    *parseExternalDeclaration();
     ExprNode *parseBinoOps(Parser *self, ExprNode *(Parser::*f)(),

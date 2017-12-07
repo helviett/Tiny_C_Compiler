@@ -7,6 +7,13 @@
 
 #include "compilation_error.h"
 
+class Symbol;
+class SymType;
+class SymRecord;
+class IdNode;
+class SymAlias;
+class ExprNode;
+
 class SemanticError: public CompilationError
 {
 public:
@@ -58,15 +65,10 @@ public:
 class RequiredModifiableLvalueError: public SemanticError
 {
 public:
-    explicit RequiredModifiableLvalueError();
+    explicit RequiredModifiableLvalueError(ExprNode *expr);
     const char *what() const throw() override;
 };
 
-class Symbol;
-class SymType;
-class SymRecord;
-class IdNode;
-class SymAlias;
 
 class InvalidOperandError: public SemanticError
 {
@@ -81,7 +83,7 @@ class BadIndexingError: public SemanticError
 {
 public:
     BadIndexingError();
-    explicit BadIndexingError(SymType *type);
+    explicit BadIndexingError(ExprNode *index);
 
     const char *what() const throw() override
     {
@@ -121,7 +123,7 @@ public:
 class BadTypeConversionError: public SemanticError
 {
 public:
-    explicit BadTypeConversionError(SymType *type, SymType *castType);
+    explicit BadTypeConversionError(ExprNode *expr, SymType *castType);
     const char *what() const throw() override;
 };
 
@@ -144,7 +146,7 @@ class SymFunction;
 class MismatchNumberOfArguments: public SemanticError
 {
 public:
-    explicit MismatchNumberOfArguments(SymFunction *function);
+    explicit MismatchNumberOfArguments(ExprNode *function);
     const char *what() const throw() override;
 };
 
@@ -203,6 +205,15 @@ class RequiredConstantExpressionError: public  SemanticError
 {
 public:
     explicit RequiredConstantExpressionError(IdNode *id);
+    explicit RequiredConstantExpressionError(ExprNode *expr);
+    const char *what() const throw() override;
+};
+
+class RequiredConstantIntegerExpressionError: public  SemanticError
+{
+public:
+    explicit RequiredConstantIntegerExpressionError(IdNode *id);
+    explicit RequiredConstantIntegerExpressionError(ExprNode *expr);
     const char *what() const throw() override;
 };
 
@@ -210,6 +221,24 @@ class ConfclitingTypesError: public SemanticError
 {
 public:
     explicit ConfclitingTypesError(SymFunction *func);
+    const char *what() const throw() override;
+};
+
+class ExcessElementsInStructInitializerError: public SemanticError
+{
+public:
+    explicit ExcessElementsInStructInitializerError();
+    const char *what() const throw() override;
+};
+
+class StructMemberDesignator;
+class ArrayDesignator;
+
+class BadDesignatorError: public SemanticError
+{
+public:
+    explicit BadDesignatorError(StructMemberDesignator *designator);
+    explicit BadDesignatorError(ArrayDesignator *designator);
     const char *what() const throw() override;
 };
 

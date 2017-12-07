@@ -1,3 +1,4 @@
+void dosomething(void);
 void forloop (int n)
 {
     int i;

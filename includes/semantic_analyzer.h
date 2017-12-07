@@ -51,6 +51,7 @@ public:
     BreakStatementNode *BuildBreakStatementNode(std::shared_ptr<Token> statement);
     ContinueStatementNode *BuildContinueStatementNode(std::shared_ptr<Token> statement);
     TypedefIdentifierNode *BuildTypedefIdentifierNode(const std::shared_ptr<Token> &id);
+    ExprNode *EvaluateArraySizer(ExprNode *expr);
     void ProcessFunction(SymType *funcType);
     void FinishLastFunctionProcessing();
     void ProcessLoop(IterationStatementNode *loop);
@@ -72,10 +73,12 @@ private:
     void ImplicitlyConvert(ExprNode **left, ExprNode **right);
     void Convert(ExprNode **expr, SymType *type);
     bool equalQualifiers(SymType *one, SymType *other);
+    void analyseInitializerList(SymType *current, InitializerNode *initializer, DesignatorNode *designator = nullptr);
     SymType *unqualify(SymType *type);
     ScopeTree scopeTree;
     std::stack<SymType *> processingFunctions;
     std::stack<IterationStatementNode *> processingLoops;
+    Evaluator evaluator;
 };
 
 #endif //TINY_C_COMPILER_SEMANTIC_ANALYZER_H

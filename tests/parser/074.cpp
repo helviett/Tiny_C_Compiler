@@ -1,3 +1,4 @@
+void dosmth(void);
 int main(void)
 {
     do

@@ -436,8 +436,9 @@ JumpStatementNode *Parser::parseJumpStatement()
         switch (t->keyword)
         {
             case Keyword::GOTO:
-                requireNext(TokenType::ID);
+                require(TokenType::ID);
                 js = new GotoStatementNode(new IdNode(scanner->Current()));
+                scanner->Next();
                 break;
             case Keyword::CONTINUE:
                 js = sematicAnalyzer.BuildContinueStatementNode(t);
@@ -649,7 +650,8 @@ void Parser::parseArrayDeclarator(DeclaratorNode *declarator)
         declarator->SetType(new SymArray(declarator->GetType(), nullptr));
         return;
     }
-    auto ce = parseConstantExpr();
+    auto ce = sematicAnalyzer.EvaluateArraySizer(parseConstantExpr());
+//    auto ce = parseConstantExpr();
     requireNext(TokenType::RSQUARE_BRACKET);
     declarator->SetType(new SymArray(declarator->GetType(), ce));
 }
@@ -816,19 +818,6 @@ InitDeclaratorNode *Parser::parseInitDeclarator(SymType *type, bool isTypeDef)
     return sematicAnalyzer.BuildInitDeclaratorNode(declarator, initializer, isTypeDef);
 }
 
-//initializer ::= assignment-expr | {initializer-list} | {initializer-list , }
-
-InitializerNode *Parser::parseInitializer()
-{
-    if (maybe(TokenType::LCURLY_BRACKET))
-    {
-        auto il =  (InitializerNode *)parseInitializerList();
-        requireNext(TokenType::RCURLY_BRACKET);
-        return il;
-    }
-    return new SimpleInitializer(parseAssignmentExpr());
-}
-
 //labeled-statement ::= id : statement
 
 LabelStatementNode *Parser::parseLabelStatement()
@@ -837,7 +826,6 @@ LabelStatementNode *Parser::parseLabelStatement()
     auto id = new IdNode(scanner->Current());
     scanner->Next();
     requireNext(TokenType::COLON);
-    scanner->Next();
     return new LabelStatementNode(id, parseStatement());
 }
 
@@ -1027,12 +1015,24 @@ DeclarationSpecifiersNode *Parser::parseSpecifierQualifierList()
     return tnn;
 }
 
+//initializer ::= assignment-expr | {initializer-list} | {initializer-list , }
+
+InitializerNode *Parser::parseInitializer()
+{
+    if (maybe(TokenType::LCURLY_BRACKET))
+    {
+        auto il =  (InitializerNode *)parseInitializerList();
+        requireNext(TokenType::RCURLY_BRACKET);
+        return il;
+    }
+    return new SimpleInitializer(parseAssignmentExpr());
+}
+
 //initializer-list ::= `designation initializer | initializer-list , `designation initializer
 
 InitializerListNode *Parser::parseInitializerList()
 {
-    require(TokenType::LCURLY_BRACKET);
-    scanner->Next();
+    requireNext(TokenType::LCURLY_BRACKET);
     auto il = new InitializerListNode();
     do
     {
@@ -1071,7 +1071,7 @@ DesignatorNode *Parser::parseDesignator()
     {
         auto constExpr = parseConstantExpr();
         requireNext(TokenType::RSQUARE_BRACKET);
-        return new ArrayDesignator((ExprNode *)constExpr);
+        return new ArrayDesignator(constExpr);
     }
     requireNext(TokenType::DOT);
     require(TokenType::ID);
@@ -1082,11 +1082,11 @@ DesignatorNode *Parser::parseDesignator()
 
 // `designation initializer
 
-DesignatedInitializerNode *Parser::parseDesignatedInitializer()
+InitializerNode *Parser::parseDesignatedInitializer()
 {
     if (maybe(TokenType::DOT) || maybe(TokenType::LSQUARE_BRACKET))
         return new DesignatedInitializerNode(parseDesignation(), parseInitializer());
-    return new DesignatedInitializerNode(nullptr, parseInitializer());
+    return parseInitializer();
 }
 
 //translation-unit ::= external-declaration | translation-unit external-declaration

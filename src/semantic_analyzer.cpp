@@ -81,18 +81,22 @@ ScopeTree *SemanticAnalyzer::GetScopeTree()
 PostfixDecrementNode *SemanticAnalyzer::BuildPostfixDecrementNode(ExprNode *expr, const std::shared_ptr<Token> &op)
 {
     CheckIncDecRules(expr, op);
+    auto res = new PostfixDecrementNode(expr);
+    res->SetPosition(op);
     return new PostfixDecrementNode(expr);
 }
 
 PostfixIncrementNode *SemanticAnalyzer::BuildPostfixIncrementNode(ExprNode *expr, const std::shared_ptr<Token> &op)
 {
     CheckIncDecRules(expr, op);
-    return new PostfixIncrementNode(expr);
+    auto res = new PostfixIncrementNode(expr);
+    res->SetPosition(op);
+    return res;
 }
 
 void SemanticAnalyzer::CheckIncDecRules(ExprNode *expr, std::shared_ptr<Token> op)
 {
-    if (!isModifiableLvalue(expr)) throw RequiredModifiableLvalueError();
+    if (!isModifiableLvalue(expr)) throw RequiredModifiableLvalueError(expr);
     auto type = unqualify(expr->GetType());
     if (!isArithmeticType(type) && !isPointerType(type) || isVoidPointer(type))
         throw InvalidOperandError(std::move(op), expr->GetType());
@@ -111,7 +115,9 @@ bool SemanticAnalyzer::isPointerType(SymType *type)
     return type->GetTypeKind() == TypeKind::POINTER;
 }
 
-InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer, bool isTypedef)
+InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *declarator,
+                                                              InitializerNode *initializer,
+                                                              bool isTypedef)
 {
     auto prev = scopeTree.GetActiveScope()->Find(declarator->GetId()->GetName()); // TODO FUNCTIONS
     if (prev) throw RedeclarationError(declarator->GetId(), prev);
@@ -133,15 +139,7 @@ InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *de
         else
             scopeTree.GetActiveScope()->Insert(name, new SymVariable(name, declarator->GetType(), declarator->GetId()));
     if (initializer)
-    {
-        auto simple = dynamic_cast<SimpleInitializer *>(initializer);
-        if (simple)
-        {
-            auto value = simple->GetValue();
-            Convert(&value, t);
-            simple->SetValue(value);
-        }
-    }
+        analyseInitializerList(declarator->GetType(), initializer, nullptr);
     return new InitDeclaratorNode(declarator, initializer);
 }
 
@@ -165,6 +163,7 @@ SemanticAnalyzer::BuildStructureOrUnionMemberAccessNode(ExprNode *structure, IdN
     if (!(sfield = (SymVariable *)stype->GetFieldsTable()->Find(field->GetName())))
         throw NonexistentMemberError(stype, field);
     auto res = new StructureOrUnionMemberAccessNode(structure, field);
+    res->SetPosition(dot);
     uint32_t squals = type->IsQualified() ? ((SymQualifiedType *)type)->GetQualifiers() : 0;
     auto rest = sfield->GetType();
     if (rest->IsQualified())
@@ -191,6 +190,7 @@ SemanticAnalyzer::BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, 
     if (!(sfield = (SymVariable *)stype->GetFieldsTable()->Find(field->GetName())))
         throw NonexistentMemberError(stype, field);
     auto res = new StructureOrUnionMemberAccessByPointerNode(ptr, field);
+    res->SetPosition(arrow);
     res->SetValueCategory(ValueCategory::LVAVLUE);
     auto rest = sfield->GetType();
     uint32_t squals = ptype->GetTarget()->IsQualified() ? ((SymQualifiedType *)ptype->GetTarget())->GetQualifiers() : 0;
@@ -215,7 +215,7 @@ ArrayAccessNode *SemanticAnalyzer::BuildArrayAccessNode(ExprNode *array, ExprNod
         array->SetType(((SymArray *)array->GetType())->ToPointer());
     if (array->GetType()->GetTypeKind() != TypeKind::POINTER) throw BadIndexingError();
     array->SetValueCategory(ValueCategory::LVAVLUE);
-    if (!isIntegerType(index->GetType())) throw BadIndexingError(index->GetType());
+    if (!isIntegerType(index->GetType())) throw BadIndexingError(index);
     auto res = new ArrayAccessNode(array, index);
     res->SetValueCategory(ValueCategory::LVAVLUE);
     res->SetType(((SymPointer *)array->GetType())->GetTarget());
@@ -240,7 +240,7 @@ FunctionCallNode *SemanticAnalyzer::BuildFunctionCallNode(ExprNode *func, Argume
     {
         if (ftype->GetOderedParams().size() != 1 || !isVoidType(ftype->GetOderedParams()[0]->GetType())
             || !args->List().empty())
-                throw MismatchNumberOfArguments((SymFunction *)unqualify(ftype));
+                throw MismatchNumberOfArguments(func);
     }
     for (auto &arg : args->List())
     {
@@ -431,7 +431,7 @@ SemanticAnalyzer::BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue
 
 AssignmentNode *SemanticAnalyzer::BuildAssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp)
 {
-    if (!isModifiableLvalue(left)) throw RequiredModifiableLvalueError();
+    if (!isModifiableLvalue(left)) throw RequiredModifiableLvalueError(left);
     auto ltype = left->GetType(), rtype = right->GetType();
     if (assignmentOp->type != TokenType::ASSIGNMENT)
         right = BuildBinOpNode(left, right, extractArithmeticOperationFromAssignmentBy(assignmentOp));  // TODO redo
@@ -524,7 +524,7 @@ void SemanticAnalyzer::Convert(ExprNode **expr, SymType *type)
         *expr = new TypeCastNode(type, *expr);
         return;
     }
-    throw BadTypeConversionError(etype, type);
+    throw BadTypeConversionError(*expr, type);
 }
 
 FunctionDefinitionNode *
@@ -588,7 +588,7 @@ EnumeratorNode *SemanticAnalyzer::BuildEnumeratorNode(IdNode *enumerator, ExprNo
         if (!expr) throw RequiredConstantExpressionError(enumerator);
         auto intconst = dynamic_cast<IntConstNode *>(expr);
         if (!intconst) throw RequiredConstantExpressionError(enumerator);
-        prev = intconst->GetValue()->intValue;
+        prev = intconst->GetValue();
     }
     auto symenumerator = scopeTree.GetActiveScope()->Find(enumerator->GetName());
     if (symenumerator) throw RedeclarationError(enumerator, symenumerator);
@@ -680,3 +680,95 @@ bool SemanticAnalyzer::equalQualifiers(SymType *one, SymType *other)
     }
     return !one->IsQualified() && !other->IsQualified();
 }
+
+ExprNode *SemanticAnalyzer::EvaluateArraySizer(ExprNode *expr)
+{
+    if (!isIntegerType(expr->GetType())) throw RequiredConstantIntegerExpressionError(expr);
+    expr = evaluator.Eval(expr);
+    auto constIntExpr = dynamic_cast<IntConstNode *>(expr);
+    if (!constIntExpr) throw RequiredConstantIntegerExpressionError(expr);
+    return expr;
+}
+
+void SemanticAnalyzer::analyseInitializerList(SymType *current,
+                                              InitializerNode *initializer,
+                                              DesignatorNode *designator)
+{
+    auto simple = dynamic_cast<SimpleInitializer *>(initializer);
+    if (simple)
+    {
+        auto value = simple->GetValue();
+        Convert(&value, current);
+        if (designator)
+            designator->SetValue(new SimpleInitializer(value));
+        else
+            simple->SetValue(value);
+        return;
+    }
+    int i = 0, size = 0;
+    current = unqualify(current);
+    auto tp = current->GetTypeKind();
+    if (tp != TypeKind::ARRAY && tp != TypeKind::STRUCT) throw "";
+    auto array = dynamic_cast<SymArray *>(current);
+    auto structure = dynamic_cast<SymRecord *>(current);
+    auto list = dynamic_cast<InitializerListNode *>(initializer);
+    for (auto value: list->List())
+    {
+        auto simple = dynamic_cast<SimpleInitializer *>(value);
+        if (simple)
+        {
+            auto expr = simple->GetValue();
+            if (array)
+            {
+                Convert(&expr, array->GetValueType());
+                i++;
+            }
+            else
+            {
+                structure->GetOrderedFields();
+                if (structure->GetOrderedFields().size() <= i) throw ExcessElementsInStructInitializerError();
+                Convert(&expr, structure->GetOrderedFields()[i++]->GetType());
+            }
+            simple->SetValue(expr);
+            continue;
+        }
+        auto il = dynamic_cast<InitializerListNode *>(value);
+        if (il)
+        {
+            if (array)
+            {
+                analyseInitializerList(array->GetValueType(), il);
+                i++;
+            }
+            else
+            {
+                if (structure->GetOrderedFields().size() <= i) throw ExcessElementsInStructInitializerError();
+                analyseInitializerList(structure->GetOrderedFields()[i++]->GetType(), il);
+            }
+            continue;
+        }
+        auto di = dynamic_cast<DesignatedInitializerNode *>(value);
+        if (di)
+        {
+            auto init = di->GetInitializer();
+            for (auto designator: di->GetDesignation()->List())
+            {
+                auto ad = dynamic_cast<ArrayDesignator *>(designator);
+                auto sd = dynamic_cast<StructMemberDesignator *>(designator);
+                if (sd)
+                {
+                    if (!structure) throw BadDesignatorError(sd);
+                    auto field = (SymVariable *)structure->GetFieldsTable()->Find(sd->GetMemberId()->GetName());
+                    if (!field) throw NonexistentMemberError(structure, sd->GetMemberId());
+                    analyseInitializerList(unqualify(field->GetType()), init, sd);
+                }
+                else
+                {
+                    if (!array) throw BadDesignatorError(ad);
+                    analyseInitializerList(array->GetValueType(), init, ad);
+                }
+            }
+        }
+    }
+}
+

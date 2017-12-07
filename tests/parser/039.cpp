@@ -1,2 +1,2 @@
 char* (*(*foo[5])(char*, int))[];
-char *(*(**foo [][8])(void))[];
+char *(*(**bar [][8])(void))[];

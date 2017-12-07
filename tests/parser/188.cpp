@@ -1,0 +1,1 @@
+struct A {int a, b;} a = {.c = 123};

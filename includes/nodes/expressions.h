@@ -29,9 +29,14 @@ public:
     ValueCategory  GetValueCategory() const;
     void SetValueCategory(ValueCategory category);
     virtual ExprNode * Eval(Evaluator *evaluator) = 0;
+    Position GetPosition() const;
+    void SetPosition(Position position);
+    void SetPosition(int row, int col);
+    void SetPosition(std::shared_ptr<Token> token);
 protected:
     SymType *type{nullptr};
     ValueCategory  category{ValueCategory::RVALUE};
+    Position position;
 };
 
 class PostfixIncrementNode: public ExprNode
@@ -216,7 +221,6 @@ public:
     IdNode(std::shared_ptr<Token> token, SymType *type);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     std::string GetName() const;
-    Position GetPosition() const;
     ExprNode * Eval(Evaluator *evaluator) override;
 private:
     std::shared_ptr<Token> token;
@@ -225,12 +229,9 @@ private:
 class ConstNode: public ExprNode
 {
 public:
-    explicit ConstNode(std::shared_ptr<Token> token);
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
     ExprNode * Eval(Evaluator *evaluator) override = 0;
-    std::shared_ptr<Token> GetValue();
 protected:
-    std::shared_ptr<Token> token;
 };
 
 class IntConstNode: public ConstNode
@@ -239,6 +240,9 @@ public:
     explicit IntConstNode(std::shared_ptr<Token> token);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     ExprNode * Eval(Evaluator *evaluator) override;
+    int32_t GetValue() const;
+private:
+    int32_t value;
 };
 
 class FloatConstNode: public ConstNode
@@ -247,6 +251,9 @@ public:
     explicit FloatConstNode(std::shared_ptr<Token> token);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     ExprNode * Eval(Evaluator *evaluator) override;
+    float GetValue() const;
+private:
+    float value;
 };
 
 class StringLiteralNode: public ExprNode
