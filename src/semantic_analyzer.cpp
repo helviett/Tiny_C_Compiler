@@ -134,10 +134,13 @@ InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *de
         }
     }
     else
+    {
+        if (isVoidType(t)) throw UnknownVariableStorageError(new SymVariable(name, t, declarator->GetId()));
         if (isTypedef)
             scopeTree.GetActiveScope()->Insert(name, new SymAlias(name, t));
         else
-            scopeTree.GetActiveScope()->Insert(name, new SymVariable(name, declarator->GetType(), declarator->GetId()));
+            scopeTree.GetActiveScope()->Insert(name, new SymVariable(name, t, declarator->GetId()));
+    }
     if (initializer)
         analyseInitializerList(declarator->GetType(), initializer, nullptr);
     return new InitDeclaratorNode(declarator, initializer);

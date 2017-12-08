@@ -5,6 +5,7 @@
 #ifndef TINY_C_COMPILER_SEMANTIC_ERRORS_H
 #define TINY_C_COMPILER_SEMANTIC_ERRORS_H
 
+#include <symbols.h>
 #include "compilation_error.h"
 
 class Symbol;
@@ -239,6 +240,13 @@ class BadDesignatorError: public SemanticError
 public:
     explicit BadDesignatorError(StructMemberDesignator *designator);
     explicit BadDesignatorError(ArrayDesignator *designator);
+    const char *what() const throw() override;
+};
+
+class UnknownVariableStorageError: public SemanticError
+{
+public:
+    explicit UnknownVariableStorageError(SymVariable *variable);
     const char *what() const throw() override;
 };
 

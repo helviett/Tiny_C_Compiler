@@ -1,1 +1,1 @@
-(11, 5): Invalid iperands for '+'
+(11, 5): Invalid operands for '+'

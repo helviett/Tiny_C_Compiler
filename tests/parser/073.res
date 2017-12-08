@@ -1,1 +1,1 @@
-(5, 9) UndeclaredIdentifierError: dosmth.
+(7, 13) SyntaxError: expected LBRACKET, got 1.

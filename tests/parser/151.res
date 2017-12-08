@@ -1,1 +1,1 @@
-(16, 4): Invalid iperands for ':'
+(16, 4): Invalid operands for ':'

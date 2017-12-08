@@ -1,1 +1,1 @@
-(7, 4): Invalid iperands for '&&'
+(7, 4): Invalid operands for '&&'

@@ -394,3 +394,16 @@ BadDesignatorError::BadDesignatorError(ArrayDesignator *designator)
     msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
             "): Array index in non-array initializer.";
 }
+
+const char *UnknownVariableStorageError::what() const throw()
+{
+    return msg.c_str();
+}
+
+UnknownVariableStorageError::UnknownVariableStorageError(SymVariable *variable)
+{
+    auto id = variable->GetId();
+    auto pos = id->GetPosition();
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
+          "): Storage of '" + id->GetName() + "' isn't known.";
+}

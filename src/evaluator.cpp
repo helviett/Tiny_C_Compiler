@@ -1,3 +1,4 @@
+#include <errors/tcc_exceptions.h>
 #include "../includes/evaluator.h"
 
 ExprNode *Evaluator::Eval(ExprNode *node)
@@ -41,42 +42,37 @@ ExprNode *Evaluator::Eval(BinOpNode *node)
 #define EVAL(OP)\
     if (ileft && iright)\
     {\
-        value = ileft->GetValue() OP iright->GetValue();\
-        t = std::make_shared<Token>(TokenType::NUM_INT, -1, -1, std::to_string((int)value));\
-        t->intValue = value;\
-        return new IntConstNode(t);\
+        return new IntConstNode(ileft->GetValue() OP iright->GetValue());\
     }
 
     switch (node->GetOperation()->type)
     {
         case TokenType::PLUS:
             if (ileft && iright)
-            {
-                value = ileft->GetValue() + iright->GetValue();
-                t = std::make_shared<Token>(TokenType::NUM_INT, -1, -1, std::to_string((int)value));
-                t->intValue = value;
-                return new IntConstNode(t);
-            }
+                return new IntConstNode(ileft->GetValue() + iright->GetValue());
         case TokenType::MINUS:
             if (ileft && iright)
-            {
-                value = ileft->GetValue() - iright->GetValue();
-                t = std::make_shared<Token>(TokenType::NUM_INT, -1, -1, std::to_string((int)value));
-                t->intValue = value;
-                return new IntConstNode(t);
-            }
+                return new IntConstNode(ileft->GetValue() - iright->GetValue());
         case TokenType::ASTERIX:
             if (ileft && iright)
-            {
-                value = ileft->GetValue() * iright->GetValue();
-                t = std::make_shared<Token>(TokenType::NUM_INT, -1, -1, std::to_string((int)value));
-                t->intValue = value;
-                return new IntConstNode(t);
-            }
+                return new IntConstNode(ileft->GetValue() * iright->GetValue());
         case TokenType::BITWISE_AND:
-            EVAL(&);
+            if (ileft && iright)
+                return new IntConstNode(ileft->GetValue() * iright->GetValue());
+//            throw InvalidOperandError(node->GetOperation(), ileft->GetType(), iright->GetType());
         case TokenType::BITWISE_OR:
-            EVAL(|)
+            if (ileft && iright)
+                return new IntConstNode(ileft->GetValue() | iright->GetValue());
+        case TokenType::BITWISE_XOR:
+            if (ileft && iright)
+                return new IntConstNode(ileft->GetValue() ^ iright->GetValue());
+        case TokenType::BITWISE_LSHIFT:
+            if (ileft && iright)
+                return new IntConstNode(ileft->GetValue() | iright->GetValue());
+        case TokenType::BITWISE_RSHIFT:
+            if (ileft && iright)
+                return new IntConstNode(ileft->GetValue() | iright->GetValue());
+
 
     }
     return nullptr;

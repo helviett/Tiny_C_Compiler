@@ -29,6 +29,12 @@ int32_t IntConstNode::GetValue() const
     return value;
 }
 
+IntConstNode::IntConstNode(int32_t value)
+{
+    this->value = value;
+    type = new SymBuiltInType(BuiltInTypeKind::INT32);
+}
+
 void FloatConstNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");

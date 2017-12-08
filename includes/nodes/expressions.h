@@ -36,7 +36,7 @@ public:
 protected:
     SymType *type{nullptr};
     ValueCategory  category{ValueCategory::RVALUE};
-    Position position;
+    Position position{-1, -1};
 };
 
 class PostfixIncrementNode: public ExprNode
@@ -238,6 +238,7 @@ class IntConstNode: public ConstNode
 {
 public:
     explicit IntConstNode(std::shared_ptr<Token> token);
+    IntConstNode(int32_t value);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     ExprNode * Eval(Evaluator *evaluator) override;
     int32_t GetValue() const;

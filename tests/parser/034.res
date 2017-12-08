@@ -70,12 +70,10 @@
     │           │   │   └── INT32
     │           │   └── 3
     │           └── InitializerList
-    │               ├── DesignatedInitializer
-    │               │   └── Initializer 
-    │               │       └── 1
-    │               ├── DesignatedInitializer
-    │               │   └── Initializer 
-    │               │       └── 2
+    │               ├── Initializer 
+    │               │   └── 1
+    │               ├── Initializer 
+    │               │   └── 2
     │               └── DesignatedInitializer
     │                   ├── 
     │                   │   └── DesignatorList
@@ -92,12 +90,10 @@
                 │   │   └── INT32
                 │   └── 4
                 └── InitializerList
-                    ├── DesignatedInitializer
-                    │   └── Initializer 
-                    │       └── 1
-                    ├── DesignatedInitializer
-                    │   └── Initializer 
-                    │       └── 2
+                    ├── Initializer 
+                    │   └── 1
+                    ├── Initializer 
+                    │   └── 2
                     ├── DesignatedInitializer
                     │   ├── 
                     │   │   └── DesignatorList

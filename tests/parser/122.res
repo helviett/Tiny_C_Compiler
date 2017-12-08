@@ -1,1 +1,1 @@
-(7, 5): Invalid iperands for '<<'
+(7, 5): Invalid operands for '<<'

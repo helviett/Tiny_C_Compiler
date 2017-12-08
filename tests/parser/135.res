@@ -1,1 +1,1 @@
-Invalid iperands for '*'
+Invalid operands for '*'

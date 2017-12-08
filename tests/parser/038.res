@@ -16,14 +16,20 @@
     │           │   │   └── FLOAT
     │           │   └── 3
     │           └── InitializerList
-    │               ├── DesignatedInitializer
-    │               │   └── Initializer 
+    │               ├── Initializer 
+    │               │   └── typcast
+    │               │       ├── Qualified 0
+    │               │       │   └── FLOAT
     │               │       └── 1
-    │               ├── DesignatedInitializer
-    │               │   └── Initializer 
+    │               ├── Initializer 
+    │               │   └── typcast
+    │               │       ├── Qualified 0
+    │               │       │   └── FLOAT
     │               │       └── 2
-    │               └── DesignatedInitializer
-    │                   └── Initializer 
+    │               └── Initializer 
+    │                   └── typcast
+    │                       ├── Qualified 0
+    │                       │   └── FLOAT
     │                       └── 3
     ├── Decl
     │   └── InitDeclaratorList
@@ -66,28 +72,27 @@
                 │   │           └── FLOAT
                 │   └── 2
                 └── InitializerList
-                    ├── DesignatedInitializer
-                    │   └── InitializerList
-                    │       ├── DesignatedInitializer
-                    │       │   ├── 
-                    │       │   │   └── DesignatorList
-                    │       │   │       └── .
-                    │       │   │           └── a
-                    │       │   └── Initializer 
-                    │       │       └── 12
-                    │       └── DesignatedInitializer
-                    │           ├── 
-                    │           │   └── DesignatorList
-                    │           │       └── .
-                    │           │           └── b
-                    │           └── Initializer 
-                    │               └── 0.001
-                    └── DesignatedInitializer
-                        └── InitializerList
-                            ├── DesignatedInitializer
-                            │   └── Initializer 
-                            │       └── 13
-                            └── DesignatedInitializer
-                                └── Initializer 
-                                    └── 12
+                    ├── InitializerList
+                    │   ├── DesignatedInitializer
+                    │   │   ├── 
+                    │   │   │   └── DesignatorList
+                    │   │   │       └── .
+                    │   │   │           └── a
+                    │   │   └── Initializer 
+                    │   │       └── 12
+                    │   └── DesignatedInitializer
+                    │       ├── 
+                    │       │   └── DesignatorList
+                    │       │       └── .
+                    │       │           └── b
+                    │       └── Initializer 
+                    │           └── 0.001
+                    └── InitializerList
+                        ├── Initializer 
+                        │   └── 13
+                        └── Initializer 
+                            └── typcast
+                                ├── Qualified 0
+                                │   └── FLOAT
+                                └── 12
 
