@@ -7,7 +7,9 @@ postfix-expr ::= primary-expr | postifx-expr [expr] | postfix-expr (`argument-ex
 argument-expr-list ::= argument-expr | argument-expr-list, argument-expr
 
 unary-expr ::= postfix-expr | ++ unary-expr | -- unary-expr | unary-op cast-expr 
-			  | sizeof unary-expr | sizeof (type-id)
+			  | sizeof unary-expr | sizeof (type-id) | printf(format-string `variadic-arguments)
+
+variadic-arguments ::= , argument-expr-list
 
 unary-op  ::= & | * | + | - | ~ | !  
 

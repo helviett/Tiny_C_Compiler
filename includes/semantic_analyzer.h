@@ -51,6 +51,7 @@ public:
     BreakStatementNode *BuildBreakStatementNode(std::shared_ptr<Token> statement);
     ContinueStatementNode *BuildContinueStatementNode(std::shared_ptr<Token> statement);
     TypedefIdentifierNode *BuildTypedefIdentifierNode(const std::shared_ptr<Token> &id);
+    PrintfNode *BuildPrintfNode(StringLiteralNode *format, ArgumentExprListNode *arguments);
     ExprNode *EvaluateArraySizer(ExprNode *expr);
     void ProcessFunction(SymType *funcType);
     void FinishLastFunctionProcessing();

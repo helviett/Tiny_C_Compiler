@@ -810,15 +810,15 @@ void FunctionCallNode::Print(std::ostream &os, std::string indent, bool isTail)
     indent.append(isTail ? "    " : "│   ");
     if (arguments->Size())
     {
-        functionName->Print(os, indent, false);
+        function->Print(os, indent, false);
         arguments->Print(os, indent, true);
         return;
     }
-    functionName->Print(os, indent, true);
+    function->Print(os, indent, true);
 }
 
-FunctionCallNode::FunctionCallNode(ExprNode *functionName, ArgumentExprListNode *arguments) :
-        functionName(functionName), arguments(arguments) {}
+FunctionCallNode::FunctionCallNode(ExprNode *function, ArgumentExprListNode *arguments) :
+        function(function), arguments(arguments) {}
 
 ExprNode *FunctionCallNode::Eval(Evaluator *evaluator)
 {
@@ -1706,4 +1706,26 @@ void SimpleInitializer::Generate(Asm::Assembly *assembly)
 void DesignatorNode::SetValue(InitializerNode *value)
 {
     this->value = value;
+}
+
+PrintfNode::PrintfNode(StringLiteralNode *format, ArgumentExprListNode *arguments):
+        format(format), arguments(arguments) {}
+
+void PrintfNode::Print(std::ostream &os, std::string indent, bool isTail)
+{
+    os << indent << (isTail ? "└── " : "├── ");
+    os << "printf " << std::endl;
+    indent.append(isTail ? "    " : "│   ");
+    format->Print(os, indent, !arguments);
+    if (arguments) arguments->Print(os, indent, true);
+}
+
+ExprNode *PrintfNode::Eval(Evaluator *evaluator)
+{
+    return nullptr;
+}
+
+void PrintfNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }

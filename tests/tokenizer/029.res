@@ -9,7 +9,7 @@ Position		Type			Value			Text
 (1, 24)			ID			e				  e
 (1, 25)			RBRACKET			)				  )
 (2, 1)			LCURLY_BRACKET			{				  {
-(3, 5)			ID			printf				  printf
+(3, 5)			KEYWORD			31				  printf
 (3, 11)			LBRACKET			(				  (
 (3, 12)			STRING			Error %s: Code %d				  "Error %s: Code %d"
 (3, 31)			COMMA			,				  ,

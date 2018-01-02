@@ -27,7 +27,8 @@ enum class Keyword
 {
     BREAK, CASE, CHAR, CONST, CONTINUE, DEFAULT, DO, DOUBLE, ELSE, ENUM,
     EXTERN, FLOAT, FOR, GOTO, IF, INT, LONG, REGISTER, RETURN, SHORT,
-    SIGNED, SIZEOF, STATIC, STRUCT, TYPEDEF, UNION, UNSIGNED, VOID, VOLATILE, WHILE, INLINE
+    SIGNED, SIZEOF, STATIC, STRUCT, TYPEDEF, UNION, UNSIGNED, VOID, VOLATILE, WHILE, INLINE,
+    PRINTF
 };
 
 static std::unordered_map<TokenType, std::string> TokenTypeToString(
@@ -94,6 +95,7 @@ static std::unordered_map<std::string, Keyword> StringToKeyword
     {"unsigned", Keyword::UNSIGNED},
     {"default", Keyword::DEFAULT},
     {"typedef", Keyword::TYPEDEF},
+    {"printf", Keyword::PRINTF},
     {"return", Keyword::RETURN},
     {"signed", Keyword::SIGNED},
     {"sizeof", Keyword::SIZEOF},
@@ -117,7 +119,8 @@ static std::unordered_map<std::string, Keyword> StringToKeyword
     {"for", Keyword::FOR},
     {"int", Keyword::INT},
     {"if", Keyword::IF},
-    {"do", Keyword::DO}
+    {"do", Keyword::DO},
+
 };
 
 struct Position

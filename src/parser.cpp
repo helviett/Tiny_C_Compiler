@@ -133,6 +133,18 @@ ExprNode *Parser::parseUnaryExpr()
                 else
                     ue = new SizeofExprNode(parseUnaryExpr());
             }
+            else if (t->keyword == Keyword::PRINTF)
+            {
+                ArgumentExprListNode *arguments = nullptr;
+                scanner->Next();
+                requireNext(TokenType::LBRACKET);
+                t = scanner->Current();
+                requireNext(TokenType::STRING);
+                if (maybeNext(TokenType::COMMA))
+                    arguments = parseArgumentExprList();
+                requireNext(TokenType::RBRACKET);
+                ue = sematicAnalyzer.BuildPrintfNode(new StringLiteralNode(t), arguments);
+            }
             break;
         default:
             if (isUnaryOp(t))

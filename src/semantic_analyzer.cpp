@@ -1,5 +1,3 @@
-#include <utility>
-
 #include "../includes/semantic_analyzer.h"
 
 IdNode *SemanticAnalyzer::BuildIdNode(std::shared_ptr<Token> token)
@@ -774,5 +772,17 @@ void SemanticAnalyzer::analyseInitializerList(SymType *current,
             }
         }
     }
+}
+
+PrintfNode *SemanticAnalyzer::BuildPrintfNode(StringLiteralNode *format, ArgumentExprListNode *arguments)
+{
+    if (arguments)
+        for (auto &arg: arguments->List())
+        {
+            auto type = dynamic_cast<SymBuiltInType *>(arg->GetType());
+            if (type && type->GetBuiltIntTypeKind() == BuiltInTypeKind::FLOAT)
+                arg = new TypeCastNode(new SymBuiltInType(BuiltInTypeKind::DOUBLE), arg);
+        }
+    return new PrintfNode(format, arguments);
 }
 

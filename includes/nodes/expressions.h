@@ -108,12 +108,26 @@ private:
 class FunctionCallNode: public ExprNode
 {
 public:
-    FunctionCallNode(ExprNode *functionName, ArgumentExprListNode *arguments);
+    FunctionCallNode(ExprNode *function, ArgumentExprListNode *arguments);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     ExprNode *Eval(Evaluator *evaluator) override;
     void Generate(Asm::Assembly *assembly) override;
 private:
-    ExprNode *functionName;
+    ExprNode *function;
+    ArgumentExprListNode *arguments;
+};
+
+class StringLiteralNode;
+
+class PrintfNode: public ExprNode
+{
+public:
+    PrintfNode(StringLiteralNode *format, ArgumentExprListNode *arguments);
+    void Print(std::ostream &os, std::string indent, bool isTail) override;
+    ExprNode *Eval(Evaluator *evaluator) override;
+    void Generate(Asm::Assembly *assembly) override;
+private:
+    StringLiteralNode *format;
     ArgumentExprListNode *arguments;
 };
 
