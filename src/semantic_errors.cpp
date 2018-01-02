@@ -5,7 +5,7 @@
 InvalidOperandError::InvalidOperandError(std::shared_ptr<Token> op, SymType *ltype, SymType *rtype)
 {
     auto pos = op->position;
-    msg = "(" + std::to_string(pos.col) + ", " + std::to_string(pos.row) +
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): Invalid operands for '" + op->text + "'";
 }
 

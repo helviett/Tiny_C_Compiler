@@ -1,1 +1,1 @@
-(7, 5): Invalid operands for '>>'
+(5, 7): Invalid operands for '>>'

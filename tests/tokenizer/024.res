@@ -1,3 +1,3 @@
 Position		Type			Value			Text
 
-(1, 3)			SEMICOLON			;				  ;
+(2, 1)			SEMICOLON			;				  ;

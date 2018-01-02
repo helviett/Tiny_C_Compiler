@@ -157,6 +157,12 @@ void Tokenizer::parseMultilineComment()
     {
         buffer[0] = buffer[1];
         buffer[1] = currentCharacter;
+        if (currentCharacter == '\n')
+        {
+            currentPos.row++;
+            currentPos.col = 0;
+        }
+        currentPos.col++;
         if (buffer[0] == '/' && buffer[1] == '*')
             nesting++;
         if (buffer[0] == '*' && buffer[1] == '/')
@@ -169,6 +175,7 @@ void Tokenizer::parseComment()
 {
     while (currentFile.get(currentCharacter))
         if (currentCharacter == '\n') break;
+    currentPos.row++, currentPos.col = 1;
     buffer.resize(0);
     currentState = 0;
 }

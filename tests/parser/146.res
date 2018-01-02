@@ -1,1 +1,1 @@
-(7, 4): Invalid operands for '^'
+(4, 7): Invalid operands for '^'

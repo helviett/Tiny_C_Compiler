@@ -15,8 +15,8 @@ Position		Type			Value			Text
 (3, 9)			ID			b				  b
 (3, 10)			RBRACKET			)				  )
 (4, 1)			LCURLY_BRACKET			{				  {
-(5, 7)			RCURLY_BRACKET			}				  }
-(6, 1)			KEYWORD			8				  else
-(7, 5)			ID			b				  b
-(7, 7)			ASSIGNMENT_BY_DIFFERENCE			-=				  -=
-(7, 10)			ID			a				  a
+(6, 1)			RCURLY_BRACKET			}				  }
+(7, 1)			KEYWORD			8				  else
+(8, 5)			ID			b				  b
+(8, 7)			ASSIGNMENT_BY_DIFFERENCE			-=				  -=
+(8, 10)			ID			a				  a

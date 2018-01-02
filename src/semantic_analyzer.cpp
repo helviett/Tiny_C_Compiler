@@ -439,6 +439,7 @@ AssignmentNode *SemanticAnalyzer::BuildAssignmentNode(ExprNode *left, ExprNode *
     if (assignmentOp->type != TokenType::ASSIGNMENT)
         right = BuildBinOpNode(left, right, extractArithmeticOperationFromAssignmentBy(assignmentOp));  // TODO redo
     left->SetType(ltype);
+    rtype = unqualify(right->GetType());
     if (isArithmeticType(ltype) && isArithmeticType(rtype))
     {
         Convert(&right, ltype);

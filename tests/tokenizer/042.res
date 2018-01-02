@@ -1,4 +1,4 @@
 Position		Type			Value			Text
 
-(1, 3)			STRING			good_string				  "good_string"
-WrongStringLiteral at (1, 32). Text:
+(2, 1)			STRING			good_string				  "good_string"
+WrongStringLiteral at (2, 30). Text:
