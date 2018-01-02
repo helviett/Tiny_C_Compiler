@@ -35,6 +35,12 @@ IntConstNode::IntConstNode(int32_t value)
     type = new SymBuiltInType(BuiltInTypeKind::INT32);
 }
 
+void IntConstNode::Generate(Asm::Assembly *assembly)
+{
+    assembly->AddCommand(Asm::CommandName::PUSH, (ConstNode *)this, Asm::CommandSuffix::L);
+    // TODO
+}
+
 void FloatConstNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -57,6 +63,12 @@ ExprNode *FloatConstNode::Eval(Evaluator *evaluator)
 float FloatConstNode::GetValue() const
 {
     return value;
+}
+
+void FloatConstNode::Generate(Asm::Assembly *assembly)
+{
+    assembly->AddCommand(Asm::CommandName::PUSH, (ConstNode *)this, Asm::CommandSuffix::L);
+    // TODO
 }
 
 void IdNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -88,6 +100,11 @@ ExprNode *IdNode::Eval(Evaluator *evaluator)
     return evaluator->Eval(this);
 }
 
+void IdNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void StringLiteralNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -103,6 +120,11 @@ StringLiteralNode::StringLiteralNode(std::shared_ptr<Token> token): token(token)
 ExprNode *StringLiteralNode::Eval(Evaluator *evaluator)
 {
     return evaluator->Eval(this);
+}
+
+void StringLiteralNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void PostfixIncrementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -123,6 +145,11 @@ ExprNode * PostfixIncrementNode::Eval(Evaluator *evaluator)
     evaluator->Eval(this);
 }
 
+void PostfixIncrementNode::Generate(Asm::Assembly *assembly)
+{
+    
+}
+
 void PostfixDecrementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -141,6 +168,11 @@ ExprNode *PostfixDecrementNode::Eval(Evaluator *evaluator)
     return evaluator->Eval(this);
 }
 
+void PostfixDecrementNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void StructureOrUnionMemberAccessNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -156,6 +188,11 @@ StructureOrUnionMemberAccessNode::StructureOrUnionMemberAccessNode(ExprNode *str
 ExprNode *StructureOrUnionMemberAccessNode::Eval(Evaluator *evaluator)
 {
     return evaluator->Eval(this);
+}
+
+void StructureOrUnionMemberAccessNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void StructureOrUnionMemberAccessByPointerNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -176,6 +213,11 @@ ExprNode *StructureOrUnionMemberAccessByPointerNode::Eval(Evaluator *evaluator)
     return evaluator->Eval(this);
 }
 
+void StructureOrUnionMemberAccessByPointerNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void PrefixIncrementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -192,6 +234,11 @@ PrefixIncrementNode::PrefixIncrementNode(ExprNode *node) : node(node)
 ExprNode *PrefixIncrementNode::Eval(Evaluator *evaluator)
 {
     return evaluator->Eval(this);
+}
+
+void PrefixIncrementNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void PrefixDecrementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -212,6 +259,11 @@ ExprNode *PrefixDecrementNode::Eval(Evaluator *evaluator)
     return evaluator->Eval(this);
 }
 
+void PrefixDecrementNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void BinOpNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -228,7 +280,7 @@ BinOpNode::BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op)
 }
 
 BinOpNode::BinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> op, SymType *resultType):
-        BinOpNode(left, right, op)
+        BinOpNode(left, right, std::move(op))
 {
     this->type = resultType;
 }
@@ -253,6 +305,46 @@ std::shared_ptr<Token> BinOpNode::GetOperation() const
     return op;
 }
 
+void BinOpNode::Generate(Asm::Assembly *assembly)
+{
+    left->Generate(assembly);
+    right->Generate(assembly);
+    switch (op->type)
+    {
+        case TokenType::PLUS:
+            if (left->GetType()->GetTypeKind() == TypeKind::BUILTIN)
+            {
+                switch (static_cast<SymBuiltInType *>(left->GetType())->GetBuiltIntTypeKind())
+                {
+                    case BuiltInTypeKind::INT32:
+                        assembly->AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
+                        assembly->AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+                        assembly->AddCommand(Asm::CommandName::ADD, Asm::Register::EBX, Asm::Register::EAX, Asm::CommandSuffix::L);
+                        assembly->AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+                        break;
+                    case BuiltInTypeKind::FLOAT:
+                        assembly->AddCommand(Asm::CommandName::FLD,
+                                             Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                             Asm::CommandSuffix::S);
+                        assembly->AddCommand(Asm::CommandName::POP, Asm::Register::EAX,
+                                             Asm::CommandSuffix::L);
+                        assembly->AddCommand(Asm::CommandName::FLD,
+                                             Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                             Asm::CommandSuffix::S);
+                        assembly->AddCommand(Asm::CommandName::FADDP);
+                        assembly->AddCommand(Asm::CommandName::FSTP,
+                                             Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                             Asm::CommandSuffix::S);
+                        break;
+                }
+            }
+
+            break;
+        case TokenType::MINUS:
+            break;
+    }
+}
+
 void ArrayAccessNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -267,6 +359,11 @@ ArrayAccessNode::ArrayAccessNode(ExprNode *left, ExprNode *inBrackets) : left(le
 ExprNode *ArrayAccessNode::Eval(Evaluator *evaluator)
 {
     return evaluator->Eval(this);
+}
+
+void ArrayAccessNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void TernaryOperatorNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -290,6 +387,11 @@ ExprNode *TernaryOperatorNode::Eval(Evaluator *evaluator)
     return evaluator->Eval(this);
 }
 
+void TernaryOperatorNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 
 void AssignmentNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -311,6 +413,11 @@ ExprNode *AssignmentNode::Eval(Evaluator *evaluator)
     return evaluator->Eval(this);
 }
 
+void AssignmentNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void TypeCastNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -328,6 +435,11 @@ TypeCastNode::TypeCastNode(SymType *type, ExprNode *castExpr) : castType(type), 
 ExprNode *TypeCastNode::Eval(Evaluator *evaluator)
 {
     return evaluator->Eval(this);
+}
+
+void TypeCastNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void UnaryOpNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -348,6 +460,11 @@ ExprNode *UnaryOpNode::Eval(Evaluator *evaluator)
     return evaluator->Eval(this);
 }
 
+void UnaryOpNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void SizeofExprNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -363,6 +480,11 @@ ExprNode *SizeofExprNode::Eval(Evaluator *evaluator)
     return evaluator->Eval(this);
 }
 
+void SizeofExprNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void SizeofTypeNameNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -376,6 +498,11 @@ SizeofTypeNameNode::SizeofTypeNameNode(SymType *typeName) : typeName(typeName) {
 ExprNode *SizeofTypeNameNode::Eval(Evaluator *evaluator)
 {
     return evaluator->Eval(this);
+}
+
+void SizeofTypeNameNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void CommaSeparatedExprs::Print(std::ostream &os, std::string indent, bool isTail)
@@ -394,6 +521,11 @@ ExprNode *CommaSeparatedExprs::Eval(Evaluator *evaluator)
     return evaluator->Eval(this);
 }
 
+void CommaSeparatedExprs::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void PointerNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -408,12 +540,27 @@ void PointerNode::Print(std::ostream &os, std::string indent, bool isTail)
         typeQualifierList->Print(os, indent, true);
 }
 
+PointerNode::PointerNode(DeclarationSpecifiersNode *typeQualifierList, PointerNode *pointer) :
+        typeQualifierList(typeQualifierList), pointer(pointer) {}
+
+void PointerNode::Generate(Asm::Assembly *assembly)
+{
+
+}
+
 void ExprStatmentNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << ";" << std::endl;
     indent.append(isTail ? "    " : "│   ");
     if (expr) expr->Print(os, indent, true);
+}
+
+ExprStatmentNode::ExprStatmentNode(ExprNode *expr) : expr(expr) {}
+
+void ExprStatmentNode::Generate(Asm::Assembly *assembly)
+{
+    expr->Generate(assembly);
 }
 
 void IfStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -425,6 +572,13 @@ void IfStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
     then->Print(os, indent, true);
 }
 
+void IfStatementNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
+IfStatementNode::IfStatementNode(ExprNode *expr, StatementNode *then) : expr(expr), then(then) {}
+
 void IfElseStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -435,6 +589,14 @@ void IfElseStatementNode::Print(std::ostream &os, std::string indent, bool isTai
     _else->Print(os, indent, true);
 }
 
+IfElseStatementNode::IfElseStatementNode(ExprNode *expr, StatementNode *then, StatementNode *_else) :
+        IfStatementNode(expr, then), _else(_else) {}
+
+void IfElseStatementNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void GotoStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -443,10 +605,22 @@ void GotoStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
     id->Print(os, indent, true);
 }
 
+GotoStatementNode::GotoStatementNode(IdNode *id) : id(id) {}
+
+void GotoStatementNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void ContinueStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << "continue" << std::endl;
+}
+
+void ContinueStatementNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void BreakStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -455,12 +629,24 @@ void BreakStatementNode::Print(std::ostream &os, std::string indent, bool isTail
     os << "break" << std::endl;
 }
 
+void BreakStatementNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void ReturnStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << "return" << std::endl;
     indent.append(isTail ? "    " : "│   ");
     if (expr) expr->Print(os, indent, true);
+}
+
+ReturnStatementNode::ReturnStatementNode(ExprNode *expr) : expr(expr) {}
+
+void ReturnStatementNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void WhileStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -475,6 +661,11 @@ void WhileStatementNode::Print(std::ostream &os, std::string indent, bool isTail
 WhileStatementNode::WhileStatementNode(ExprNode *condition, StatementNode *body): condition(condition)
 {
     this->body = body;
+}
+
+void WhileStatementNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void DoWhileStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -494,6 +685,11 @@ DoWhileStatementNode::DoWhileStatementNode(ExprNode *condition, StatementNode *b
 void DoWhileStatementNode::SetCondition(ExprNode *condition)
 {
     this->condition = condition;
+}
+
+void DoWhileStatementNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void ForStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -518,6 +714,11 @@ ForStatementNode::ForStatementNode(ExprStatmentNode *init, ExprStatmentNode *con
     this->body = body;
 }
 
+void ForStatementNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 
 void LabelStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -529,6 +730,11 @@ void LabelStatementNode::Print(std::ostream &os, std::string indent, bool isTail
 }
 
 LabelStatementNode::LabelStatementNode(IdNode *labelName, StatementNode *statement) : labelName(labelName), statement(statement) {}
+
+void LabelStatementNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
 
 void DeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -559,6 +765,11 @@ IdNode *DeclaratorNode::GetId() const
     return id;
 }
 
+void DeclaratorNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void ArgumentExprListNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     if (list.empty()) return;
@@ -587,6 +798,11 @@ std::list<ExprNode *> &ArgumentExprListNode::List()
     return list;
 }
 
+void ArgumentExprListNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void FunctionCallNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -607,6 +823,11 @@ FunctionCallNode::FunctionCallNode(ExprNode *functionName, ArgumentExprListNode 
 ExprNode *FunctionCallNode::Eval(Evaluator *evaluator)
 {
     return evaluator->Eval(this);
+}
+
+void FunctionCallNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void DeclarationSpecifiersNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -643,6 +864,11 @@ std::list<DeclarationSpecifierNode *> &DeclarationSpecifiersNode::List()
     return list;
 }
 
+void DeclarationSpecifiersNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void ParameterList::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -670,6 +896,11 @@ std::list<ParameterDeclarationNode *> &ParameterList::List()
     return list;
 }
 
+void ParameterList::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void ParameterDeclarationNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -685,12 +916,22 @@ ParameterDeclarationNode::ParameterDeclarationNode(DeclaratorNode *declarator)
     SetType(declarator->GetType());
 }
 
+void ParameterDeclarationNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void DeclarationNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << "Decl" << std::endl;
     indent.append(isTail ? "    " : "│   ");
     if (list) list->Print(os, indent, true);
+}
+
+void DeclarationNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 uint64_t InitDeclaratorListNode::Size()
@@ -721,6 +962,11 @@ std::list<InitDeclaratorNode *> &InitDeclaratorListNode::List()
     return list;
 }
 
+void InitDeclaratorListNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void InitDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -742,12 +988,24 @@ InitializerNode *InitDeclaratorNode::GetInitializer() const
     return initializer;
 }
 
+void InitDeclaratorNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void CompoundStatement::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << "{}" << std::endl;
     indent.append(isTail ? "    " : "│   ");
     if (blockItemList) blockItemList->Print(os, indent, true);
+}
+
+CompoundStatement::CompoundStatement(BlockItemListNode *blockItemList) : blockItemList(blockItemList) {}
+
+void CompoundStatement::Generate(Asm::Assembly *assembly)
+{
+    blockItemList->Generate(assembly);
 }
 
 void BlockItemNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -759,6 +1017,11 @@ void BlockItemNode::Print(std::ostream &os, std::string indent, bool isTail)
 }
 
 BlockItemNode::BlockItemNode(Node *declOrStatement) : declOrStatement(declOrStatement) {}
+
+void BlockItemNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
 
 uint64_t BlockItemListNode::Size()
 {
@@ -781,6 +1044,12 @@ void BlockItemListNode::Print(std::ostream &os, std::string indent, bool isTail)
         for (; it != --list.end(); it++)
             (*it)->Print(os, indent, false);
     (*it)->Print(os, indent, true);
+}
+
+void BlockItemListNode::Generate(Asm::Assembly *assembly)
+{
+    for (auto &element: list)
+        element->Generate(assembly);
 }
 
 uint64_t EnumeratorList::Size()
@@ -811,6 +1080,11 @@ std::list<EnumeratorNode *> &EnumeratorList::List()
     return list;
 }
 
+void EnumeratorList::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void EnumSpecifierNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -833,6 +1107,11 @@ void EnumSpecifierNode::Print(std::ostream &os, std::string indent, bool isTail)
 EnumSpecifierNode::EnumSpecifierNode(IdNode *id, EnumeratorList *enumeratorList) : id(id), enumeratorList(enumeratorList)
 {
     this->kind = SpecifierKind::ENUM;
+}
+
+void EnumSpecifierNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void EnumeratorNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -875,13 +1154,23 @@ ExprNode *EnumeratorNode::Eval(Evaluator *evaluator)
     return evaluator->Eval(this);
 }
 
+void EnumeratorNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void TypeSpecifierQualifierNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << value->text << std::endl;
 }
 
-TypeSpecifierQualifierNode::TypeSpecifierQualifierNode(std::shared_ptr<Token> value) : SimpleSpecifier(value) {}
+TypeSpecifierQualifierNode::TypeSpecifierQualifierNode(std::shared_ptr<Token> value) : SimpleSpecifier(std::move(value)) {}
+
+void TypeSpecifierQualifierNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
 
 void TypeSpecifierNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -889,7 +1178,12 @@ void TypeSpecifierNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << value->text << std::endl;
 }
 
-TypeSpecifierNode::TypeSpecifierNode(std::shared_ptr<Token> specifier) : TypeSpecifierQualifierNode(specifier) {}
+TypeSpecifierNode::TypeSpecifierNode(std::shared_ptr<Token> specifier) : TypeSpecifierQualifierNode(std::move(specifier)) {}
+
+void TypeSpecifierNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
 
 void TypeQualifierNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -897,7 +1191,12 @@ void TypeQualifierNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << value->text << std::endl;
 }
 
-TypeQualifierNode::TypeQualifierNode(std::shared_ptr<Token> qualifier) : TypeSpecifierQualifierNode(qualifier) {}
+TypeQualifierNode::TypeQualifierNode(std::shared_ptr<Token> qualifier) : TypeSpecifierQualifierNode(std::move(qualifier)) {}
+
+void TypeQualifierNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
 
 void StorageClassSpecifierNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -905,7 +1204,12 @@ void StorageClassSpecifierNode::Print(std::ostream &os, std::string indent, bool
     os << value->text << std::endl;
 }
 
-StorageClassSpecifierNode::StorageClassSpecifierNode(std::shared_ptr<Token> specifier) : SimpleSpecifier(specifier) {}
+StorageClassSpecifierNode::StorageClassSpecifierNode(std::shared_ptr<Token> specifier) : SimpleSpecifier(std::move(specifier)) {}
+
+void StorageClassSpecifierNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
 
 void FunctionSpecifierNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -913,7 +1217,12 @@ void FunctionSpecifierNode::Print(std::ostream &os, std::string indent, bool isT
     os << value->text << std::endl;
 }
 
-FunctionSpecifierNode::FunctionSpecifierNode(std::shared_ptr<Token> specifier) : SimpleSpecifier(specifier) {}
+FunctionSpecifierNode::FunctionSpecifierNode(std::shared_ptr<Token> specifier) : SimpleSpecifier(std::move(specifier)) {}
+
+void FunctionSpecifierNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
 
 void SimpleSpecifier::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -926,7 +1235,12 @@ std::shared_ptr<Token> SimpleSpecifier::Value()
     return value;
 }
 
-SimpleSpecifier::SimpleSpecifier(std::shared_ptr<Token> specifier) : value(specifier) { kind = SpecifierKind::SIMPLE; }
+SimpleSpecifier::SimpleSpecifier(std::shared_ptr<Token> specifier) : value(std::move(specifier)) { kind = SpecifierKind::SIMPLE; }
+
+void SimpleSpecifier::Generate(Asm::Assembly *assembly)
+{
+
+}
 
 void StructDeclaratorListNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
@@ -956,6 +1270,11 @@ std::list<StructDeclaratorNode *> &StructDeclaratorListNode::List()
     return list;
 }
 
+void StructDeclaratorListNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void StructDeclarationNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -967,6 +1286,11 @@ void StructDeclarationNode::Print(std::ostream &os, std::string indent, bool isT
 std::list<StructDeclaratorNode *> & StructDeclarationNode::List() const
 {
     return structDeclaratorList->List();
+}
+
+void StructDeclarationNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 uint64_t StructDeclarationListNode::Size()
@@ -995,6 +1319,11 @@ void StructDeclarationListNode::Print(std::ostream &os, std::string indent, bool
 std::list<StructDeclarationNode *> &StructDeclarationListNode::List()
 {
     return list;
+}
+
+void StructDeclarationListNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void StructSpecifierNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1035,6 +1364,11 @@ std::shared_ptr<Token> StructSpecifierNode::GetToken() const
     return token;
 }
 
+void StructSpecifierNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void StructDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -1049,6 +1383,11 @@ StructDeclaratorNode::StructDeclaratorNode(DeclaratorNode *declarator, ExprNode 
 {
     SetId(declarator->GetId());
     SetType(declarator->GetType());
+}
+
+void StructDeclaratorNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 uint64_t InitializerListNode::Size()
@@ -1079,6 +1418,11 @@ std::list<InitializerNode *> &InitializerListNode::List()
     return list;
 }
 
+void InitializerListNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void DesignatorListNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     if (list.empty()) return;
@@ -1107,6 +1451,11 @@ std::list<DesignatorNode *> &DesignatorListNode::List()
     return list;
 }
 
+void DesignatorListNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void ArrayDesignator::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -1120,6 +1469,11 @@ ArrayDesignator::ArrayDesignator(ExprNode *index) : index(index) {}
 ExprNode *ArrayDesignator::GetIndex() const
 {
     return index;
+}
+
+void ArrayDesignator::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void DesignationNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1137,6 +1491,11 @@ std::list<DesignatorNode *> &DesignationNode::List()
     return designatorList->List();
 }
 
+void DesignationNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void StructMemberDesignator::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -1150,6 +1509,11 @@ StructMemberDesignator::StructMemberDesignator(IdNode *id) : id(id) {}
 IdNode *StructMemberDesignator::GetMemberId() const
 {
     return id;
+}
+
+void StructMemberDesignator::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void DesignatedInitializerNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1174,6 +1538,11 @@ InitializerNode *DesignatedInitializerNode::GetInitializer() const
     return initializer;
 }
 
+void DesignatedInitializerNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 void FunctionDefinitionNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -1191,6 +1560,15 @@ void FunctionDefinitionNode::SetBody(CompoundStatement *body)
 SymType *FunctionDefinitionNode::GetType() const
 {
     return declarator->GetType();
+}
+
+FunctionDefinitionNode::FunctionDefinitionNode(DeclaratorNode *declarator, CompoundStatement *compoundStatement) :
+        declarator(declarator), body(compoundStatement) {}
+
+void FunctionDefinitionNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO;
+    body->Generate(assembly);
 }
 
 void TranslationUnitNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1214,6 +1592,12 @@ void TranslationUnitNode::Add(ExternalDeclarationNode *initDeclarator)
 uint64_t TranslationUnitNode::Size()
 {
     return list.size();
+}
+
+void TranslationUnitNode::Generate(Asm::Assembly *assembly)
+{
+    for (auto it = list.begin(); it != list.end(); it++)
+        (*it)->Generate(assembly);
 }
 
 SpecifierKind DeclarationSpecifierNode::Kind()
@@ -1289,6 +1673,11 @@ void TypedefIdentifierNode::Print(std::ostream &os, std::string indent, bool isT
     alias->Print(os, indent, true);
 }
 
+void TypedefIdentifierNode::Generate(Asm::Assembly *assembly)
+{
+    // TODO
+}
+
 SimpleInitializer::SimpleInitializer(ExprNode *expr): value(expr) {}
 
 void SimpleInitializer::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1307,6 +1696,11 @@ void SimpleInitializer::SetValue(ExprNode *value)
 ExprNode *SimpleInitializer::GetValue() const
 {
     return value;
+}
+
+void SimpleInitializer::Generate(Asm::Assembly *assembly)
+{
+    // TODO
 }
 
 void DesignatorNode::SetValue(InitializerNode *value)

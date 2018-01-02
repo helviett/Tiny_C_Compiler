@@ -18,6 +18,7 @@ public:
     void SetValue(ExprNode *);
     IdNode *GetId();
     ExprNode * Eval(Evaluator *evaluator) override;
+    void Generate(Asm::Assembly *assembly) override;
 private:
     IdNode *enumerationConstant;
     ExprNode *value;
@@ -30,6 +31,7 @@ public:
     void Add(EnumeratorNode *initDeclarator);
     uint64_t Size();
     std::list<EnumeratorNode *> &List();
+    void Generate(Asm::Assembly *assembly) override;
 protected:
     std::list<EnumeratorNode *> list;
 };
@@ -39,6 +41,7 @@ class EnumSpecifierNode: public DeclarationSpecifierNode
 public:
     EnumSpecifierNode(IdNode *id, EnumeratorList *enumeratorList);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    void Generate(Asm::Assembly *assembly) override;
 private:
     IdNode *id{};
     EnumeratorList *enumeratorList;

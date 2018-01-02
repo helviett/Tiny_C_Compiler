@@ -359,7 +359,7 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
             }
             if (isPointerType(rtype))
                 std::swap(left, right);
-            if (!isPointerType(left->GetType()) || !isArithmeticType(right->GetType()))
+            if (!isPointerType(left->GetType()) || !isIntegerType(right->GetType()))
                 throw InvalidOperandError(binOp, ltype, rtype);
             return new BinOpNode(left, right, binOp);
         case TokenType::MINUS:
@@ -455,7 +455,7 @@ AssignmentNode *SemanticAnalyzer::BuildAssignmentNode(ExprNode *left, ExprNode *
         if (!ltype->Equal(rtype)) throw InvalidOperandError(assignmentOp, ltype, rtype);
         return new AssignmentNode(left, right, assignmentOp);
     }
-    return new AssignmentNode(left, right, assignmentOp);
+    throw InvalidOperandError(assignmentOp, ltype, rtype);
 }
 
 bool SemanticAnalyzer::isModifiableLvalue(ExprNode *expr)

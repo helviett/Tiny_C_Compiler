@@ -15,11 +15,11 @@ class ExternalDeclarationNode;
 class FunctionDefinitionNode: public ExternalDeclarationNode
 {
 public:
-    FunctionDefinitionNode(DeclaratorNode *declarator, CompoundStatement *compoundStatement):
-            declarator(declarator), body(compoundStatement) {}
+    FunctionDefinitionNode(DeclaratorNode *declarator, CompoundStatement *compoundStatement);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void SetBody(CompoundStatement *body);
     SymType *GetType() const;
+    void Generate(Asm::Assembly *assembly) override;
 private:
     DeclaratorNode *declarator;
     CompoundStatement *body;

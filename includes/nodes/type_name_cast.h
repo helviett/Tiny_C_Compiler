@@ -15,6 +15,7 @@ public:
     TypeCastNode(SymType *typeName, ExprNode *castExpr);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     ExprNode * Eval(Evaluator *evaluator) override;
+    void Generate(Asm::Assembly *assembly) override;
 private:
     SymType *castType;
     ExprNode *castExpr;

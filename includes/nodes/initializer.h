@@ -16,6 +16,7 @@ public:
     InitDeclaratorNode(DeclaratorNode *declarator, InitializerNode *initializer);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     InitializerNode *GetInitializer() const;
+    void Generate(Asm::Assembly *assembly) override;
 private:
     InitializerNode *initializer;
 };
@@ -27,6 +28,7 @@ public:
     void Add(InitDeclaratorNode *initDeclarator);
     std::list<InitDeclaratorNode *> &List();
     uint64_t Size();
+    void Generate(Asm::Assembly *assembly) override;
 protected:
     std::list<InitDeclaratorNode *> list;
 };
@@ -42,6 +44,7 @@ class DesignatorNode: public Node
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
     void SetValue(InitializerNode *value);
+    void Generate(Asm::Assembly *assembly) override = 0;
 protected:
     InitializerNode *value{nullptr};
 };
@@ -52,6 +55,7 @@ public:
     explicit ArrayDesignator(ExprNode *index);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     ExprNode *GetIndex() const;
+    void Generate(Asm::Assembly *assembly) override;
 private:
     ExprNode *index{};
 };
@@ -62,6 +66,7 @@ public:
     explicit StructMemberDesignator(IdNode *id);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     IdNode *GetMemberId() const;
+    void Generate(Asm::Assembly *assembly) override;
 private:
     IdNode *id{nullptr};
 };
@@ -73,6 +78,7 @@ public:
     void Add(DesignatorNode *designator);
     uint64_t Size();
     std::list<DesignatorNode *> &List();
+    void Generate(Asm::Assembly *assembly) override;
 protected:
     std::list<DesignatorNode *> list;
 };
@@ -83,6 +89,7 @@ public:
     explicit DesignationNode(DesignatorListNode *designatorList);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     std::list<DesignatorNode *> &List();
+    void Generate(Asm::Assembly *assembly) override;
 private:
     DesignatorListNode *designatorList;
 };
@@ -94,6 +101,7 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     DesignationNode *GetDesignation() const;
     InitializerNode *GetInitializer() const;
+    void Generate(Asm::Assembly *assembly) override;
 private:
     DesignationNode *designation;
     InitializerNode *initializer;
@@ -106,6 +114,7 @@ public:
     void Add(InitializerNode *initializer);
     uint64_t Size();
     std::list<InitializerNode *> &List();
+    void Generate(Asm::Assembly *assembly) override;
 protected:
     std::list<InitializerNode *> list;
 };
@@ -117,6 +126,7 @@ public:
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     ExprNode *GetValue() const;
     void SetValue(ExprNode *value);
+    void Generate(Asm::Assembly *assembly) override;
 private:
     ExprNode *value;
 };

@@ -12,7 +12,6 @@
 class SyntaxTree
 {
 public:
-
     Node *root;
     friend std::ostream &operator<<(std::ostream &os, SyntaxTree &st);
 };

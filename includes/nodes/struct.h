@@ -13,6 +13,7 @@ class StructDeclaratorNode: public DeclaratorNode
 public:
     StructDeclaratorNode(DeclaratorNode *declarator, ExprNode *constantExpr);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    void Generate(Asm::Assembly *assembly) override;
 private:
     ExprNode *constantExpr;
 };
@@ -24,6 +25,7 @@ public:
     void Add(StructDeclaratorNode *initDeclarator);
     uint64_t Size();
     std::list<StructDeclaratorNode *> &List();
+    void Generate(Asm::Assembly *assembly) override;
 protected:
     std::list<StructDeclaratorNode *> list;
 };
@@ -35,6 +37,7 @@ public:
             structDeclaratorList(structDeclaratorList) {}
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     std::list<StructDeclaratorNode *>  &List() const;
+    void Generate(Asm::Assembly *assembly) override;
 private:
     StructDeclaratorListNode *structDeclaratorList;
 };
@@ -46,6 +49,7 @@ public:
     void Add(StructDeclarationNode *initDeclarator);
     uint64_t Size();
     std::list<StructDeclarationNode *> &List();
+    void Generate(Asm::Assembly *assembly) override;
 protected:
     std::list<StructDeclarationNode *> list;
 };
@@ -60,6 +64,7 @@ public:
     SymRecord *GetRecordType() const;
     void SetRecordType(SymRecord *type);
     std::shared_ptr<Token> GetToken() const;
+    void Generate(Asm::Assembly *assembly) override;
 private:
     SymRecord *type{nullptr};
     std::shared_ptr<Token> token;

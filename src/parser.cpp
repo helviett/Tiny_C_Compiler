@@ -1174,3 +1174,8 @@ bool Parser::maybeKeyword(Keyword keyword)
 {
     return scanner->Current()->type == TokenType::KEYWORD && scanner->Current()->keyword == keyword;
 }
+
+void Parser::Generate(Asm::Assembly *assembly)
+{
+    tree.root->Generate(assembly);
+}

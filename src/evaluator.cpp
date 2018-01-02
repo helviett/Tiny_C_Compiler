@@ -59,7 +59,6 @@ ExprNode *Evaluator::Eval(BinOpNode *node)
         case TokenType::BITWISE_AND:
             if (ileft && iright)
                 return new IntConstNode(ileft->GetValue() * iright->GetValue());
-//            throw InvalidOperandError(node->GetOperation(), ileft->GetType(), iright->GetType());
         case TokenType::BITWISE_OR:
             if (ileft && iright)
                 return new IntConstNode(ileft->GetValue() | iright->GetValue());

@@ -47,6 +47,15 @@ void ParseOnly()
     std::cout << par;
 }
 
+void Compile()
+{
+    Parser par(new Tokenizer(sourceFile.Get()));
+    auto *assembly = new Asm::Assembly();
+    par.Parse();
+    par.Generate(assembly);
+    std::cout << *assembly;
+}
+
 int main(int argc, char **argv)
 {
 
@@ -82,6 +91,10 @@ int main(int argc, char **argv)
         else if (parseOnly)
         {
             ParseOnly();
+        }
+        else
+        {
+            Compile();
         }
     }
     catch (CompilationError &e)

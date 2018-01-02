@@ -61,6 +61,7 @@ public:
 
     void Parse();
     friend std::ostream &operator<<(std::ostream &os, Parser &parser);
+    void Generate(Asm::Assembly *assembly);
 private:
     ExprNode            *parsePrimaryExpr();
     ExprNode            *parsePostfixExpr();

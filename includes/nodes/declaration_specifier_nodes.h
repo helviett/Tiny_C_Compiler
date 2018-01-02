@@ -33,6 +33,7 @@ public:
     explicit SimpleSpecifier(std::shared_ptr<Token> specifier);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     std::shared_ptr<Token> Value();
+    void Generate(Asm::Assembly *assembly) override;
 protected:
     std::shared_ptr<Token> value;
 };
@@ -43,6 +44,7 @@ public:
     TypeSpecifierQualifierNode() = default;
     explicit TypeSpecifierQualifierNode(std::shared_ptr<Token> value);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    void Generate(Asm::Assembly *assembly) override;
 };
 
 class TypeSpecifierNode: public TypeSpecifierQualifierNode
@@ -50,6 +52,7 @@ class TypeSpecifierNode: public TypeSpecifierQualifierNode
 public:
     explicit TypeSpecifierNode(std::shared_ptr<Token> specifier);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    void Generate(Asm::Assembly *assembly) override;
 };
 
 class TypeQualifierNode: public TypeSpecifierQualifierNode
@@ -57,6 +60,7 @@ class TypeQualifierNode: public TypeSpecifierQualifierNode
 public:
     explicit TypeQualifierNode(std::shared_ptr<Token> qualifier);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    void Generate(Asm::Assembly *assembly) override;
 };
 
 class StorageClassSpecifierNode: public SimpleSpecifier
@@ -64,6 +68,7 @@ class StorageClassSpecifierNode: public SimpleSpecifier
 public:
     explicit StorageClassSpecifierNode(std::shared_ptr<Token> specifier);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    void Generate(Asm::Assembly *assembly) override;
 };
 
 class FunctionSpecifierNode: public SimpleSpecifier
@@ -71,6 +76,7 @@ class FunctionSpecifierNode: public SimpleSpecifier
 public:
     explicit FunctionSpecifierNode(std::shared_ptr<Token> specifier);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
+    void Generate(Asm::Assembly *assembly) override;
 };
 
 class DeclarationSpecifiersNode: public Node
@@ -82,6 +88,7 @@ public:
     void Add(DeclarationSpecifierNode *specifier);
     std::list<DeclarationSpecifierNode *> &List();
     uint64_t Size();
+    void Generate(Asm::Assembly *assembly) override;
 private:
     std::list<DeclarationSpecifierNode *> list;
 };
@@ -96,6 +103,7 @@ public:
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     std::shared_ptr<Token> GetToken();
     SymAlias *GetAlias() const;
+    void Generate(Asm::Assembly *assembly) override;
 private:
     SymAlias *alias{nullptr};
     std::shared_ptr<Token> id;

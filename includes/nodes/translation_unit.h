@@ -12,6 +12,7 @@ class ExternalDeclarationNode: public Node
 {
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
+    virtual void Generate(Asm::Assembly *assembly) = 0;
 };
 
 class TranslationUnitNode: public Node
@@ -20,6 +21,7 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Add(ExternalDeclarationNode *initDeclarator);
     uint64_t Size();
+    void Generate(Asm::Assembly *assembly) override;
 protected:
     std::list<ExternalDeclarationNode *> list;
 };
