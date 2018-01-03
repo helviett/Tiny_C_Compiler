@@ -2,12 +2,12 @@ primary-expr ::= id | constant | string-literal | (expr)
 
 postfix-expr ::= primary-expr | postifx-expr [expr] | postfix-expr (`argument-expr-list)
 				| postfix-expr . id | postfix-expr -> id | postfix-expr ++ | postfix-expr -- 
-				| (type-id) {initializer-list} | (type-id) {initializer-list, }
+				| (type-id) {initializer-list} | (type-id) {initializer-list, } | printf(format-string `variadic-arguments)
 
 argument-expr-list ::= argument-expr | argument-expr-list, argument-expr
 
 unary-expr ::= postfix-expr | ++ unary-expr | -- unary-expr | unary-op cast-expr 
-			  | sizeof unary-expr | sizeof (type-id) | printf(format-string `variadic-arguments)
+			  | sizeof unary-expr | sizeof (type-id)
 
 variadic-arguments ::= , argument-expr-list
 
