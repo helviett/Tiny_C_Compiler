@@ -314,7 +314,7 @@ void BinOpNode::Generate(Asm::Assembly *assembly)
         case TokenType::PLUS:
             if (left->GetType()->GetTypeKind() == TypeKind::BUILTIN)
             {
-                switch (static_cast<SymBuiltInType *>(left->GetType())->GetBuiltIntTypeKind())
+                switch (reinterpret_cast<SymBuiltInType *>(left->GetType())->GetBuiltIntTypeKind())
                 {
                     case BuiltInTypeKind::INT32:
                         assembly->AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
@@ -439,6 +439,14 @@ ExprNode *TypeCastNode::Eval(Evaluator *evaluator)
 
 void TypeCastNode::Generate(Asm::Assembly *assembly)
 {
+    castExpr->Generate(assembly);
+    auto cet = castExpr->GetType();
+    if (cet->GetTypeKind() == TypeKind::BUILTIN && castType->GetTypeKind() == TypeKind::BUILTIN)
+    {
+        auto castTypeBtk = reinterpret_cast<SymBuiltInType *>(castType);
+        auto castExprBtk = reinterpret_cast<SymBuiltInType *>(cet);
+        BuiltInTypeConversions[std::make_pair(castExprBtk->GetBuiltIntTypeKind(), castTypeBtk->GetBuiltIntTypeKind())](assembly);
+    }
     // TODO
 }
 

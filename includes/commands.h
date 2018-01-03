@@ -24,6 +24,7 @@ namespace Asm
             {CommandName::MOV, "mov"}, {CommandName::ADD, "add"},
             {CommandName::SUB, "sub"}, {CommandName::FLD, "fld"},
             {CommandName::FADDP, "faddp"}, {CommandName::FSTP, "fstp"},
+            {CommandName::FILD, "fild"},
     };
 
     enum class CommandSuffix
