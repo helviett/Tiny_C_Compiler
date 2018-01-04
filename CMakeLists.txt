@@ -17,7 +17,7 @@ set(SOURCE_FILES
         src/symbol_table.cpp includes/scope_tree.h src/scope_tree.cpp includes/symbols/sym_variable.h src/sym_variable.cpp
         src/symbol.cpp includes/semantic_analyzer.h src/semantic_analyzer.cpp includes/value_category.h
         includes/errors/semantic_errors.h src/semantic_errors.cpp includes/evaluator.h src/evaluator.cpp includes/assembly.h src/assembly.cpp
-        includes/commands.h includes/arguments.h src/commands.cpp src/arguments.cpp)
+        includes/commands.h includes/arguments.h src/commands.cpp src/arguments.cpp includes/asm_element.h src/asm_element.cpp includes/asm_label.h includes/asm_directive.h src/asm_directive.cpp src/asm_label.cpp includes/asm_section.h src/asm_section.cpp)
 
 include_directories(includes src)
 

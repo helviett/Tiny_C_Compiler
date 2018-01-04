@@ -10,12 +10,13 @@
 #include <arguments.h>
 #include <unordered_map>
 #include <ostream>
+#include "asm_element.h"
 
 namespace Asm
 {
     enum class CommandName
     {
-        PUSH, POP, MOV, ADD, SUB, FLD, FILD, FST, FSTP, FADDP
+        PUSH, POP, MOV, ADD, SUB, FLD, FILD, FST, FSTP, FADDP, CALL
     };
 
     static std::unordered_map<CommandName, std::string> CommandNameToString =
@@ -24,7 +25,7 @@ namespace Asm
             {CommandName::MOV, "mov"}, {CommandName::ADD, "add"},
             {CommandName::SUB, "sub"}, {CommandName::FLD, "fld"},
             {CommandName::FADDP, "faddp"}, {CommandName::FSTP, "fstp"},
-            {CommandName::FILD, "fild"},
+            {CommandName::FILD, "fild"}, {CommandName::CALL, "call"},
     };
 
     enum class CommandSuffix
@@ -40,11 +41,12 @@ namespace Asm
             {CommandSuffix::NONE, ""},
     };
 
-    class Command
+    class Command: public AsmElement
     {
     public:
+        Command() = default;
         explicit Command(CommandName name, CommandSuffix suffix = CommandSuffix::NONE);
-        virtual void Print(std::ostream &os);
+        void Print(std::ostream &os) override;
     protected:
         CommandName name;
         CommandSuffix suffix{CommandSuffix::NONE};
@@ -69,7 +71,6 @@ namespace Asm
         Argument *left, *right;
     };
 
-    std::ostream &operator<<(std::ostream &os, Command *command);
 }
 
 #endif //TINY_C_COMPILER_COMMANDS_H

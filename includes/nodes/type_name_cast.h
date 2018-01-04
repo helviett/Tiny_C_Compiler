@@ -24,19 +24,25 @@ static std::unordered_map<std::pair<BuiltInTypeKind, BuiltInTypeKind>, std::func
         {std::make_pair(BuiltInTypeKind::INT32, BuiltInTypeKind::FLOAT),
                 [](Asm::Assembly *assembly)
                 {
-                    assembly->AddCommand(Asm::CommandName::FILD, Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
-                                         Asm::CommandSuffix::L);
-                    assembly->AddCommand(Asm::CommandName::FSTP,Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
-                                         Asm::CommandSuffix::S);
+                    assembly->TextSection().AddCommand(Asm::CommandName::FILD,
+                                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                                       Asm::CommandSuffix::L);
+                    assembly->TextSection().AddCommand(Asm::CommandName::FSTP,
+                                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                                       Asm::CommandSuffix::S);
                 }},
         {std::make_pair(BuiltInTypeKind::FLOAT, BuiltInTypeKind::DOUBLE),
                 [](Asm::Assembly *assembly)
                 {
-                    assembly->AddCommand(Asm::CommandName::FILD, Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
-                                         Asm::CommandSuffix::S);
-                    assembly->AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
-                    assembly->AddCommand(Asm::CommandName::FSTP,Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
-                                         Asm::CommandSuffix::L);
+                    assembly->TextSection().AddCommand(Asm::CommandName::FILD,
+                                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                                       Asm::CommandSuffix::S);
+                    assembly->TextSection().AddCommand(Asm::CommandName::PUSH,
+                                                       Asm::Register::EAX,
+                                                       Asm::CommandSuffix::L);
+                    assembly->TextSection().AddCommand(Asm::CommandName::FSTP,
+                                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                                       Asm::CommandSuffix::L);
                 }},
 };
 
