@@ -13,12 +13,14 @@ namespace Asm
     {
     public:
         void Print(std::ostream &os) override = 0;
+        virtual std::string GetName() = 0;
     };
 
     class AsmSimpleLabel: public AsmLabel
     {
     public:
         explicit AsmSimpleLabel(size_t number);
+        std::string GetName() override;
         void Print(std::ostream &os) override;
     private:
         size_t number;
@@ -28,6 +30,7 @@ namespace Asm
     {
     public:
         AsmFunction(std::string name);
+        std::string GetName() override;
         void Print(std::ostream &os) override;
     private:
         std::string name;

@@ -7,6 +7,8 @@
 
 #include <vector>
 #include "commands.h"
+#include "asm_directive.h"
+#include "asm_label.h"
 
 namespace Asm
 {
@@ -14,6 +16,7 @@ namespace Asm
     {
     public:
         void AddCommand(Command *command, CommandSuffix suffix = CommandSuffix::NONE);
+        void AddCommand(CommandName name, AsmLabel *label, bool asAddress = false, CommandSuffix suffix = CommandSuffix::NONE);
         void AddCommand(CommandName name, CommandSuffix suffix = CommandSuffix::NONE);
         void AddCommand(CommandName name, Register aregister, CommandSuffix suffix = CommandSuffix::NONE);
         void AddCommand(CommandName name, Argument *argument, CommandSuffix suffix = CommandSuffix::NONE);
@@ -21,7 +24,8 @@ namespace Asm
         void AddCommand(CommandName name, Register firstRegister,
                         Register secondRegister, CommandSuffix suffix = CommandSuffix::NONE);
         void AddCommand(CommandName name, ArgumentAddress *address, CommandSuffix suffix = CommandSuffix::NONE);
-
+        void AddDirective(AsmDirective *directive);
+        void AddLabel(AsmLabel *label);
         friend std::ostream &operator<<(std::ostream &os, Section &parser);
     private:
         std::vector<AsmElement *> asmElements;

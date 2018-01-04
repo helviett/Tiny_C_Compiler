@@ -34,7 +34,7 @@ void TokenizeOnly()
                 break;
             default:
                 printf("(%d, %d)\t\t\t%s\t\t\t%s\t\t\t\t  %s\n", pos.row, pos.col,
-                       TokenTypeToString[t->type].c_str(), t->stringValue,t->text.c_str());
+                       TokenTypeToString[t->type].c_str(), t->text.c_str(),t->text.c_str());
         }
     }
 

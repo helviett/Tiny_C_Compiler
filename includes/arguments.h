@@ -8,6 +8,7 @@
 #include <ostream>
 #include <unordered_map>
 #include <iostream>
+#include "asm_label.h"
 
 class ConstNode;
 
@@ -76,6 +77,16 @@ namespace Asm
         void Print(std::ostream &os) override;
     private:
         ConstNode *constant;
+    };
+
+    class ArgumentLabel: public Argument
+    {
+    public:
+        explicit ArgumentLabel(AsmLabel *label, bool asAddress = false);
+        void Print(std::ostream &os) override;
+    private:
+        bool asAddress = false;
+        AsmLabel *label;
     };
 
     std::ostream &operator<<(std::ostream &os, Argument *argument);

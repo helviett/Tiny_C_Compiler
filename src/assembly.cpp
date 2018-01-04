@@ -1,13 +1,11 @@
 #include "../includes/assembly.h"
 #include "../includes/nodes/expressions.h"
 
-//template<typename... Args>
-//void Asm::Assembly::Add(Asm::CommandName name, Args... args)
-//{
-//    return new Command(name, std::forward(args)...);
-//}
 std::ostream &Asm::operator<<(std::ostream &os, Asm::Assembly &assembly)
 {
+    os << ".extern printf" << std::endl;
+    os << ".section .data" << std::endl;
+    os << assembly.dataSection << std::endl;
     os << ".section .text" << std::endl << ".globl main" << std::endl;
     os << assembly.textSection << std::endl;
 }
@@ -15,4 +13,24 @@ std::ostream &Asm::operator<<(std::ostream &os, Asm::Assembly &assembly)
 Asm::Section &Asm::Assembly::TextSection()
 {
     return textSection;
+}
+
+Asm::Section &Asm::Assembly::DataSection()
+{
+    return dataSection;
+}
+
+Asm::Section &Asm::Assembly::BssSection()
+{
+    return bssSection;
+}
+
+Asm::AsmSimpleLabel *Asm::Assembly::NextLabel()
+{
+    return new AsmSimpleLabel(nextLabel++);
+}
+
+Asm::AsmFunction *Asm::Assembly::MakeFunctionLabel(std::string name)
+{
+    return new AsmFunction(std::move(name));
 }

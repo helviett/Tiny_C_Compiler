@@ -34,7 +34,7 @@ static std::unordered_map<std::pair<BuiltInTypeKind, BuiltInTypeKind>, std::func
         {std::make_pair(BuiltInTypeKind::FLOAT, BuiltInTypeKind::DOUBLE),
                 [](Asm::Assembly *assembly)
                 {
-                    assembly->TextSection().AddCommand(Asm::CommandName::FILD,
+                    assembly->TextSection().AddCommand(Asm::CommandName::FLD,
                                                        Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
                                                        Asm::CommandSuffix::S);
                     assembly->TextSection().AddCommand(Asm::CommandName::PUSH,

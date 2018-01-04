@@ -293,8 +293,10 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     ExprNode *Eval(Evaluator *evaluator) override;
     void Generate(Asm::Assembly *assembly) override;
+    Asm::AsmLabel *GetAddress() const;
 private:
     std::shared_ptr<Token> token;
+    Asm::AsmLabel *address;
 };
 
 #endif //TINY_C_COMPILER_EXPRESSIONS_H

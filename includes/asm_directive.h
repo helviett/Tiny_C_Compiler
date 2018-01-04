@@ -20,6 +20,7 @@ namespace Asm
     class AsmStringDirective: public AsmDirective
     {
     public:
+        AsmStringDirective(std::string str);
         void Print(std::ostream &os) override;
     private:
         std::string str;

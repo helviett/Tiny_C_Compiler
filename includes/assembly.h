@@ -9,6 +9,7 @@
 #include <ostream>
 #include "commands.h"
 #include "asm_section.h"
+#include "asm_label.h"
 
 namespace Asm
 {
@@ -16,11 +17,16 @@ namespace Asm
     {
     public:
         Section &TextSection();
+        Section &DataSection();
+        Section &BssSection();
+        AsmSimpleLabel *NextLabel();
+        AsmFunction *MakeFunctionLabel(std::string name);
         friend std::ostream &operator<<(std::ostream &os, Assembly &parser);
     private:
         Section textSection;
         Section dataSection;
         Section bssSection;
+        size_t nextLabel{0};
     };
 
 }

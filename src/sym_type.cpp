@@ -223,6 +223,16 @@ void SymFunction::SetOrderedParams(std::vector<SymVariable *> &orderedParams)
     this->orderedParams = orderedParams;
 }
 
+void SymFunction::SetLabel(Asm::AsmFunction *label)
+{
+    this->label = label;
+}
+
+Asm::AsmFunction *SymFunction::GetLabel() const
+{
+    return label;
+}
+
 SymAlias::SymAlias(std::string name, SymType *type): type(type)
 {
     this->name = std::move(name);

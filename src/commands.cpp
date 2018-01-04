@@ -24,7 +24,7 @@ void Asm::TwoArgumentsCommand::Print(std::ostream &os)
 
 void Asm::Command::Print(std::ostream &os)
 {
-    os << Asm::CommandNameToString[name] << CommandSuffixToString[suffix] << "  ";
+    os << '\t' << Asm::CommandNameToString[name] << CommandSuffixToString[suffix] << " ";
 }
 
 Asm::Command::Command(Asm::CommandName name, Asm::CommandSuffix suffix): name(name), suffix(suffix) {}

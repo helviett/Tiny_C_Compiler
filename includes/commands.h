@@ -16,7 +16,7 @@ namespace Asm
 {
     enum class CommandName
     {
-        PUSH, POP, MOV, ADD, SUB, FLD, FILD, FST, FSTP, FADDP, CALL
+        PUSH, POP, MOV, ADD, SUB, FLD, FILD, FST, FSTP, FADDP, CALL, LEAVE, RET
     };
 
     static std::unordered_map<CommandName, std::string> CommandNameToString =
@@ -26,6 +26,7 @@ namespace Asm
             {CommandName::SUB, "sub"}, {CommandName::FLD, "fld"},
             {CommandName::FADDP, "faddp"}, {CommandName::FSTP, "fstp"},
             {CommandName::FILD, "fild"}, {CommandName::CALL, "call"},
+            {CommandName::LEAVE, "leave"}, {CommandName::RET, "ret"},
     };
 
     enum class CommandSuffix

@@ -124,7 +124,14 @@ ExprNode *StringLiteralNode::Eval(Evaluator *evaluator)
 
 void StringLiteralNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    address = assembly->NextLabel();
+    assembly->DataSection().AddLabel(address);
+    assembly->DataSection().AddDirective(new Asm::AsmStringDirective(token->text));
+}
+
+Asm::AsmLabel *StringLiteralNode::GetAddress() const
+{
+    return address;
 }
 
 void PostfixIncrementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -309,6 +316,7 @@ void BinOpNode::Generate(Asm::Assembly *assembly)
 {
     left->Generate(assembly);
     right->Generate(assembly);
+    Asm::Section &section = assembly->TextSection();
     switch (op->type)
     {
         case TokenType::PLUS:
@@ -317,23 +325,22 @@ void BinOpNode::Generate(Asm::Assembly *assembly)
                 switch (reinterpret_cast<SymBuiltInType *>(left->GetType())->GetBuiltIntTypeKind())
                 {
                     case BuiltInTypeKind::INT32:
-                        assembly->TextSection().AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
-                        assembly->TextSection().AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
-                        assembly->TextSection().AddCommand(Asm::CommandName::ADD, Asm::Register::EBX, Asm::Register::EAX, Asm::CommandSuffix::L);
-                        assembly->TextSection().AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+                        section.AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
+                        section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+                        section.AddCommand(Asm::CommandName::ADD, Asm::Register::EBX, Asm::Register::EAX, Asm::CommandSuffix::L);
+                        section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
                         break;
                     case BuiltInTypeKind::FLOAT:
-                        assembly->TextSection().AddCommand(Asm::CommandName::FLD,
+                        section.AddCommand(Asm::CommandName::FLD,
                                              Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
                                              Asm::CommandSuffix::S);
-                        assembly->TextSection().AddCommand(Asm::CommandName::POP, Asm::Register::EAX,
+                        section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX,
                                              Asm::CommandSuffix::L);
-                        assembly->TextSection().AddCommand(Asm::CommandName::FLD,
+                        section.AddCommand(Asm::CommandName::FLD,
                                              Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
                                              Asm::CommandSuffix::S);
-                        assembly->TextSection().AddCommand(Asm::CommandName::FADDP);
-                        assembly->TextSection().AddCommand(Asm::CommandName::FSTP,
-                                             Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                        section.AddCommand(Asm::CommandName::FADDP);
+                        section.AddCommand(Asm::CommandName::FSTP, Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
                                              Asm::CommandSuffix::S);
                         break;
                 }
@@ -1576,8 +1583,16 @@ FunctionDefinitionNode::FunctionDefinitionNode(DeclaratorNode *declarator, Compo
 
 void FunctionDefinitionNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO;
+    auto t = reinterpret_cast<SymFunction *>(GetType());
+    auto l = assembly->MakeFunctionLabel(t->GetName());
+    t->SetLabel(l);
+    Asm::Section &s = assembly->TextSection();
+    s.AddLabel(l);
+    s.AddCommand(Asm::CommandName::PUSH, Asm::Register::EBP, Asm::CommandSuffix::L);
+    s.AddCommand(Asm::CommandName::MOV, Asm::Register::ESP, Asm::Register::EBP, Asm::CommandSuffix::L);
     body->Generate(assembly);
+    s.AddCommand(Asm::CommandName::LEAVE);
+    s.AddCommand(Asm::CommandName::RET);
 }
 
 void TranslationUnitNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1736,6 +1751,8 @@ ExprNode *PrintfNode::Eval(Evaluator *evaluator)
 
 void PrintfNode::Generate(Asm::Assembly *assembly)
 {
-
-    // TODO
+    if (arguments) arguments->Generate(assembly);
+    format->Generate(assembly);
+    assembly->TextSection().AddCommand(Asm::CommandName::PUSH, format->GetAddress(), true, Asm::CommandSuffix::L);
+    assembly->TextSection().AddCommand(Asm::CommandName::CALL, new Asm::AsmFunction("printf"));
 }

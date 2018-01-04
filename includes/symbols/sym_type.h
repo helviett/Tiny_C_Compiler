@@ -132,11 +132,14 @@ public:
     bool IsComplete() override;
     bool Defined() const;
     void Define();
+    Asm::AsmFunction *GetLabel() const;
+    void SetLabel(Asm::AsmFunction *label);
 private:
     SymType *returnType{nullptr};
     SymbolTable *params{nullptr};
     bool defined{false};
     std::vector<SymVariable *> orderedParams;
+    Asm::AsmFunction *label;
 };
 
 class SymAlias: public SymType

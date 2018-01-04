@@ -44,17 +44,14 @@ void Asm::ArgumentAddress::Print(std::ostream &os)
     }
 }
 
-Asm::ArgumentAddress::ArgumentAddress(int32_t address, Asm::Argument *base): address(address), base(base)
+Asm::ArgumentAddress::ArgumentAddress(int32_t address, Asm::Argument *base): address(address), base(base) {}
+
+Asm::ArgumentAddress::ArgumentAddress(Asm::Argument *base): base(base) {}
+
+Asm::ArgumentLabel::ArgumentLabel(Asm::AsmLabel *label, bool asAddress): label(label), asAddress(asAddress) {}
+
+void Asm::ArgumentLabel::Print(std::ostream &os)
 {
-
+    auto prefix = asAddress ? "$" : "";
+    os << prefix << label->GetName();
 }
-
-Asm::ArgumentAddress::ArgumentAddress(Asm::Argument *base): base(base)
-{
-
-}
-
-//Asm::ArgumentAddress::ArgumentAddress(Asm::Argument *&base)
-//{
-//    std::cout << "KEK" << std::endl;
-//}

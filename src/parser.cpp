@@ -95,20 +95,6 @@ ExprNode *Parser::parsePostfixExpr()
                 require(TokenType::RBRACKET);
                 t = scanner->Next();
                 break;
-            case TokenType::KEYWORD:
-                if (t->keyword == Keyword::PRINTF)
-                {
-                    ArgumentExprListNode *arguments = nullptr;
-                    scanner->Next();
-                    requireNext(TokenType::LBRACKET);
-                    t = scanner->Current();
-                    requireNext(TokenType::STRING);
-                    if (maybeNext(TokenType::COMMA))
-                        arguments = parseArgumentExprList();
-                    requireNext(TokenType::RBRACKET);
-                    pe = sematicAnalyzer.BuildPrintfNode(new StringLiteralNode(t), arguments);
-                }
-                break;
             default:
                 stillPostfixOperator = false;
         }
@@ -146,6 +132,18 @@ ExprNode *Parser::parseUnaryExpr()
                 }
                 else
                     ue = new SizeofExprNode(parseUnaryExpr());
+            }
+            else if (t->keyword == Keyword::PRINTF)
+            {
+                ArgumentExprListNode *arguments = nullptr;
+                scanner->Next();
+                requireNext(TokenType::LBRACKET);
+                t = scanner->Current();
+                requireNext(TokenType::STRING);
+                if (maybeNext(TokenType::COMMA))
+                    arguments = parseArgumentExprList();
+                requireNext(TokenType::RBRACKET);
+                ue = sematicAnalyzer.BuildPrintfNode(new StringLiteralNode(t), arguments);
             }
             break;
         default:

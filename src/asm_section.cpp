@@ -43,3 +43,18 @@ void Asm::Section::AddCommand(Asm::CommandName name, Asm::Argument *argument, As
 {
     asmElements.push_back(new OneArgumentCommand(name, argument, suffix));
 }
+
+void Asm::Section::AddDirective(Asm::AsmDirective *directive)
+{
+    asmElements.push_back(directive);
+}
+
+void Asm::Section::AddLabel(Asm::AsmLabel *label)
+{
+    asmElements.push_back(label);
+}
+
+void Asm::Section::AddCommand(Asm::CommandName name, Asm::AsmLabel *label, bool asAddress, Asm::CommandSuffix suffix)
+{
+    asmElements.push_back(new OneArgumentCommand(name, new ArgumentLabel(label, asAddress), suffix));
+}
