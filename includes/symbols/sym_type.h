@@ -48,6 +48,7 @@ public:
     virtual bool Equal(SymType *other) = 0;
     virtual bool IsComplete() = 0;
     bool IsQualified() const;
+    virtual SymType *GetUnqualified() = 0;
 protected:
     TypeKind kind;
     bool isQualified{false};
@@ -64,6 +65,7 @@ public:
     void SetType(SymType *type);
     uint32_t GetQualifiers() const;
     void SetQualifiers(uint32_t qualifiers);
+    SymType *GetUnqualified() override;
 private:
     SymType *type;
     uint32_t qualfiers{0};
@@ -79,6 +81,7 @@ public:
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     bool Equal(SymType *other) override;
     bool IsComplete() override;
+    SymType *GetUnqualified() override;
 private:
     BuiltInTypeKind builtInTypeKind;
 };
@@ -92,6 +95,7 @@ public:
     void SetTarget(SymType *target);
     bool Equal(SymType *other) override;
     bool IsComplete() override;
+    SymType *GetUnqualified() override;
 private:
     SymType *target;
 };
@@ -108,6 +112,7 @@ public:
     bool Equal(SymType *other) override;
     SymPointer *ToPointer();
     bool IsComplete() override;
+    SymType *GetUnqualified() override;
 private:
     SymType *valueType;
     ExprNode *size;
@@ -134,6 +139,7 @@ public:
     void Define();
     Asm::AsmFunction *GetLabel() const;
     void SetLabel(Asm::AsmFunction *label);
+    SymType *GetUnqualified() override;
 private:
     SymType *returnType{nullptr};
     SymbolTable *params{nullptr};
@@ -150,6 +156,7 @@ public:
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     bool Equal(SymType *other) override;
     bool IsComplete() override;
+    SymType *GetUnqualified() override;
 private:
     SymType *type;
 };
@@ -168,6 +175,7 @@ public:
     IdNode *GetTag() const;
     void SetTag(IdNode *tag);
     bool IsComplete() override;
+    SymType *GetUnqualified() override;
 private:
     IdNode *tag{nullptr};
     SymbolTable *fields{nullptr};
@@ -183,6 +191,7 @@ public:
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     bool Equal(SymType *other) override;
     bool IsComplete() override;
+    SymType *GetUnqualified() override;
 private:
     IdNode *tag{nullptr};
     bool defined{false};
@@ -197,6 +206,7 @@ public:
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     bool Equal(SymType *other) override;
     bool IsComplete() override;
+    SymType *GetUnqualified() override;
 private:
     ExprNode *value{nullptr};
 };

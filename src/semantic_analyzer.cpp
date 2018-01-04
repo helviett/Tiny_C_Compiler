@@ -779,7 +779,7 @@ PrintfNode *SemanticAnalyzer::BuildPrintfNode(StringLiteralNode *format, Argumen
     if (arguments)
         for (auto &arg: arguments->List())
         {
-            auto type = dynamic_cast<SymBuiltInType *>(arg->GetType());
+            auto type = dynamic_cast<SymBuiltInType *>(arg->GetType()->GetUnqualified());
             if (type && type->GetBuiltIntTypeKind() == BuiltInTypeKind::FLOAT)
                 arg = new TypeCastNode(new SymBuiltInType(BuiltInTypeKind::DOUBLE), arg);
         }

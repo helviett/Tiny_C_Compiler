@@ -58,3 +58,9 @@ void Asm::Section::AddCommand(Asm::CommandName name, Asm::AsmLabel *label, bool 
 {
     asmElements.push_back(new OneArgumentCommand(name, new ArgumentLabel(label, asAddress), suffix));
 }
+
+void
+Asm::Section::AddCommand(Asm::CommandName name, ConstNode *constant, Asm::Register aregister, Asm::CommandSuffix suffix)
+{
+    asmElements.push_back(new TwoArgumentsCommand(name, new ArgumentConstant(constant), Registers[aregister], suffix));
+}

@@ -345,9 +345,93 @@ void BinOpNode::Generate(Asm::Assembly *assembly)
                         break;
                 }
             }
-
             break;
         case TokenType::MINUS:
+            switch (reinterpret_cast<SymBuiltInType *>(left->GetType())->GetBuiltIntTypeKind())
+            {
+                case BuiltInTypeKind::INT32:
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::SUB, Asm::Register::EBX, Asm::Register::EAX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+                    break;
+                case BuiltInTypeKind::FLOAT:
+                    section.AddCommand(Asm::CommandName::FLD,
+                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                       Asm::CommandSuffix::S);
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX,
+                                       Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::FLD,
+                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                       Asm::CommandSuffix::S);
+                    section.AddCommand(Asm::CommandName::FSUBP);
+                    section.AddCommand(Asm::CommandName::FSTP, Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                       Asm::CommandSuffix::S);
+                    break;
+            }
+            break;
+        case TokenType::ASTERIX:
+            switch (reinterpret_cast<SymBuiltInType *>(left->GetType())->GetBuiltIntTypeKind())
+            {
+                case BuiltInTypeKind::INT32:
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::MUL, Asm::Register::EBX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+                    break;
+                case BuiltInTypeKind::FLOAT:
+                    section.AddCommand(Asm::CommandName::FLD,
+                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                       Asm::CommandSuffix::S);
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX,
+                                       Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::FLD,
+                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                       Asm::CommandSuffix::S);
+                    section.AddCommand(Asm::CommandName::FMULP);
+                    section.AddCommand(Asm::CommandName::FSTP, Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                       Asm::CommandSuffix::S);
+                    break;
+            }
+            break;
+        case TokenType::FORWARD_SLASH:
+            switch (reinterpret_cast<SymBuiltInType *>(left->GetType())->GetBuiltIntTypeKind())
+            {
+                case BuiltInTypeKind::INT32:
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::MOV, (ConstNode *)new IntConstNode(0),
+                                       Asm::Register::EDX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::DIV, Asm::Register::EBX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+                    break;
+                case BuiltInTypeKind::FLOAT:
+                    section.AddCommand(Asm::CommandName::FLD,
+                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                       Asm::CommandSuffix::S);
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX,
+                                       Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::FLD,
+                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                       Asm::CommandSuffix::S);
+                    section.AddCommand(Asm::CommandName::FDIVP);
+                    section.AddCommand(Asm::CommandName::FSTP, Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                       Asm::CommandSuffix::S);
+                    break;
+            }
+            break;
+        case TokenType::REMINDER:
+            switch (reinterpret_cast<SymBuiltInType *>(left->GetType())->GetBuiltIntTypeKind())
+            {
+                case BuiltInTypeKind::INT32:
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::MOV, (ConstNode *)new IntConstNode(0),
+                                       Asm::Register::EDX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::DIV, Asm::Register::EBX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EDX, Asm::CommandSuffix::L);
+                    break;
+            }
             break;
     }
 }
@@ -450,8 +534,8 @@ void TypeCastNode::Generate(Asm::Assembly *assembly)
     auto cet = castExpr->GetType();
     if (cet->GetTypeKind() == TypeKind::BUILTIN && castType->GetTypeKind() == TypeKind::BUILTIN)
     {
-        auto castTypeBtk = reinterpret_cast<SymBuiltInType *>(castType);
-        auto castExprBtk = reinterpret_cast<SymBuiltInType *>(cet);
+        auto castTypeBtk = reinterpret_cast<SymBuiltInType *>(castType->GetUnqualified());
+        auto castExprBtk = reinterpret_cast<SymBuiltInType *>(cet->GetUnqualified());
         BuiltInTypeConversions[std::make_pair(castExprBtk->GetBuiltIntTypeKind(), castTypeBtk->GetBuiltIntTypeKind())](assembly);
     }
     // TODO

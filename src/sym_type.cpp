@@ -57,6 +57,11 @@ bool SymBuiltInType::IsComplete()
     return true;
 }
 
+SymType *SymBuiltInType::GetUnqualified()
+{
+    return this;
+}
+
 SymPointer::SymPointer(SymType *target) : SymType(), target(target)
 {
     kind = TypeKind::POINTER;
@@ -89,6 +94,11 @@ bool SymPointer::Equal(SymType *other)
 bool SymPointer::IsComplete()
 {
     return target->IsComplete();
+}
+
+SymType *SymPointer::GetUnqualified()
+{
+    return this;
 }
 
 SymArray::SymArray(SymType *valueType, ExprNode *size): SymType(), valueType(valueType), size(size)
@@ -130,6 +140,11 @@ SymPointer *SymArray::ToPointer()
 bool SymArray::IsComplete()
 {
     return valueType->IsComplete();
+}
+
+SymType *SymArray::GetUnqualified()
+{
+    return this;
 }
 
 SymFunction::SymFunction(SymType *returnType): SymType(), returnType(returnType)
@@ -233,6 +248,11 @@ Asm::AsmFunction *SymFunction::GetLabel() const
     return label;
 }
 
+SymType *SymFunction::GetUnqualified()
+{
+    return this;
+}
+
 SymAlias::SymAlias(std::string name, SymType *type): type(type)
 {
     this->name = std::move(name);
@@ -261,6 +281,11 @@ bool SymAlias::Equal(SymType *other)
 bool SymAlias::IsComplete()
 {
     return type->IsComplete();
+}
+
+SymType *SymAlias::GetUnqualified()
+{
+    return type->GetUnqualified();
 }
 
 void SymRecord::Print(std::ostream &os, std::string indent, bool isTail)
@@ -345,6 +370,11 @@ bool SymRecord::IsComplete()
     return fields;
 }
 
+SymType *SymRecord::GetUnqualified()
+{
+    return this;
+}
+
 void SymQualifiedType::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -389,6 +419,11 @@ uint32_t SymQualifiedType::GetQualifiers() const
     return qualfiers;
 }
 
+SymType *SymQualifiedType::GetUnqualified()
+{
+    return type;
+}
+
 SymEnumerator::SymEnumerator(std::string name, ExprNode *value): value(value)
 {
     this->name = std::move(name);
@@ -424,6 +459,11 @@ void SymEnumerator::Print(std::ostream &os, std::string indent, bool isTail)
     value->Print(os, indent, true);
 }
 
+SymType *SymEnumerator::GetUnqualified()
+{
+    return this;
+}
+
 bool SymEnum::Defined() const
 {
     return defined;
@@ -449,4 +489,9 @@ bool SymEnum::Equal(SymType *other)
 bool SymEnum::IsComplete()
 {
     return defined;
+}
+
+SymType *SymEnum::GetUnqualified()
+{
+    return this;
 }
