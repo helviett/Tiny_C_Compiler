@@ -71,6 +71,11 @@ void FloatConstNode::Generate(Asm::Assembly *assembly)
     // TODO
 }
 
+FloatConstNode::FloatConstNode(float value)
+{
+    this->value = value;
+}
+
 void IdNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -317,6 +322,7 @@ void BinOpNode::Generate(Asm::Assembly *assembly)
     left->Generate(assembly);
     right->Generate(assembly);
     Asm::Section &section = assembly->TextSection();
+    Asm::AsmLabel *l1, *l2;
     switch (op->type)
     {
         case TokenType::PLUS:
@@ -433,6 +439,55 @@ void BinOpNode::Generate(Asm::Assembly *assembly)
                     break;
             }
             break;
+        case TokenType::LOGIC_AND:
+            switch (reinterpret_cast<SymBuiltInType *>(left->GetType())->GetBuiltIntTypeKind())
+            {
+                case BuiltInTypeKind::INT32:
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::CMP, ConstNode::IntZero(),
+                                       Asm::Register::EAX, Asm::CommandSuffix::L);
+
+                    l1 = assembly->NextLabel();
+                    l2 = assembly->NextLabel();
+                    section.AddCommand(Asm::CommandName::JE, l1);
+                    section.AddCommand(Asm::CommandName::CMP, ConstNode::IntZero(),
+                                       Asm::Register::EBX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::JE, l1);
+                    section.AddCommand(Asm::CommandName::PUSH, (ConstNode *)new IntConstNode(1), Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::JMP, l2);
+                    section.AddLabel(l1);
+                    section.AddCommand(Asm::CommandName::PUSH, ConstNode::IntZero(), Asm::CommandSuffix::L);
+                    section.AddLabel(l2);
+                    break;
+                case BuiltInTypeKind::FLOAT:
+                    section.AddCommand(Asm::CommandName::FLD,
+                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                       Asm::CommandSuffix::S);
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX,
+                                       Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::FLDZ);
+                    section.AddCommand(Asm::CommandName::FCOMIP);
+                    section.AddCommand(Asm::CommandName::FSTP, Asm::Register::ST0);
+                    l1 = assembly->NextLabel();
+                    l2 = assembly->NextLabel();
+                    section.AddCommand(Asm::CommandName::JE, l1);
+                    section.AddCommand(Asm::CommandName::FLD,
+                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                       Asm::CommandSuffix::S);
+                    section.AddCommand(Asm::CommandName::FLDZ);
+                    section.AddCommand(Asm::CommandName::FCOMIP);
+                    section.AddCommand(Asm::CommandName::FSTP, Asm::Register::ST0);
+                    section.AddCommand(Asm::CommandName::JE, l1);
+                    section.AddCommand(Asm::CommandName::MOV, ConstNode::IntOne(),
+                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]), Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::JMP, l2);
+                    section.AddLabel(l1);
+                    section.AddCommand(Asm::CommandName::MOV, ConstNode::IntZero(),
+                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]), Asm::CommandSuffix::L);
+                    section.AddLabel(l2);
+                    break;
+            }
     }
 }
 
@@ -1839,4 +1894,28 @@ void PrintfNode::Generate(Asm::Assembly *assembly)
     format->Generate(assembly);
     assembly->TextSection().AddCommand(Asm::CommandName::PUSH, format->GetAddress(), true, Asm::CommandSuffix::L);
     assembly->TextSection().AddCommand(Asm::CommandName::CALL, new Asm::AsmFunction("printf"));
+}
+
+IntConstNode *ConstNode::IntZero()
+{
+    static auto zero = new IntConstNode(0);
+    return zero;
+}
+
+IntConstNode *ConstNode::IntOne()
+{
+    static auto one = new IntConstNode(1);
+    return one;
+}
+
+FloatConstNode *ConstNode::FloatZero()
+{
+    static auto zero = new FloatConstNode(0.0f);
+    return nullptr;
+}
+
+FloatConstNode *ConstNode::FloatOne()
+{
+    static auto one = new FloatConstNode(0.1f);
+    return one;
 }

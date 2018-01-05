@@ -252,12 +252,19 @@ private:
     std::shared_ptr<Token> token;
 };
 
+class IntConstNode;
+class FloatConstNode;
+
 class ConstNode: public ExprNode
 {
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
     ExprNode *Eval(Evaluator *evaluator) override = 0;
     void Generate(Asm::Assembly *assembly) override = 0;
+    static IntConstNode *IntZero();
+    static IntConstNode *IntOne();
+    static FloatConstNode *FloatZero();
+    static FloatConstNode *FloatOne();
 protected:
 };
 
@@ -278,6 +285,7 @@ class FloatConstNode: public ConstNode
 {
 public:
     explicit FloatConstNode(std::shared_ptr<Token> token);
+    FloatConstNode(float value);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     ExprNode *Eval(Evaluator *evaluator) override;
     float GetValue() const;

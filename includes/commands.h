@@ -17,7 +17,8 @@ namespace Asm
     enum class CommandName
     {
         PUSH, POP, MOV, ADD, SUB, FLD, FILD, FST, FSTP, FADDP, CALL, LEAVE, RET, FSUBP,
-        MUL, DIV, FMULP, FDIVP
+        MUL, DIV, FMULP, FDIVP, CMP, JMP, JE, JNE, JG, JGE, JL, JLE, JZ, JNZ, FCOMIP,
+        JA, JAE, JB, JBE, FLDZ
     };
 
     static std::unordered_map<CommandName, std::string> CommandNameToString =
@@ -30,7 +31,15 @@ namespace Asm
             {CommandName::LEAVE, "leave"}, {CommandName::RET, "ret"},
             {CommandName::FSUBP, "fsubp"}, {CommandName::MUL, "mul"},
             {CommandName::DIV, "div"}, {CommandName::FMULP, "fmulp"},
-            {CommandName::FDIVP, "fdivp"},
+            {CommandName::FDIVP, "fdivp"}, {CommandName::CMP, "cmp"},
+            {CommandName::JMP, "jmp"}, {CommandName::JE, "je"},
+            {CommandName::JNE, "jne"}, {CommandName::JG, "jg"},
+            {CommandName::JGE, "jge"}, {CommandName::JL, "jl"},
+            {CommandName::JLE, "jle"}, {CommandName::JZ, "jz"},
+            {CommandName::JNZ, "jnz"}, {CommandName::FCOMIP, "fcomip"},
+            {CommandName::JA, "ja"}, {CommandName::JAE, "jae"},
+            {CommandName::JB, "jb"}, {CommandName::JBE, "jbe"},
+            {CommandName::FLDZ, "fldz"},
     };
 
     enum class CommandSuffix
