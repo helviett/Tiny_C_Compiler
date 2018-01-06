@@ -201,7 +201,10 @@ public:
     std::shared_ptr<Token> GetOperation() const;
     void Generate(Asm::Assembly *assembly) override;
 private:
-    void generateCommonPart(Asm::Assembly *assembly);
+    void int32Generate(Asm::Assembly *assembly);
+    void floatGenerate(Asm::Assembly *assembly);
+    void logicalAndGenerate(Asm::Assembly *assembly);
+    void logicalOrGenerate(Asm::Assembly *assembly);
     ExprNode *left, *right;
     std::shared_ptr<Token> op;
 };

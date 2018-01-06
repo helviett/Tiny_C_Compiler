@@ -55,7 +55,7 @@ do
 	eval "./$tccpath tests/generator/$file > tests/generator/asm.s"
 	eval "gcc -m32 tests/generator/asm.s -o tests/generator/a.out"
 	eval "./tests/generator/a.out > tests/generator/tcc.res"
-	eval "gcc -m32 tests/generator/$file -o tests/generator/a.out"
+	eval "gcc -m32 -w tests/generator/$file -o tests/generator/a.out"
 	eval "./tests/generator/a.out > tests/generator/gcc.res"
 	cmp -s "tests/generator/tcc.res" "tests/generator/gcc.res"
 	if [ $? -eq 1 ]; then
