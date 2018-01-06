@@ -22,7 +22,7 @@ namespace Asm
 
     enum class Register
     {
-        EAX, EBX, ECX, EDX, EBP, ESP, ST0
+        EAX, EBX, ECX, EDX, EBP, ESP, ST0, BL, CL
     };
 
     static std::unordered_map<Register, std::string> RegisterToString =
@@ -30,7 +30,8 @@ namespace Asm
             {Register::EAX, "eax"}, {Register::EBX, "ebx"},
             {Register::ECX, "ecx"}, {Register::EDX, "edx"},
             {Register::EBP, "ebp"}, {Register::ESP, "esp"},
-            {Register::ST0, "st(0)"}
+            {Register::ST0, "st(0)"}, {Register::BL, "bl"},
+            {Register::CL, "cl"},
     };
 
     class ArgumentRegister: public Argument
@@ -51,7 +52,8 @@ namespace Asm
             {Register::EBP, new ArgumentRegister(Register::EBP)},
             {Register::ESP, new ArgumentRegister(Register::ESP)},
             {Register::ST0, new ArgumentRegister(Register::ST0)},
-
+            {Register::BL, new ArgumentRegister(Register::BL)},
+            {Register::CL, new ArgumentRegister(Register::CL)},
     };
 
     class ArgumentAddress: public Argument

@@ -553,6 +553,20 @@ void BinOpNode::Generate(Asm::Assembly *assembly)
                     break;
             }
             break;
+        case TokenType::BITWISE_LSHIFT:
+            right->Generate(assembly);
+            section.AddCommand(Asm::CommandName::POP, Asm::Register::ECX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::SAL, Asm::Register::CL, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+            break;
+        case TokenType::BITWISE_RSHIFT:
+            right->Generate(assembly);
+            section.AddCommand(Asm::CommandName::POP, Asm::Register::ECX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::SAR, Asm::Register::CL, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+            break;
     }
 }
 
