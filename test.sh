@@ -46,7 +46,29 @@ do
 done
 rm tests/parser/temp.txt
 echo "Parser: passed $pi/$pj"
-echo "Total:  passed $(($pi+$ti))/$(($tj+$pj))"
+ci=0
+cj=0
+for file in $(ls tests/generator/ | sort -n)
+do
+	cj=$(($cj + 1))
+	prefix=$( echo "$file" | sed -e "s/\.cpp//g" )
+	eval "./$tccpath tests/generator/$file > tests/generator/asm.s"
+	eval "gcc -m32 tests/generator/asm.s -o tests/generator/a.out"
+	eval "./tests/generator/a.out > tests/generator/tcc.res"
+	eval "gcc -m32 tests/generator/$file -o tests/generator/a.out"
+	eval "./tests/generator/a.out > tests/generator/gcc.res"
+	cmp -s "tests/generator/tcc.res" "tests/generator/gcc.res"
+	if [ $? -eq 1 ]; then
+		echo "$file test failed"
+	else
+		echo "$file test succed"
+		ci=$(($ci + 1))
+	fi
+	rm tests/generator/tcc.res tests/generator/gcc.res tests/generator/a.out
+	rm tests/generator/asm.s
+done
+echo "Generator: passed $ci/$cj"
+echo "Total:  passed $(($pi+$ti+$ci))/$(($tj+$pj+$cj))"
 
 
 

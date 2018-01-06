@@ -591,6 +591,28 @@ void BinOpNode::Generate(Asm::Assembly *assembly)
     }
 }
 
+void BinOpNode::generateCommonPart(Asm::Assembly *assembly)
+{
+    if (left->GetType()->GetTypeKind() == TypeKind::BUILTIN)
+    {
+        switch (reinterpret_cast<SymBuiltInType *>(left->GetType())->GetBuiltIntTypeKind())
+        {
+            case BuiltInTypeKind::INT32:
+                switch (op->type)
+                {
+                    case TokenType::PLUS:
+                    case TokenType::MINUS:
+                    case TokenType::FORWARD_SLASH:
+                    case TokenType::ASTERIX:
+                        1;
+                }
+                break;
+            case BuiltInTypeKind::FLOAT:
+                break;
+        }
+    }
+}
+
 void ArrayAccessNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
