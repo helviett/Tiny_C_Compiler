@@ -444,22 +444,38 @@ void BinOpNode::Generate(Asm::Assembly *assembly)
             }
             break;
         case TokenType::LOGIC_AND:
+            l1 = assembly->NextLabel();
+            l2 = assembly->NextLabel();
             switch (reinterpret_cast<SymBuiltInType *>(left->GetType())->GetBuiltIntTypeKind())
             {
                 case BuiltInTypeKind::INT32:
                     section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
                     section.AddCommand(Asm::CommandName::CMP, ConstNode::IntZero(),
                                        Asm::Register::EAX, Asm::CommandSuffix::L);
-
-                    l1 = assembly->NextLabel();
-                    l2 = assembly->NextLabel();
                     section.AddCommand(Asm::CommandName::JE, l1);
-                    right->Generate(assembly);
+
+                    break;
+                case BuiltInTypeKind::FLOAT:
+                    section.AddCommand(Asm::CommandName::FLD,
+                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                       Asm::CommandSuffix::S);
+                    section.AddCommand(Asm::CommandName::FLDZ);
+                    section.AddCommand(Asm::CommandName::FCOMIP);
+                    section.AddCommand(Asm::CommandName::FSTP, Asm::Register::ST0);
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+
+                    section.AddCommand(Asm::CommandName::JE, l1);
+                    break;
+            }
+            right->Generate(assembly);
+            switch (reinterpret_cast<SymBuiltInType *>(right->GetType())->GetBuiltIntTypeKind())
+            {
+                case BuiltInTypeKind::INT32:
                     section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
                     section.AddCommand(Asm::CommandName::CMP, ConstNode::IntZero(),
                                        Asm::Register::EAX, Asm::CommandSuffix::L);
                     section.AddCommand(Asm::CommandName::JE, l1);
-                    section.AddCommand(Asm::CommandName::PUSH, (ConstNode *)new IntConstNode(1), Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::PUSH, ConstNode::IntOne(), Asm::CommandSuffix::L);
                     section.AddCommand(Asm::CommandName::JMP, l2);
                     section.AddLabel(l1);
                     section.AddCommand(Asm::CommandName::PUSH, ConstNode::IntZero(), Asm::CommandSuffix::L);
@@ -472,10 +488,52 @@ void BinOpNode::Generate(Asm::Assembly *assembly)
                     section.AddCommand(Asm::CommandName::FLDZ);
                     section.AddCommand(Asm::CommandName::FCOMIP);
                     section.AddCommand(Asm::CommandName::FSTP, Asm::Register::ST0);
-                    l1 = assembly->NextLabel();
-                    l2 = assembly->NextLabel();
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
                     section.AddCommand(Asm::CommandName::JE, l1);
-                    right->Generate(assembly);
+                    section.AddCommand(Asm::CommandName::PUSH, ConstNode::IntOne(), Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::JMP, l2);
+                    section.AddLabel(l1);
+                    section.AddCommand(Asm::CommandName::PUSH, ConstNode::IntZero(), Asm::CommandSuffix::L);
+                    section.AddLabel(l2);
+                    break;
+            }
+            break;
+        case TokenType::LOGIC_OR:
+            l1 = assembly->NextLabel();
+            l2 = assembly->NextLabel();
+            switch (reinterpret_cast<SymBuiltInType *>(left->GetType())->GetBuiltIntTypeKind())
+            {
+                case BuiltInTypeKind::INT32:
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::CMP, ConstNode::IntZero(),
+                                       Asm::Register::EAX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::JNE, l1);
+                    break;
+                case BuiltInTypeKind::FLOAT:
+                    section.AddCommand(Asm::CommandName::FLD,
+                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                                       Asm::CommandSuffix::S);
+                    section.AddCommand(Asm::CommandName::FLDZ);
+                    section.AddCommand(Asm::CommandName::FCOMIP);
+                    section.AddCommand(Asm::CommandName::FSTP, Asm::Register::ST0);
+                    section.AddCommand(Asm::CommandName::JNE, l1);
+                    break;
+            }
+            right->Generate(assembly);
+            switch (reinterpret_cast<SymBuiltInType *>(right->GetType())->GetBuiltIntTypeKind())
+            {
+                case BuiltInTypeKind::INT32:
+                    section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::CMP, ConstNode::IntZero(),
+                                       Asm::Register::EAX, Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::JNE, l1);
+                    section.AddCommand(Asm::CommandName::PUSH, ConstNode::IntZero(), Asm::CommandSuffix::L);
+                    section.AddCommand(Asm::CommandName::JMP, l2);
+                    section.AddLabel(l1);
+                    section.AddCommand(Asm::CommandName::PUSH, ConstNode::IntOne(), Asm::CommandSuffix::L);
+                    section.AddLabel(l2);
+                    break;
+                case BuiltInTypeKind::FLOAT:
                     section.AddCommand(Asm::CommandName::FLD,
                                        Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
                                        Asm::CommandSuffix::S);
@@ -484,16 +542,17 @@ void BinOpNode::Generate(Asm::Assembly *assembly)
                     section.AddCommand(Asm::CommandName::FSTP, Asm::Register::ST0);
                     section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX,
                                        Asm::CommandSuffix::L);
-                    section.AddCommand(Asm::CommandName::JE, l1);
-                    section.AddCommand(Asm::CommandName::MOV, ConstNode::IntOne(),
+                    section.AddCommand(Asm::CommandName::JNE, l1);
+                    section.AddCommand(Asm::CommandName::MOV, ConstNode::IntZero(),
                                        Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]), Asm::CommandSuffix::L);
                     section.AddCommand(Asm::CommandName::JMP, l2);
                     section.AddLabel(l1);
-                    section.AddCommand(Asm::CommandName::MOV, ConstNode::IntZero(),
+                    section.AddCommand(Asm::CommandName::MOV, ConstNode::IntOne(),
                                        Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]), Asm::CommandSuffix::L);
                     section.AddLabel(l2);
                     break;
             }
+            break;
     }
 }
 

@@ -378,7 +378,6 @@ BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std
         case TokenType::BITWISE_LSHIFT: case TokenType::BITWISE_RSHIFT:
         case TokenType::BITWISE_AND: case TokenType::BITWISE_XOR: case TokenType::BITWISE_OR:
             if (!isIntegerType(ltype) || !isIntegerType(rtype)) throw InvalidOperandError(binOp, ltype, rtype);
-            ImplicitlyConvert(&left, &right);
             return new BinOpNode(left, right, binOp);
         case TokenType::RELOP_LE: case TokenType::RELOP_LT:
         case TokenType::RELOP_GE: case TokenType::RELOP_GT:
