@@ -567,6 +567,27 @@ void BinOpNode::Generate(Asm::Assembly *assembly)
             section.AddCommand(Asm::CommandName::SAR, Asm::Register::CL, Asm::Register::EAX, Asm::CommandSuffix::L);
             section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
             break;
+        case TokenType::BITWISE_AND:
+            right->Generate(assembly);
+            section.AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::AND, Asm::Register::EBX, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+            break;
+        case TokenType::BITWISE_OR:
+            right->Generate(assembly);
+            section.AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::OR, Asm::Register::EBX, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+            break;
+        case TokenType::BITWISE_XOR:
+            right->Generate(assembly);
+            section.AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::XOR, Asm::Register::EBX, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+            break;
     }
 }
 

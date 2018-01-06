@@ -18,7 +18,7 @@ namespace Asm
     {
         PUSH, POP, MOV, ADD, SUB, FLD, FILD, FST, FSTP, FADDP, CALL, LEAVE, RET, FSUBP,
         MUL, DIV, FMULP, FDIVP, CMP, JMP, JE, JNE, JG, JGE, JL, JLE, JZ, JNZ, FCOMIP,
-        JA, JAE, JB, JBE, FLDZ, SAL, SAR
+        JA, JAE, JB, JBE, FLDZ, SAL, SAR, AND, OR, XOR, NOT
     };
 
     static std::unordered_map<CommandName, std::string> CommandNameToString =
@@ -40,7 +40,9 @@ namespace Asm
             {CommandName::JA, "ja"}, {CommandName::JAE, "jae"},
             {CommandName::JB, "jb"}, {CommandName::JBE, "jbe"},
             {CommandName::FLDZ, "fldz"}, {CommandName::SAR, "sar"},
-            {CommandName::SAL, "sal"},
+            {CommandName::SAL, "sal"}, {CommandName::AND, "and"},
+            {CommandName::OR, "or"}, {CommandName::XOR, "xor"},
+            {CommandName::NOT, "not"},
     };
 
     enum class CommandSuffix
