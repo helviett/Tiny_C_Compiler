@@ -363,14 +363,14 @@ void BinOpNode::int32Generate(Asm::Assembly *assembly)
             break;
         case TokenType::FORWARD_SLASH:
             common(section);
-            section.AddCommand(Asm::CommandName::MOV, ConstNode::IntZero(), Asm::Register::EDX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::XOR, Asm::Register::EDX, Asm::Register::EDX, Asm::CommandSuffix::L);
             section.AddCommand(Asm::CommandName::DIV, Asm::Register::EBX, Asm::CommandSuffix::L);
             section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
             break;
 
         case TokenType::REMINDER:
             common(section);
-            section.AddCommand(Asm::CommandName::MOV, ConstNode::IntZero(), Asm::Register::EDX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::XOR, Asm::Register::EDX, Asm::Register::EDX, Asm::CommandSuffix::L);
             section.AddCommand(Asm::CommandName::DIV, Asm::Register::EBX, Asm::CommandSuffix::L);
             section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EDX, Asm::CommandSuffix::L);
             break;
@@ -425,6 +425,7 @@ void BinOpNode::floatGenerate(Asm::Assembly *assembly)
         section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
         section.AddCommand(Asm::CommandName::FLD, Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
                            Asm::CommandSuffix::S);
+
     };
     switch (op->type)
     {
