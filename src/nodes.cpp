@@ -694,7 +694,68 @@ ExprNode *UnaryOpNode::Eval(Evaluator *evaluator)
 
 void UnaryOpNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    expr->Generate(assembly);
+    if (expr->GetType()->GetTypeKind() == TypeKind::BUILTIN)
+        switch (reinterpret_cast<SymBuiltInType *>(expr->GetType())->GetBuiltIntTypeKind())
+        {
+            case BuiltInTypeKind::INT32:
+                int32Generate(assembly);
+                break;
+            case BuiltInTypeKind::FLOAT:
+                floatGenerate(assembly);
+                break;
+        }
+}
+
+void UnaryOpNode::int32Generate(Asm::Assembly *assembly)
+{
+    Asm::Section &section = assembly->TextSection();
+    switch (unaryOp->type)
+    {
+        case TokenType::MINUS:
+            section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::NEG, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+            break;
+        case TokenType::BITWISE_NOT:
+            section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::NOT, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+            break;
+        case TokenType::LOGIC_NO:
+            section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::CMP, ConstNode::IntZero(), Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::SETE, Asm::Register::BL);
+            section.AddCommand(Asm::CommandName::MOVZX, Asm::Register::BL, Asm::Register::EAX);
+            section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+            break;
+    }
+}
+
+void UnaryOpNode::floatGenerate(Asm::Assembly *assembly)
+{
+    Asm::Section &section = assembly->TextSection();
+    switch (unaryOp->type)
+    {
+        case TokenType::MINUS:
+            section.AddCommand(Asm::CommandName::FLD, Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                               Asm::CommandSuffix::S);
+            section.AddCommand(Asm::CommandName::FCHS);
+            section.AddCommand(Asm::CommandName::FSTP, Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                               Asm::CommandSuffix::S);
+            break;
+        case TokenType::LOGIC_NO:
+            section.AddCommand(Asm::CommandName::FLD, Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                             Asm::CommandSuffix::S);
+            section.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+            section.AddCommand(Asm::CommandName::FLDZ);
+            section.AddCommand(Asm::CommandName::FCOMIP);
+            section.AddCommand(Asm::CommandName::FSTP, Asm::Register::ST0);
+            section.AddCommand(Asm::CommandName::SETE, Asm::Register::BL);
+            section.AddCommand(Asm::CommandName::MOVZX, Asm::Register::BL, Asm::Register::EAX);
+            section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+            break;
+    }
 }
 
 void SizeofExprNode::Print(std::ostream &os, std::string indent, bool isTail)

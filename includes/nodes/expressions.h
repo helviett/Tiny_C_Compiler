@@ -163,6 +163,8 @@ public:
     ExprNode *Eval(Evaluator *evaluator) override;
     void Generate(Asm::Assembly *assembly) override;
 private:
+    void int32Generate(Asm::Assembly *assembly);
+    void floatGenerate(Asm::Assembly *assembly);
     std::shared_ptr<Token> unaryOp;
     ExprNode *expr;
 };
