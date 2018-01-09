@@ -20,9 +20,12 @@ public:
     void SetType(SymType *type);
     IdNode *GetId() const;
     void SetId(IdNode *id);
+    void SetOffset(int32_t offset);
+    int32_t GetOffset() const;
 private:
     SymType *type;
     IdNode *id;
+    int32_t offset;
 };
 
 #endif //TINY_C_COMPILER_SYM_VARIABLE_H

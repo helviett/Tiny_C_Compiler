@@ -245,6 +245,8 @@ private:
     ExprNode *left, *right;
 };
 
+class SymVariable;
+
 class IdNode: public ExprNode
 {
 public:
@@ -254,7 +256,9 @@ public:
     std::string GetName() const;
     ExprNode *Eval(Evaluator *evaluator) override;
     void Generate(Asm::Assembly *assembly) override;
+    void SetVariable(SymVariable *variable);
 private:
+    SymVariable *variable;
     std::shared_ptr<Token> token;
 };
 

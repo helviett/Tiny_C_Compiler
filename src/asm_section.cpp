@@ -70,3 +70,15 @@ Asm::Section::AddCommand(Asm::CommandName name, ConstNode *constant, Asm::Argume
 {
     asmElements.push_back(new TwoArgumentsCommand(name, new ArgumentConstant(constant), argument, suffix));
 }
+
+void Asm::Section::AddCommand(Asm::CommandName name, Asm::Register aregister, Asm::Argument *argument,
+                              Asm::CommandSuffix suffix)
+{
+    asmElements.push_back(new TwoArgumentsCommand(name, Asm::Registers[aregister], argument, suffix));
+}
+
+void Asm::Section::AddCommand(Asm::CommandName name, Asm::Argument *argument, Asm::Register aregister,
+                              Asm::CommandSuffix suffix)
+{
+    asmElements.push_back(new TwoArgumentsCommand(name, argument, Asm::Registers[aregister], suffix));
+}

@@ -34,3 +34,13 @@ void SymVariable::SetId(IdNode *id)
 {
     this->id = id;
 }
+
+void SymVariable::SetOffset(int32_t offset)
+{
+    this->offset = offset;
+}
+
+int32_t SymVariable::GetOffset() const
+{
+    return offset;
+}

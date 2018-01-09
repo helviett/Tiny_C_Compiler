@@ -49,6 +49,7 @@ public:
     virtual bool IsComplete() = 0;
     bool IsQualified() const;
     virtual SymType *GetUnqualified() = 0;
+    virtual int32_t Size() = 0;
 protected:
     TypeKind kind;
     bool isQualified{false};
@@ -66,6 +67,7 @@ public:
     uint32_t GetQualifiers() const;
     void SetQualifiers(uint32_t qualifiers);
     SymType *GetUnqualified() override;
+    int32_t Size() override;
 private:
     SymType *type;
     uint32_t qualfiers{0};
@@ -82,6 +84,7 @@ public:
     bool Equal(SymType *other) override;
     bool IsComplete() override;
     SymType *GetUnqualified() override;
+    int32_t Size() override;
 private:
     BuiltInTypeKind builtInTypeKind;
 };
@@ -96,6 +99,7 @@ public:
     bool Equal(SymType *other) override;
     bool IsComplete() override;
     SymType *GetUnqualified() override;
+    int32_t Size() override;
 private:
     SymType *target;
 };
@@ -113,6 +117,7 @@ public:
     SymPointer *ToPointer();
     bool IsComplete() override;
     SymType *GetUnqualified() override;
+    int32_t Size() override;
 private:
     SymType *valueType;
     ExprNode *size;
@@ -140,12 +145,16 @@ public:
     Asm::AsmFunction *GetLabel() const;
     void SetLabel(Asm::AsmFunction *label);
     SymType *GetUnqualified() override;
+    int32_t Size() override;
+    int32_t AllocateVariable(int32_t varSize);
+    int32_t GetAllocatedStorageSize() const;
 private:
     SymType *returnType{nullptr};
     SymbolTable *params{nullptr};
     bool defined{false};
     std::vector<SymVariable *> orderedParams;
     Asm::AsmFunction *label;
+    int32_t localVariableStorage{0};
 };
 
 class SymAlias: public SymType
@@ -157,6 +166,7 @@ public:
     bool Equal(SymType *other) override;
     bool IsComplete() override;
     SymType *GetUnqualified() override;
+    int32_t Size() override;
 private:
     SymType *type;
 };
@@ -165,7 +175,7 @@ class SymRecord: public SymType
 {
 public:
     SymRecord();
-    SymRecord(IdNode *tag);
+    explicit SymRecord(IdNode *tag);
     SymRecord(SymbolTable *fields,  std::vector<SymVariable *> orderedFields);
     SymRecord(SymbolTable *fields,  std::vector<SymVariable *> orderedFields, IdNode *tag);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
@@ -176,6 +186,7 @@ public:
     void SetTag(IdNode *tag);
     bool IsComplete() override;
     SymType *GetUnqualified() override;
+    int32_t Size() override;
 private:
     IdNode *tag{nullptr};
     SymbolTable *fields{nullptr};
@@ -192,6 +203,7 @@ public:
     bool Equal(SymType *other) override;
     bool IsComplete() override;
     SymType *GetUnqualified() override;
+    int32_t Size() override;
 private:
     IdNode *tag{nullptr};
     bool defined{false};
@@ -207,6 +219,7 @@ public:
     bool Equal(SymType *other) override;
     bool IsComplete() override;
     SymType *GetUnqualified() override;
+    int32_t Size() override;
 private:
     ExprNode *value{nullptr};
 };

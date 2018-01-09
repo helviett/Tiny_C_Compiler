@@ -62,6 +62,19 @@ SymType *SymBuiltInType::GetUnqualified()
     return this;
 }
 
+int32_t SymBuiltInType::Size()
+{
+    switch (builtInTypeKind)
+    {
+        case BuiltInTypeKind::INT32: case BuiltInTypeKind::FLOAT:
+        case BuiltInTypeKind::UINT32:
+            return 4;
+        case BuiltInTypeKind::DOUBLE: case BuiltInTypeKind::INT64:
+        case BuiltInTypeKind::UINT64:
+            return 8;
+    }
+}
+
 SymPointer::SymPointer(SymType *target) : SymType(), target(target)
 {
     kind = TypeKind::POINTER;
@@ -99,6 +112,11 @@ bool SymPointer::IsComplete()
 SymType *SymPointer::GetUnqualified()
 {
     return this;
+}
+
+int32_t SymPointer::Size()
+{
+    return 4;
 }
 
 SymArray::SymArray(SymType *valueType, ExprNode *size): SymType(), valueType(valueType), size(size)
@@ -145,6 +163,11 @@ bool SymArray::IsComplete()
 SymType *SymArray::GetUnqualified()
 {
     return this;
+}
+
+int32_t SymArray::Size()
+{
+    return 0; // ??
 }
 
 SymFunction::SymFunction(SymType *returnType): SymType(), returnType(returnType)
@@ -253,6 +276,22 @@ SymType *SymFunction::GetUnqualified()
     return this;
 }
 
+int32_t SymFunction::Size()
+{
+    return 0;
+}
+
+int32_t SymFunction::AllocateVariable(int32_t varSize)
+{
+    varSize = varSize < 4 ? 4 : varSize;
+    return (localVariableStorage += varSize);
+}
+
+int32_t SymFunction::GetAllocatedStorageSize() const
+{
+    return localVariableStorage;
+}
+
 SymAlias::SymAlias(std::string name, SymType *type): type(type)
 {
     this->name = std::move(name);
@@ -286,6 +325,11 @@ bool SymAlias::IsComplete()
 SymType *SymAlias::GetUnqualified()
 {
     return type->GetUnqualified();
+}
+
+int32_t SymAlias::Size()
+{
+    return type->Size();
 }
 
 void SymRecord::Print(std::ostream &os, std::string indent, bool isTail)
@@ -375,6 +419,14 @@ SymType *SymRecord::GetUnqualified()
     return this;
 }
 
+int32_t SymRecord::Size()
+{
+    int32_t size = 0;
+    for (auto f: orderedFields)
+        size += f->GetType()->Size();
+    return size;
+}
+
 void SymQualifiedType::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -424,6 +476,11 @@ SymType *SymQualifiedType::GetUnqualified()
     return type;
 }
 
+int32_t SymQualifiedType::Size()
+{
+    return type->Size();
+}
+
 SymEnumerator::SymEnumerator(std::string name, ExprNode *value): value(value)
 {
     this->name = std::move(name);
@@ -464,6 +521,11 @@ SymType *SymEnumerator::GetUnqualified()
     return this;
 }
 
+int32_t SymEnumerator::Size()
+{
+    return 0;
+}
+
 bool SymEnum::Defined() const
 {
     return defined;
@@ -494,4 +556,9 @@ bool SymEnum::IsComplete()
 SymType *SymEnum::GetUnqualified()
 {
     return this;
+}
+
+int32_t SymEnum::Size()
+{
+    return 32;
 }

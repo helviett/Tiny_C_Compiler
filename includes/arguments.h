@@ -60,7 +60,9 @@ namespace Asm
     {
     public:
         explicit ArgumentAddress(Argument *base);
+        explicit ArgumentAddress(Register base);
         ArgumentAddress(int32_t address, Argument *base);
+        ArgumentAddress(int32_t address, Register base);
         void Print(std::ostream &os) override;
     private:
         int32_t address{0}, multiplier{0};

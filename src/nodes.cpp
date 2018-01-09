@@ -107,7 +107,22 @@ ExprNode *IdNode::Eval(Evaluator *evaluator)
 
 void IdNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    Asm::Section &s = assembly->TextSection();
+    if (variable)
+    {
+        if (GetValueCategory() == ValueCategory::LVAVLUE)
+            s.AddCommand(Asm::CommandName::LEA, Asm::MakeAddress(-variable->GetOffset(), Asm::Register::EBP),
+                         Asm::Register::EAX ,Asm::CommandSuffix::L);
+        else
+            s.AddCommand(Asm::CommandName::MOV, Asm::MakeAddress(-variable->GetOffset(), Asm::Register::EBP),
+                         Asm::Register::EAX ,Asm::CommandSuffix::L);
+        s.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+    }
+}
+
+void IdNode::SetVariable(SymVariable *variable)
+{
+    this->variable = variable;
 }
 
 void StringLiteralNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -417,7 +432,7 @@ void BinOpNode::floatGenerate(Asm::Assembly *assembly)
 {
     Asm::Section &section = assembly->TextSection();
     Asm::AsmLabel *l1, *l2;
-    static auto common = [=](Asm::Section &section)
+    auto common = [=](Asm::Section &section)
     {
         right->Generate(assembly);
         section.AddCommand(Asm::CommandName::FLD, Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
@@ -639,7 +654,12 @@ ExprNode *AssignmentNode::Eval(Evaluator *evaluator)
 
 void AssignmentNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    Asm::Section &s = assembly->TextSection();
+    left->Generate(assembly);
+    right->Generate(assembly);
+    s.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+    s.AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
+    s.AddCommand(Asm::CommandName::MOV, Asm::Register::EAX, Asm::MakeAddress(Asm::Register::EBX), Asm::CommandSuffix::L);
 }
 
 void TypeCastNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1225,7 +1245,7 @@ void DeclarationNode::Print(std::ostream &os, std::string indent, bool isTail)
 
 void DeclarationNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    list->Generate(assembly);
 }
 
 uint64_t InitDeclaratorListNode::Size()
@@ -1258,7 +1278,8 @@ std::list<InitDeclaratorNode *> &InitDeclaratorListNode::List()
 
 void InitDeclaratorListNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    for (auto idn: list)
+        idn->Generate(assembly);
 }
 
 void InitDeclaratorNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1284,7 +1305,20 @@ InitializerNode *InitDeclaratorNode::GetInitializer() const
 
 void InitDeclaratorNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    // TODO complex initializer
+    if (initializer)
+    {
+        initializer->Generate(assembly);
+        Asm::Section &s = assembly->TextSection();
+        s.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
+        s.AddCommand(Asm::CommandName::MOV, Asm::Register::EAX,
+                     Asm::MakeAddress(-variable->GetOffset(), Asm::Register::EBP), Asm::CommandSuffix::L);
+    }
+}
+
+void InitDeclaratorNode::SetVariable(SymVariable *variable)
+{
+    this->variable = variable;
 }
 
 void CompoundStatement::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1868,6 +1902,8 @@ void FunctionDefinitionNode::Generate(Asm::Assembly *assembly)
     s.AddLabel(l);
     s.AddCommand(Asm::CommandName::PUSH, Asm::Register::EBP, Asm::CommandSuffix::L);
     s.AddCommand(Asm::CommandName::MOV, Asm::Register::ESP, Asm::Register::EBP, Asm::CommandSuffix::L);
+    s.AddCommand(Asm::CommandName::SUB, new IntConstNode(t->GetAllocatedStorageSize()), Asm::Register::ESP,
+                 Asm::CommandSuffix::L);
     body->Generate(assembly);
     s.AddCommand(Asm::CommandName::LEAVE);
     s.AddCommand(Asm::CommandName::RET);
@@ -2002,7 +2038,7 @@ ExprNode *SimpleInitializer::GetValue() const
 
 void SimpleInitializer::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    value->Generate(assembly);
 }
 
 void DesignatorNode::SetValue(InitializerNode *value)

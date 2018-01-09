@@ -53,7 +53,7 @@ public:
     TypedefIdentifierNode *BuildTypedefIdentifierNode(const std::shared_ptr<Token> &id);
     PrintfNode *BuildPrintfNode(StringLiteralNode *format, ArgumentExprListNode *arguments);
     ExprNode *EvaluateArraySizer(ExprNode *expr);
-    void ProcessFunction(SymType *funcType);
+    void ProcessFunction(SymFunction *funcType);
     void FinishLastFunctionProcessing();
     void ProcessLoop(IterationStatementNode *loop);
     void FinishLastLoopProcessing();
@@ -77,7 +77,7 @@ private:
     void analyseInitializerList(SymType *current, InitializerNode *initializer, DesignatorNode *designator = nullptr);
     SymType *unqualify(SymType *type);
     ScopeTree scopeTree;
-    std::stack<SymType *> processingFunctions;
+    std::stack<SymFunction *> processingFunctions;
     std::stack<IterationStatementNode *> processingLoops;
     Evaluator evaluator;
 };

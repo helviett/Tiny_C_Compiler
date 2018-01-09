@@ -7,8 +7,8 @@ IdNode *SemanticAnalyzer::BuildIdNode(std::shared_ptr<Token> token)
     if (symbol->GetSymbolClass() == SymbolClass::UNDEFINED) throw UnknownError(); // Unreachable
     if (symbol->GetSymbolClass() == SymbolClass::VARIABLE)
     {
-
         auto id = new IdNode(token, ((SymVariable *)symbol)->GetType());
+        id->SetVariable(((SymVariable *)symbol));
         switch (id->GetType()->GetTypeKind())
         {
             case TypeKind::ARRAY: case TypeKind::FUNCTION ://case TypeKind::STRUCT:
@@ -121,6 +121,7 @@ InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *de
     if (prev) throw RedeclarationError(declarator->GetId(), prev);
     auto name = declarator->GetId()->GetName();
     auto t = declarator->GetType();
+    SymVariable *var = nullptr;
     if (t->GetTypeKind() == TypeKind::FUNCTION)
     {
         if (isTypedef)
@@ -137,11 +138,22 @@ InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *de
         if (isTypedef)
             scopeTree.GetActiveScope()->Insert(name, new SymAlias(name, t));
         else
-            scopeTree.GetActiveScope()->Insert(name, new SymVariable(name, t, declarator->GetId()));
+        {
+            var = new SymVariable(name, t, declarator->GetId());
+            if (!processingFunctions.empty())
+            {
+                auto f = processingFunctions.top();
+                var->SetOffset(f->AllocateVariable(t->Size()));
+            }
+            scopeTree.GetActiveScope()->Insert(name, var);
+        }
+
     }
     if (initializer)
         analyseInitializerList(declarator->GetType(), initializer, nullptr);
-    return new InitDeclaratorNode(declarator, initializer);
+    auto idn = new InitDeclaratorNode(declarator, initializer);
+    idn->SetVariable(var);
+    return idn;
 }
 
 bool SemanticAnalyzer::isVoidPointer(SymType *type)
@@ -247,6 +259,7 @@ FunctionCallNode *SemanticAnalyzer::BuildFunctionCallNode(ExprNode *func, Argume
     {
         if (!arg->GetType()->Equal(ftype->GetOderedParams()[i]->GetType()))
         {
+            performLvalueConversion(arg);
             Convert(&arg, ftype->GetOderedParams()[i]->GetType());
         }
         i++;
@@ -266,7 +279,7 @@ void SemanticAnalyzer::performLvalueConversion(ExprNode *expr)
 {
     expr->SetValueCategory(ValueCategory::RVALUE);
     if (expr->GetType()->IsQualified())
-        ((SymQualifiedType *)expr->GetType())->SetQualifiers(0);
+        expr->SetType(expr->GetType()->GetUnqualified());
 }
 
 PrefixDecrementNode *SemanticAnalyzer::BuildPrefixDecrementNode(ExprNode *expr, const std::shared_ptr<Token> &op)
@@ -338,6 +351,8 @@ bool SemanticAnalyzer::isScalarType(SymType *type)
 BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> binOp)
 {
     BinOpNode *res = nullptr;
+    performLvalueConversion(left);
+    performLvalueConversion(right);
     auto ltype = left->GetType(), rtype = right->GetType();
     switch (binOp->type)
     {
@@ -432,6 +447,7 @@ SemanticAnalyzer::BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue
 AssignmentNode *SemanticAnalyzer::BuildAssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp)
 {
     if (!isModifiableLvalue(left)) throw RequiredModifiableLvalueError(left);
+    performLvalueConversion(right);
     auto ltype = left->GetType(), rtype = right->GetType();
     if (assignmentOp->type != TokenType::ASSIGNMENT)
         right = BuildBinOpNode(left, right, extractArithmeticOperationFromAssignmentBy(assignmentOp));  // TODO redo
@@ -617,7 +633,7 @@ EnumSpecifierNode *SemanticAnalyzer::BuildEnumSpecifierNode(IdNode *tag, Enumera
     return new EnumSpecifierNode(tag, list);
 }
 
-void SemanticAnalyzer::ProcessFunction(SymType *funcType)
+void SemanticAnalyzer::ProcessFunction(SymFunction *funcType)
 {
     processingFunctions.push(funcType);
 }
@@ -778,6 +794,7 @@ PrintfNode *SemanticAnalyzer::BuildPrintfNode(StringLiteralNode *format, Argumen
     if (arguments)
         for (auto &arg: arguments->List())
         {
+            performLvalueConversion(arg);
             auto type = dynamic_cast<SymBuiltInType *>(arg->GetType()->GetUnqualified());
             if (type && type->GetBuiltIntTypeKind() == BuiltInTypeKind::FLOAT)
                 arg = new TypeCastNode(new SymBuiltInType(BuiltInTypeKind::DOUBLE), arg);

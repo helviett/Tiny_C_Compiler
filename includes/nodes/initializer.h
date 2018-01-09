@@ -17,7 +17,9 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     InitializerNode *GetInitializer() const;
     void Generate(Asm::Assembly *assembly) override;
+    void SetVariable(SymVariable *variable);
 private:
+    SymVariable *variable{nullptr};
     InitializerNode *initializer;
 };
 
