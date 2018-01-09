@@ -716,7 +716,7 @@ void UnaryOpNode::Generate(Asm::Assembly *assembly)
 {
     expr->Generate(assembly);
     if (expr->GetType()->GetTypeKind() == TypeKind::BUILTIN)
-        switch (reinterpret_cast<SymBuiltInType *>(expr->GetType())->GetBuiltIntTypeKind())
+        switch (reinterpret_cast<SymBuiltInType *>(expr->GetType()->GetUnqualified())->GetBuiltIntTypeKind())
         {
             case BuiltInTypeKind::INT32:
                 int32Generate(assembly);
@@ -725,6 +725,8 @@ void UnaryOpNode::Generate(Asm::Assembly *assembly)
                 floatGenerate(assembly);
                 break;
         }
+    else if (expr->GetType()->GetTypeKind() == TypeKind::POINTER)
+        pointerGenerate(assembly);
 }
 
 void UnaryOpNode::int32Generate(Asm::Assembly *assembly)
@@ -775,6 +777,18 @@ void UnaryOpNode::floatGenerate(Asm::Assembly *assembly)
             section.AddCommand(Asm::CommandName::MOVZX, Asm::Register::BL, Asm::Register::EAX);
             section.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
             break;
+    }
+}
+
+void UnaryOpNode::pointerGenerate(Asm::Assembly *assembly)
+{
+    auto &s = assembly->TextSection();
+    auto ptrType = reinterpret_cast<SymPointer *>(expr->GetType()->GetUnqualified());
+    if (ptrType->GetTarget()->GetTypeKind() == TypeKind::BUILTIN)
+    {
+        s.AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
+        s.AddCommand(Asm::CommandName::MOV, Asm::MakeAddress(Asm::Register::EBX), Asm::Register::EAX, Asm::CommandSuffix::L);
+        s.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
     }
 }
 

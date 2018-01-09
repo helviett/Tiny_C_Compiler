@@ -290,6 +290,7 @@ PrefixDecrementNode *SemanticAnalyzer::BuildPrefixDecrementNode(ExprNode *expr, 
 
 UnaryOpNode *SemanticAnalyzer::BuildUnaryOpNode(std::shared_ptr<Token> unaryOp, ExprNode *expr)
 {
+    if (unaryOp->type != TokenType::BITWISE_AND) performLvalueConversion(expr);
     UnaryOpNode *res = nullptr;
     SymType *t = unqualify(expr->GetType());
     switch (unaryOp->type)

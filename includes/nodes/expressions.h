@@ -165,6 +165,7 @@ public:
 private:
     void int32Generate(Asm::Assembly *assembly);
     void floatGenerate(Asm::Assembly *assembly);
+    void pointerGenerate(Asm::Assembly *assembly);
     std::shared_ptr<Token> unaryOp;
     ExprNode *expr;
 };

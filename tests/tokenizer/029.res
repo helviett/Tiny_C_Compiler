@@ -11,7 +11,7 @@ Position		Type			Value			Text
 (2, 1)			LCURLY_BRACKET			{				  {
 (3, 5)			KEYWORD			31				  printf
 (3, 11)			LBRACKET			(				  (
-(3, 12)			STRING			Error %s: Code %d				  "Error %s: Code %d"
+(3, 12)			STRING			"Error %s: Code %d"				  "Error %s: Code %d"
 (3, 31)			COMMA			,				  ,
 (3, 33)			ID			e				  e
 (3, 34)			ARROW			->				  ->
