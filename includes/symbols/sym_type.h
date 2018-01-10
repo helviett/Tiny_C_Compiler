@@ -78,7 +78,7 @@ class SymBuiltInType: public SymType
 public:
     explicit SymBuiltInType (BuiltInTypeKind builtInTypeKind);
     SymBuiltInType (BuiltInTypeKind builtInTypeKind, uint32_t typeQualifiers);
-    BuiltInTypeKind GetBuiltIntTypeKind() const;
+    BuiltInTypeKind GetBuiltInTypeKind() const;
     void SetBuiltIntTypeKind(BuiltInTypeKind typeKind);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     bool Equal(SymType *other) override;

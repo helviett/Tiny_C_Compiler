@@ -19,7 +19,7 @@ bool SymType::IsQualified() const
     return isQualified;
 }
 
-BuiltInTypeKind SymBuiltInType::GetBuiltIntTypeKind() const
+BuiltInTypeKind SymBuiltInType::GetBuiltInTypeKind() const
 {
     return builtInTypeKind;
 }
@@ -44,7 +44,7 @@ void SymBuiltInType::Print(std::ostream &os, std::string indent, bool isTail)
 bool SymBuiltInType::Equal(SymType *other)
 {
     if (other->IsQualified()) other = ((SymQualifiedType *)other)->GetType();
-    return kind == other->GetTypeKind() && builtInTypeKind == ((SymBuiltInType *)other)->GetBuiltIntTypeKind();
+    return kind == other->GetTypeKind() && builtInTypeKind == ((SymBuiltInType *) other)->GetBuiltInTypeKind();
 }
 
 SymBuiltInType::SymBuiltInType(BuiltInTypeKind builtInTypeKind, uint32_t typeQualifiers): SymBuiltInType(builtInTypeKind)

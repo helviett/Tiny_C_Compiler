@@ -206,8 +206,8 @@ public:
 private:
     void int32Generate(Asm::Assembly *assembly);
     void floatGenerate(Asm::Assembly *assembly);
-    void logicalAndGenerate(Asm::Assembly *assembly);
-    void logicalOrGenerate(Asm::Assembly *assembly);
+    void logicalAndOrGenerate(Asm::Assembly *assembly);
+
     ExprNode *left, *right;
     std::shared_ptr<Token> op;
 };

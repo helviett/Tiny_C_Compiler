@@ -104,7 +104,7 @@ bool SemanticAnalyzer::isArithmeticType(SymType *type)
 {
     type = unqualify(type);
     if (type->GetTypeKind() != TypeKind::BUILTIN) return false;
-    auto bitk = ((SymBuiltInType *)type)->GetBuiltIntTypeKind();
+    auto bitk = ((SymBuiltInType *) type)->GetBuiltInTypeKind();
     return bitk != BuiltInTypeKind::VOID;
 }
 
@@ -162,7 +162,7 @@ bool SemanticAnalyzer::isVoidPointer(SymType *type)
     if (type->GetTypeKind() != TypeKind::POINTER) return false;
     auto target = unqualify(((SymPointer *)type)->GetTarget());
     return target->GetTypeKind() == TypeKind::BUILTIN &&
-            ((SymBuiltInType *)target)->GetBuiltIntTypeKind() == BuiltInTypeKind::VOID;
+            ((SymBuiltInType *) target)->GetBuiltInTypeKind() == BuiltInTypeKind::VOID;
 }
 
 StructureOrUnionMemberAccessNode *
@@ -239,7 +239,7 @@ bool SemanticAnalyzer::isIntegerType(SymType *type)
 {
     type = unqualify(type);
     if (type->GetTypeKind() != TypeKind::BUILTIN) return false;
-    auto btk = ((SymBuiltInType *)type)->GetBuiltIntTypeKind();
+    auto btk = ((SymBuiltInType *) type)->GetBuiltInTypeKind();
     return btk == BuiltInTypeKind::INT8 || btk == BuiltInTypeKind::UINT8 || btk == BuiltInTypeKind::INT32
            || btk == BuiltInTypeKind::UINT32 || btk == BuiltInTypeKind::INT64 || btk == BuiltInTypeKind::UINT64;
 }
@@ -338,7 +338,7 @@ bool SemanticAnalyzer::isUnsignedIntegerType(SymType *type)
 {
     type = unqualify(type);
     if (type->GetTypeKind() != TypeKind::BUILTIN) return false;
-    auto btk = ((SymBuiltInType *)type)->GetBuiltIntTypeKind();
+    auto btk = ((SymBuiltInType *) type)->GetBuiltInTypeKind();
     return btk == BuiltInTypeKind::UINT8 || btk == BuiltInTypeKind::UINT16 || btk == BuiltInTypeKind::UINT32 ||
             btk == BuiltInTypeKind::UINT64;
 }
@@ -524,9 +524,9 @@ void SemanticAnalyzer::ImplicitlyConvert(ExprNode **left, ExprNode **right)
         if (rtype->GetTypeKind() == TypeKind::BUILTIN)
         {
             auto rbt = (SymBuiltInType *)rtype;
-            if (lbt->GetBuiltIntTypeKind() > rbt->GetBuiltIntTypeKind())
+            if (lbt->GetBuiltInTypeKind() > rbt->GetBuiltInTypeKind())
                 *right = new TypeCastNode(lbt, *right);
-            else if (lbt->GetBuiltIntTypeKind() < rbt->GetBuiltIntTypeKind())
+            else if (lbt->GetBuiltInTypeKind() < rbt->GetBuiltInTypeKind())
                 *left = new TypeCastNode(rbt, *left);
         }
     }
@@ -658,7 +658,7 @@ bool SemanticAnalyzer::isVoidType(SymType *type)
 {
     type = unqualify(type);
     return type->GetTypeKind() == TypeKind::BUILTIN &&
-            ((SymBuiltInType *)type)->GetBuiltIntTypeKind() == BuiltInTypeKind::VOID;
+            ((SymBuiltInType *) type)->GetBuiltInTypeKind() == BuiltInTypeKind::VOID;
 }
 
 void SemanticAnalyzer::ProcessLoop(IterationStatementNode *loop)
@@ -797,7 +797,7 @@ PrintfNode *SemanticAnalyzer::BuildPrintfNode(StringLiteralNode *format, Argumen
         {
             performLvalueConversion(arg);
             auto type = dynamic_cast<SymBuiltInType *>(arg->GetType()->GetUnqualified());
-            if (type && type->GetBuiltIntTypeKind() == BuiltInTypeKind::FLOAT)
+            if (type && type->GetBuiltInTypeKind() == BuiltInTypeKind::FLOAT)
                 arg = new TypeCastNode(new SymBuiltInType(BuiltInTypeKind::DOUBLE), arg);
         }
     return new PrintfNode(format, arguments);
