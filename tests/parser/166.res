@@ -3,12 +3,9 @@
     │   ├── Declarator
     │   │   ├── main
     │   │   └── Function returning
-    │   │       ├── Qualified 0
-    │   │       │   └── INT32
+    │   │       └── Qualified 0
+    │   │           └── INT32
     │   │       └── Params
-    │   │           └── #0
-    │   │               └── Qualified 0
-    │   │                   └── VOID
     │   └── {}
     │       └── BlockItemList
     │           └── return
@@ -17,12 +14,9 @@
     │   ├── Declarator
     │   │   ├── dmain
     │   │   └── Function returning
-    │   │       ├── Qualified 0
-    │   │       │   └── DOUBLE
+    │   │       └── Qualified 0
+    │   │           └── DOUBLE
     │   │       └── Params
-    │   │           └── #0
-    │   │               └── Qualified 0
-    │   │                   └── VOID
     │   └── {}
     │       └── BlockItemList
     │           └── return
@@ -34,12 +28,9 @@
     │   ├── Declarator
     │   │   ├── vmain
     │   │   └── Function returning
-    │   │       ├── Qualified 0
-    │   │       │   └── VOID
+    │   │       └── Qualified 0
+    │   │           └── VOID
     │   │       └── Params
-    │   │           └── #0
-    │   │               └── Qualified 0
-    │   │                   └── VOID
     │   └── {}
     │       └── BlockItemList
     │           └── return
@@ -47,14 +38,11 @@
         ├── Declarator
         │   ├── smain
         │   └── Function returning
-        │       ├── struct A
-        │       │   └── a
-        │       │       └── Qualified 0
-        │       │           └── INT32
-        │       └── Params
-        │           └── #0
+        │       └── struct A
+        │           └── a
         │               └── Qualified 0
-        │                   └── VOID
+        │                   └── INT32
+        │       └── Params
         └── {}
             └── BlockItemList
                 ├── Decl

@@ -29,14 +29,11 @@
                     │   └── Pointer to
                     │       └── Pointer to
                     │           └── Function returning
-                    │               ├── Pointer to
-                    │               │   └── Array of
-                    │               │       └── Pointer to
-                    │               │           └── Qualified 0
-                    │               │               └── INT8
+                    │               └── Pointer to
+                    │                   └── Array of
+                    │                       └── Pointer to
+                    │                           └── Qualified 0
+                    │                               └── INT8
                     │               └── Params
-                    │                   └── #0
-                    │                       └── Qualified 0
-                    │                           └── VOID
                     └── 8
 

@@ -4,22 +4,16 @@
     │       └── InitDeclarator
     │           ├── forever
     │           └── Function returning
-    │               ├── Qualified 0
-    │               │   └── VOID
+    │               └── Qualified 0
+    │                   └── VOID
     │               └── Params
-    │                   └── #0
-    │                       └── Qualified 0
-    │                           └── VOID
     └── FuncDef
         ├── Declarator
         │   ├── forloop
         │   └── Function returning
-        │       ├── Qualified 0
-        │       │   └── VOID
+        │       └── Qualified 0
+        │           └── VOID
         │       └── Params
-        │           └── #0
-        │               └── Qualified 0
-        │                   └── VOID
         └── {}
             └── BlockItemList
                 └── for

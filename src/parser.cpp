@@ -638,6 +638,12 @@ void Parser::parseFunctionDeclarator(DeclaratorNode *declarator)
     scanner->Next();
     auto ptl = parseParameterTypeList();
     std::vector<SymVariable *> orderedParamTypes;
+    if (ptl->List().size() == 1)
+    {
+        auto bit = dynamic_cast<SymBuiltInType *>(ptl->List().front()->GetType()->GetUnqualified());
+        if (bit && bit->GetBuiltInTypeKind() == BuiltInTypeKind::VOID)
+            ptl->List().clear();
+    }
     orderedParamTypes.reserve(ptl->List().size());
     auto table = new SymbolTable();
     for (auto it: ptl->List())

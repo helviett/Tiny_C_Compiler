@@ -4,12 +4,9 @@
     │       └── InitDeclarator
     │           ├── f
     │           └── Function returning
-    │               ├── Qualified 0
-    │               │   └── VOID
+    │               └── Qualified 0
+    │                   └── VOID
     │               └── Params
-    │                   └── #0
-    │                       └── Qualified 0
-    │                           └── VOID
     ├── Decl
     │   └── InitDeclaratorList
     │       └── InitDeclarator
