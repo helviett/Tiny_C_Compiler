@@ -19,7 +19,7 @@ namespace Asm
         PUSH, POP, MOV, ADD, SUB, FLD, FILD, FST, FSTP, FADDP, CALL, LEAVE, RET, FSUBP,
         MUL, DIV, FMULP, FDIVP, CMP, JMP, JE, JNE, JG, JGE, JL, JLE, JZ, JNZ, FCOMIP,
         JA, JAE, JB, JBE, FLDZ, SAL, SAR, AND, OR, XOR, NOT, NEG, FCHS, SETE, MOVZX, LEA, INC, DEC, FLD1,
-        SETG, SETGE, SETL, SETLE, SETNE
+        SETG, SETGE, SETL, SETLE, SETNE, IMUL, IDIV, SETB, SETBE, SETA, SETAE
     };
 
     static std::unordered_map<CommandName, std::string> CommandNameToString =
@@ -50,6 +50,9 @@ namespace Asm
             {CommandName::FLD1, "fld1"}, {CommandName::SETG, "setg"},
             {CommandName::SETGE, "setge"}, {CommandName::SETL, "setl"},
             {CommandName::SETLE, "setle"}, {CommandName::SETNE, "setne"},
+            {CommandName::IDIV, "idiv"}, {CommandName::IMUL, "imul"},
+            {CommandName::SETB, "setb"}, {CommandName::SETA, "seta"},
+            {CommandName::SETBE, "setbe"}, {CommandName::SETAE, "setae"}
     };
 
     enum class CommandSuffix
