@@ -2,6 +2,7 @@
 // Created by keltar on 10/14/17.
 //
 
+#include <gmpxx.h>
 #include "../includes/nodes.h"
 #include "../includes/evaluator.h"
 
@@ -444,10 +445,12 @@ void BinOpNode::int32Generate(Asm::Assembly *assembly)
     static std::unordered_map<TokenType, CommandName> optoasm =
     {
             {TokenType::PLUS, CommandName::ADD}, {TokenType::MINUS, CommandName::SUB},
-            {TokenType::ASTERIX, CommandName::MUL}, {TokenType::BITWISE_AND, CommandName::AND},
-            {TokenType::BITWISE_OR, CommandName::OR}, {TokenType::BITWISE_XOR, CommandName::XOR},
-            {TokenType::FORWARD_SLASH, CommandName::DIV}, {TokenType::REMINDER, CommandName::DIV},
-            {TokenType::BITWISE_LSHIFT, CommandName::SAL}, {TokenType::BITWISE_RSHIFT, CommandName::SAR},
+            {TokenType::BITWISE_AND, CommandName::AND}, {TokenType::BITWISE_OR, CommandName::OR},
+            {TokenType::BITWISE_XOR, CommandName::XOR}, {TokenType::BITWISE_LSHIFT, CommandName::SAL},
+            {TokenType::BITWISE_RSHIFT, CommandName::SAR}, {TokenType::RELOP_EQ, CommandName::SETE},
+            {TokenType::RELOP_GT, CommandName::SETG}, {TokenType::RELOP_GE, CommandName::SETGE},
+            {TokenType::RELOP_LT, CommandName::SETL}, {TokenType::RELOP_LE, CommandName::SETLE},
+            {TokenType::RELOP_NE, CommandName::SETNE}
     };
     auto common = [&](Register aregister = Register::EBX)
     {
@@ -461,27 +464,30 @@ void BinOpNode::int32Generate(Asm::Assembly *assembly)
         case TokenType::BITWISE_OR: case TokenType::BITWISE_XOR:
             common();
             section.AddCommand(optoasm[op->type], Register::EBX, Register::EAX, CommandSuffix::L);
-            section.AddCommand(CommandName::PUSH, Register::EAX, CommandSuffix::L);
             break;
         case TokenType::ASTERIX:
             common();
             section.AddCommand(CommandName::MUL, Register::EBX, CommandSuffix::L);
-            section.AddCommand(CommandName::PUSH, Register::EAX, CommandSuffix::L);
             break;
         case TokenType::FORWARD_SLASH: case TokenType::REMINDER:
             common();
             section.AddCommand(CommandName::XOR, Register::EDX, Register::EDX, CommandSuffix::L);
             section.AddCommand(CommandName::DIV, Register::EBX, CommandSuffix::L);
-            section.AddCommand(CommandName::PUSH, op->type == TokenType::FORWARD_SLASH ? Register::EAX : Register::EDX,
-                               CommandSuffix::L);
             break;
         case TokenType::BITWISE_LSHIFT: case TokenType::BITWISE_RSHIFT:
             common(Register::ECX);
-            section.AddCommand(op->type == TokenType::BITWISE_LSHIFT ? CommandName::SAL : CommandName::SAR,
-                               Register::CL, Register::EAX, CommandSuffix::L);
-            section.AddCommand(CommandName::PUSH, Register::EAX, CommandSuffix::L);
+            section.AddCommand(optoasm[op->type], Register::CL, Register::EAX, CommandSuffix::L);
+            break;
+        case TokenType::RELOP_EQ: case TokenType::RELOP_GT: case TokenType::RELOP_GE:
+        case TokenType::RELOP_LT: case TokenType::RELOP_LE: case TokenType::RELOP_NE:
+            common();
+            section.AddCommand(CommandName::CMP, Register::EBX, Register::EAX, CommandSuffix::L);
+            section.AddCommand(optoasm[op->type], Register::BL);
+            section.AddCommand(CommandName::MOVZX, Register::BL, Register::EAX);
             break;
     }
+    section.AddCommand(CommandName::PUSH, op->type == TokenType::REMINDER ? Register::EDX : Register::EAX,
+                       CommandSuffix::L);
 }
 
 void BinOpNode::floatGenerate(Asm::Assembly *assembly)
@@ -492,13 +498,27 @@ void BinOpNode::floatGenerate(Asm::Assembly *assembly)
     {
             {TokenType::PLUS, CommandName::FADDP,}, {TokenType::MINUS, CommandName::FSUBP},
             {TokenType::ASTERIX, CommandName::FMULP}, {TokenType::FORWARD_SLASH, CommandName ::FDIVP},
+            {TokenType::RELOP_EQ, CommandName::SETE}, {TokenType::RELOP_GT, CommandName::SETG},
+            {TokenType::RELOP_GE, CommandName::SETGE}, {TokenType::RELOP_LT, CommandName::SETL},
+            {TokenType::RELOP_LE, CommandName::SETLE},
+            {TokenType::RELOP_NE, CommandName::SETNE}
     };
     right->Generate(assembly);
     section.AddCommand(CommandName::FLD, MakeAddress(Register::ESP), CommandSuffix::S);
     section.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
     section.AddCommand(CommandName::FLD, MakeAddress(Register::ESP), CommandSuffix::S);
-    section.AddCommand(optoasm[op->type]);
-    section.AddCommand(CommandName::FSTP, MakeAddress(Register::ESP), CommandSuffix::S);
+    if (isRelop(op->type))
+    {
+        section.AddCommand(CommandName::FCOMIP);
+        section.AddCommand(CommandName::FSTP, Register::ST0);
+        section.AddCommand(CommandName::SETE, Register::BL);
+        section.AddCommand(CommandName::MOVZX, Register::BL, Register::EAX);
+    }
+    else
+    {
+        section.AddCommand(optoasm[op->type]);
+        section.AddCommand(CommandName::FSTP, MakeAddress(Register::ESP), CommandSuffix::S);
+    }
 }
 
 void BinOpNode::logicalAndOrGenerate(Asm::Assembly *assembly)
@@ -541,6 +561,12 @@ void BinOpNode::logicalAndOrGenerate(Asm::Assembly *assembly)
     section.AddLabel(l1);
     section.AddCommand(CommandName::PUSH, ConstNode::IntZero(), CommandSuffix::L);
     section.AddLabel(l2);
+}
+
+bool BinOpNode::isRelop(TokenType type)
+{
+    return type == TokenType::RELOP_NE || type == TokenType::RELOP_LE || type == TokenType::RELOP_GE ||
+            type == TokenType::RELOP_GT || type == TokenType::RELOP_EQ;
 }
 
 void ArrayAccessNode::Print(std::ostream &os, std::string indent, bool isTail)

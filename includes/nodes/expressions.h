@@ -208,7 +208,7 @@ private:
     void int32Generate(Asm::Assembly *assembly);
     void floatGenerate(Asm::Assembly *assembly);
     void logicalAndOrGenerate(Asm::Assembly *assembly);
-
+    bool isRelop(TokenType tokenType);
     ExprNode *left, *right;
     std::shared_ptr<Token> op;
 };
