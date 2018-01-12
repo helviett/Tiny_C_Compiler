@@ -183,9 +183,10 @@ void SymFunction::Print(std::ostream &os, std::string indent, bool isTail)
 
     (returnType)->Print(os, indent, orderedParams.empty());
     os << indent << ("└── ") << "Params" << std::endl;
-    for (size_t i = 0; i < orderedParams.size() - 1; ++i)
+    for (int32_t i = 0; i < (int32_t)orderedParams.size() - 1; ++i)
         params->Find(orderedParams[i]->GetName())->Print(os, indent + "    ", false);
-    params->Find(orderedParams.back()->GetName())->Print(os, indent + "    ", true);
+    if (!orderedParams.empty())
+        params->Find(orderedParams.back()->GetName())->Print(os, indent + "    ", true);
 }
 
 SymType *SymFunction::GetReturnType() const
@@ -199,11 +200,12 @@ void SymFunction::SetReturnType(SymType *returnType)
     this->returnType = returnType;
 }
 
-SymFunction::SymFunction(SymType *returnType, SymbolTable *params, const std::vector<SymVariable *> &orderedParamTypes):
-    returnType(returnType), params(params), orderedParams(orderedParamTypes)
+SymFunction::SymFunction(SymType *returnType, SymbolTable *params, std::vector<SymVariable *> &orderedParamTypes):
+    returnType(returnType), params(params)
 {
     symbolClass = SymbolClass::TYPE;
     kind = TypeKind::FUNCTION;
+    SetOrderedParams(orderedParamTypes);
 }
 
 SymbolTable *SymFunction::GetParamsTable() const
@@ -217,6 +219,7 @@ bool SymFunction::Equal(SymType *other)
     auto f = (SymFunction *)other;
     if (kind == other->GetTypeKind() && (f->GetReturnType()->Equal(returnType)))
     {
+        if (this->orderedParams.size() != f->GetOderedParams().size()) return false;
         for (int i = 0;i < orderedParams.size(); ++i)
         {
             // TODO bad comparison.
@@ -259,6 +262,8 @@ void SymFunction::SetParamsTable(SymbolTable *params)
 void SymFunction::SetOrderedParams(std::vector<SymVariable *> &orderedParams)
 {
     this->orderedParams = orderedParams;
+    for (auto param: this->orderedParams)
+        argumentsStorageSize += param->GetType()->Size() < 4? 4 : param->GetType()->Size();
 }
 
 void SymFunction::SetLabel(Asm::AsmFunction *label)
@@ -284,12 +289,17 @@ int32_t SymFunction::Size()
 int32_t SymFunction::AllocateVariable(int32_t varSize)
 {
     varSize = varSize < 4 ? 4 : varSize;
-    return (localVariableStorage += varSize);
+    return (localVariablesStorageSize += varSize);
 }
 
-int32_t SymFunction::GetAllocatedStorageSize() const
+int32_t SymFunction::GetLocalVariablesStorageSize() const
 {
-    return localVariableStorage;
+    return localVariablesStorageSize;
+}
+
+int32_t SymFunction::GetArgumentsStorageSize() const
+{
+    return argumentsStorageSize;
 }
 
 SymAlias::SymAlias(std::string name, SymType *type): type(type)

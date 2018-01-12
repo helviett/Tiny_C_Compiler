@@ -1,4 +1,6 @@
-//
-// Created by keltar on 1/12/18.
-//
-
+int main(void)
+{
+    int a = 0;
+    printf("%d\t", a++);
+    printf("%d\n", a);
+}

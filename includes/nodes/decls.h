@@ -16,7 +16,7 @@ class DirectDeclaratorNode;
 class DeclaratorNode: public Node
 {
 public:
-    DeclaratorNode () { type = nullptr; }
+    DeclaratorNode ();
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void SetType(SymType *type);
     SymType *GetType() const;

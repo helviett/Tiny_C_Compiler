@@ -34,14 +34,11 @@ static std::unordered_map<std::pair<BuiltInTypeKind, BuiltInTypeKind>, std::func
         {std::make_pair(BuiltInTypeKind::FLOAT, BuiltInTypeKind::DOUBLE),
                 [](Asm::Assembly *assembly)
                 {
-                    assembly->TextSection().AddCommand(Asm::CommandName::FLD,
-                                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                    assembly->TextSection().AddCommand(Asm::CommandName::FLD, Asm::MakeAddress(Asm::Register::ESP),
                                                        Asm::CommandSuffix::S);
-                    assembly->TextSection().AddCommand(Asm::CommandName::PUSH,
-                                                       Asm::Register::EAX,
+                    assembly->TextSection().AddCommand(Asm::CommandName::SUB, new IntConstNode(4), Asm::Register::ESP,
                                                        Asm::CommandSuffix::L);
-                    assembly->TextSection().AddCommand(Asm::CommandName::FSTP,
-                                                       Asm::MakeAddress(Asm::Registers[Asm::Register::ESP]),
+                    assembly->TextSection().AddCommand(Asm::CommandName::FSTP, Asm::MakeAddress(Asm::Register::ESP),
                                                        Asm::CommandSuffix::L);
                 }},
 };

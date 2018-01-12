@@ -42,7 +42,7 @@ public:
     ExprNode *Eval(Evaluator *evaluator) override;
     void Generate(Asm::Assembly *assembly) override;
 private:
-    ExprNode *node;
+    ExprNode *expr;
 };
 
 class PostfixDecrementNode: public ExprNode
@@ -53,7 +53,7 @@ public:
     ExprNode *Eval(Evaluator *evaluator) override;
     void Generate(Asm::Assembly *assembly) override;
 private:
-    ExprNode *node;
+    ExprNode *expr;
 };
 
 class IdNode;
@@ -101,6 +101,7 @@ public:
     uint64_t Size();
     std::list<ExprNode *> &List();
     void Generate(Asm::Assembly *assembly) override;
+    int32_t GetArgumentsSize();
 private:
     std::list<ExprNode *> list;
 };
@@ -178,7 +179,7 @@ public:
     ExprNode *Eval(Evaluator *evaluator) override;
     void Generate(Asm::Assembly *assembly) override;
 private:
-    ExprNode *node;
+    ExprNode *expr;
 };
 
 class PrefixDecrementNode: public ExprNode
@@ -189,7 +190,7 @@ public:
     ExprNode *Eval(Evaluator *evaluator) override;
     void Generate(Asm::Assembly *assembly) override;
 private:
-    ExprNode *node;
+    ExprNode *expr;
 };
 
 class BinOpNode: public ExprNode

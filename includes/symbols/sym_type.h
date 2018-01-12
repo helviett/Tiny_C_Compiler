@@ -130,7 +130,7 @@ class SymFunction: public SymType
 {
 public:
     explicit SymFunction(SymType *returnType);
-    SymFunction(SymType *returnType, SymbolTable *params, const std::vector<SymVariable *> &orderedParamTypes);
+    SymFunction(SymType *returnType, SymbolTable *params, std::vector<SymVariable *> &orderedParamTypes);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
     SymType *GetReturnType() const;
     void SetReturnType(SymType *returnType);
@@ -147,14 +147,16 @@ public:
     SymType *GetUnqualified() override;
     int32_t Size() override;
     int32_t AllocateVariable(int32_t varSize);
-    int32_t GetAllocatedStorageSize() const;
+    int32_t GetLocalVariablesStorageSize() const;
+    int32_t GetArgumentsStorageSize() const;
 private:
     SymType *returnType{nullptr};
     SymbolTable *params{nullptr};
     bool defined{false};
     std::vector<SymVariable *> orderedParams;
     Asm::AsmFunction *label;
-    int32_t localVariableStorage{0};
+    int32_t localVariablesStorageSize{0};
+    int32_t argumentsStorageSize{0};
 };
 
 class SymAlias: public SymType

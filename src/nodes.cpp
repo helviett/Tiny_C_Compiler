@@ -135,6 +135,7 @@ StringLiteralNode::StringLiteralNode(std::shared_ptr<Token> token): token(token)
 {
     if (token->type != TokenType::STRING) throw "";
     position = token->position;
+    this->type = new SymPointer(new SymBuiltInType(BuiltInTypeKind::INT8));
 }
 
 ExprNode *StringLiteralNode::Eval(Evaluator *evaluator)
@@ -159,10 +160,10 @@ void PostfixIncrementNode::Print(std::ostream &os, std::string indent, bool isTa
     os << indent << (isTail ? "└── " : "├── ");
     os << "`++" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    node->Print(os, indent, true);
+    expr->Print(os, indent, true);
 }
 
-PostfixIncrementNode::PostfixIncrementNode(ExprNode *node) : node(node)
+PostfixIncrementNode::PostfixIncrementNode(ExprNode *node) : expr(node)
 {
     this->type = node->GetType();
 }
@@ -174,7 +175,28 @@ ExprNode * PostfixIncrementNode::Eval(Evaluator *evaluator)
 
 void PostfixIncrementNode::Generate(Asm::Assembly *assembly)
 {
-    
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    expr->Generate(assembly);
+    if (type->GetTypeKind() == TypeKind::BUILTIN)
+    {
+        switch (reinterpret_cast<SymBuiltInType *>(type)->GetBuiltInTypeKind())
+        {
+            case BuiltInTypeKind::INT32:
+                s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+                s.AddCommand(CommandName::PUSH, MakeAddress(Register::EAX), CommandSuffix::L);
+                s.AddCommand(CommandName::INC, MakeAddress(Register::EAX), CommandSuffix::L);
+                break;
+            case BuiltInTypeKind::FLOAT:
+                s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+                s.AddCommand(CommandName::PUSH, MakeAddress(Register::EAX), CommandSuffix::L);
+                s.AddCommand(CommandName::FLD, MakeAddress(Register::EAX), CommandSuffix::S);
+                s.AddCommand(CommandName::FLD1);
+                s.AddCommand(CommandName::FADDP);
+                s.AddCommand(CommandName::FSTP, MakeAddress(Register::EAX), CommandSuffix::S);
+                break;
+        }
+    }
 }
 
 void PostfixDecrementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -182,10 +204,10 @@ void PostfixDecrementNode::Print(std::ostream &os, std::string indent, bool isTa
     os << indent << (isTail ? "└── " : "├── ");
     os << "`--" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    node->Print(os, indent, true);
+    expr->Print(os, indent, true);
 }
 
-PostfixDecrementNode::PostfixDecrementNode(ExprNode *node) : node(node)
+PostfixDecrementNode::PostfixDecrementNode(ExprNode *node) : expr(node)
 {
     this->type = node->GetType();
 }
@@ -197,7 +219,28 @@ ExprNode *PostfixDecrementNode::Eval(Evaluator *evaluator)
 
 void PostfixDecrementNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    expr->Generate(assembly);
+    if (type->GetTypeKind() == TypeKind::BUILTIN)
+    {
+        switch (reinterpret_cast<SymBuiltInType *>(type)->GetBuiltInTypeKind())
+        {
+            case BuiltInTypeKind::INT32:
+                s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+                s.AddCommand(CommandName::PUSH, MakeAddress(Register::EAX), CommandSuffix::L);
+                s.AddCommand(CommandName::DEC, MakeAddress(Register::EAX), CommandSuffix::L);
+                break;
+            case BuiltInTypeKind::FLOAT:
+                s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+                s.AddCommand(CommandName::PUSH, MakeAddress(Register::EAX), CommandSuffix::L);
+                s.AddCommand(CommandName::FLD1);
+                s.AddCommand(CommandName::FLD, MakeAddress(Register::EAX), CommandSuffix::S);
+                s.AddCommand(CommandName::FSUBP);
+                s.AddCommand(CommandName::FSTP, MakeAddress(Register::EAX), CommandSuffix::S);
+                break;
+        }
+    }
 }
 
 void StructureOrUnionMemberAccessNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -250,10 +293,10 @@ void PrefixIncrementNode::Print(std::ostream &os, std::string indent, bool isTai
     os << indent << (isTail ? "└── " : "├── ");
     os << "++'" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    node->Print(os, indent, true);
+    expr->Print(os, indent, true);
 }
 
-PrefixIncrementNode::PrefixIncrementNode(ExprNode *node) : node(node)
+PrefixIncrementNode::PrefixIncrementNode(ExprNode *node) : expr(node)
 {
     this->type = node->GetType();
 }
@@ -265,7 +308,28 @@ ExprNode *PrefixIncrementNode::Eval(Evaluator *evaluator)
 
 void PrefixIncrementNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    expr->Generate(assembly);
+    if (type->GetTypeKind() == TypeKind::BUILTIN)
+    {
+        switch (reinterpret_cast<SymBuiltInType *>(type)->GetBuiltInTypeKind())
+        {
+            case BuiltInTypeKind::INT32:
+                s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+                s.AddCommand(CommandName::INC, MakeAddress(Register::EAX), CommandSuffix::L);
+                s.AddCommand(CommandName::PUSH, MakeAddress(Register::EAX), CommandSuffix::L);
+                break;
+            case BuiltInTypeKind::FLOAT:
+                s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+                s.AddCommand(CommandName::FLD, MakeAddress(Register::EAX), CommandSuffix::S);
+                s.AddCommand(CommandName::FLD1);
+                s.AddCommand(CommandName::FADDP);
+                s.AddCommand(CommandName::FSTP, MakeAddress(Register::EAX), CommandSuffix::S);
+                s.AddCommand(CommandName::PUSH, MakeAddress(Register::EAX), CommandSuffix::L);
+                break;
+        }
+    }
 }
 
 void PrefixDecrementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -273,10 +337,10 @@ void PrefixDecrementNode::Print(std::ostream &os, std::string indent, bool isTai
     os << indent << (isTail ? "└── " : "├── ");
     os << "--`" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    node->Print(os, indent, true);
+    expr->Print(os, indent, true);
 }
 
-PrefixDecrementNode::PrefixDecrementNode(ExprNode *node) : node(node)
+PrefixDecrementNode::PrefixDecrementNode(ExprNode *node) : expr(node)
 {
     this->type = node->GetType();
 }
@@ -288,7 +352,28 @@ ExprNode *PrefixDecrementNode::Eval(Evaluator *evaluator)
 
 void PrefixDecrementNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    expr->Generate(assembly);
+    if (type->GetTypeKind() == TypeKind::BUILTIN)
+    {
+        switch (reinterpret_cast<SymBuiltInType *>(type)->GetBuiltInTypeKind())
+        {
+            case BuiltInTypeKind::INT32:
+                s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+                s.AddCommand(CommandName::DEC, MakeAddress(Register::EAX), CommandSuffix::L);
+                s.AddCommand(CommandName::PUSH, MakeAddress(Register::EAX), CommandSuffix::L);
+                break;
+            case BuiltInTypeKind::FLOAT:
+                s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+                s.AddCommand(CommandName::FLD1);
+                s.AddCommand(CommandName::FLD, MakeAddress(Register::EAX), CommandSuffix::S);
+                s.AddCommand(CommandName::FSUBP);
+                s.AddCommand(CommandName::FSTP, MakeAddress(Register::EAX), CommandSuffix::S);
+                s.AddCommand(CommandName::PUSH, MakeAddress(Register::EAX), CommandSuffix::L);
+                break;
+        }
+    }
 }
 
 void BinOpNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -589,6 +674,7 @@ ExprNode *UnaryOpNode::Eval(Evaluator *evaluator)
 void UnaryOpNode::Generate(Asm::Assembly *assembly)
 {
     expr->Generate(assembly);
+    if (unaryOp->type == TokenType::BITWISE_AND) return;
     if (expr->GetType()->GetTypeKind() == TypeKind::BUILTIN)
         switch (reinterpret_cast<SymBuiltInType *>(expr->GetType()->GetUnqualified())->GetBuiltInTypeKind())
         {
@@ -653,12 +739,14 @@ void UnaryOpNode::pointerGenerate(Asm::Assembly *assembly)
     using namespace Asm;
     auto &s = assembly->TextSection();
     auto ptrType = reinterpret_cast<SymPointer *>(expr->GetType()->GetUnqualified());
-    if (ptrType->GetTarget()->GetTypeKind() == TypeKind::BUILTIN)
+    auto target = ptrType->GetTarget();
+    if (target->GetTypeKind() == TypeKind::BUILTIN || target->GetTypeKind() == TypeKind::POINTER)
     {
         s.AddCommand(CommandName::POP, Register::EBX, CommandSuffix::L);
         s.AddCommand(CommandName::MOV, MakeAddress(Register::EBX), Register::EAX, CommandSuffix::L);
         s.AddCommand(CommandName::PUSH, Register::EAX, CommandSuffix::L);
     }
+
 }
 
 void SizeofExprNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -966,6 +1054,11 @@ void DeclaratorNode::Generate(Asm::Assembly *assembly)
     // TODO
 }
 
+DeclaratorNode::DeclaratorNode()
+{
+    type = nullptr;
+}
+
 void ArgumentExprListNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     if (list.empty()) return;
@@ -1000,6 +1093,15 @@ void ArgumentExprListNode::Generate(Asm::Assembly *assembly)
         (*it)->Generate(assembly);
 }
 
+int32_t ArgumentExprListNode::GetArgumentsSize()
+{
+    if (!this) return 0;
+    int32_t res = 0;
+    for (auto expr: list)
+        res += expr->GetType()->Size();
+    return res;
+}
+
 void FunctionCallNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -1024,7 +1126,13 @@ ExprNode *FunctionCallNode::Eval(Evaluator *evaluator)
 
 void FunctionCallNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    auto &s = assembly->TextSection();
+    auto t = reinterpret_cast<SymFunction *>(function->GetType()->GetUnqualified());
+    if (arguments) arguments->Generate(assembly);
+    s.AddCommand(Asm::CommandName::CALL, t->GetLabel());
+    if (t->GetArgumentsStorageSize());
+        s.AddCommand(Asm::CommandName::ADD, new IntConstNode(t->GetArgumentsStorageSize()),
+                                                         Asm::Register::ESP, Asm::CommandSuffix::L);
 }
 
 void DeclarationSpecifiersNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1785,8 +1893,9 @@ void FunctionDefinitionNode::Generate(Asm::Assembly *assembly)
     s.AddLabel(l);
     s.AddCommand(Asm::CommandName::PUSH, Asm::Register::EBP, Asm::CommandSuffix::L);
     s.AddCommand(Asm::CommandName::MOV, Asm::Register::ESP, Asm::Register::EBP, Asm::CommandSuffix::L);
-    s.AddCommand(Asm::CommandName::SUB, new IntConstNode(t->GetAllocatedStorageSize()), Asm::Register::ESP,
-                 Asm::CommandSuffix::L);
+    if (t->GetLocalVariablesStorageSize())
+        s.AddCommand(Asm::CommandName::SUB, new IntConstNode(t->GetLocalVariablesStorageSize()), Asm::Register::ESP,
+                     Asm::CommandSuffix::L);
     body->Generate(assembly);
     s.AddCommand(Asm::CommandName::LEAVE);
     s.AddCommand(Asm::CommandName::RET);
@@ -1948,10 +2057,13 @@ ExprNode *PrintfNode::Eval(Evaluator *evaluator)
 
 void PrintfNode::Generate(Asm::Assembly *assembly)
 {
+    auto &s = assembly->TextSection();
     if (arguments) arguments->Generate(assembly);
     format->Generate(assembly);
-    assembly->TextSection().AddCommand(Asm::CommandName::PUSH, format->GetAddress(), true, Asm::CommandSuffix::L);
-    assembly->TextSection().AddCommand(Asm::CommandName::CALL, new Asm::AsmFunction("printf"));
+    s.AddCommand(Asm::CommandName::PUSH, format->GetAddress(), true, Asm::CommandSuffix::L);
+    s.AddCommand(Asm::CommandName::CALL, new Asm::AsmFunction("printf"));
+    auto size = 4 + arguments->GetArgumentsSize();
+    s.AddCommand(Asm::CommandName::ADD, new IntConstNode(size), Asm::Register::ESP, Asm::CommandSuffix::L);
 }
 
 IntConstNode *ConstNode::IntZero()
