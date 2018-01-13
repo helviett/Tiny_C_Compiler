@@ -149,12 +149,15 @@ public:
     int32_t AllocateVariable(int32_t varSize);
     int32_t GetLocalVariablesStorageSize() const;
     int32_t GetArgumentsStorageSize() const;
+    Asm::AsmLabel *GetReturnLabel() const;
+    void SetReturnLabel(Asm::AsmLabel *label);
 private:
     SymType *returnType{nullptr};
     SymbolTable *params{nullptr};
     bool defined{false};
     std::vector<SymVariable *> orderedParams;
-    Asm::AsmFunction *label;
+    Asm::AsmFunction *functionLabel;
+    Asm::AsmLabel *returnLabel;
     int32_t localVariablesStorageSize{0};
     int32_t argumentsStorageSize{0};
 };

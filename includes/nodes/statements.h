@@ -86,14 +86,17 @@ public:
     void Generate(Asm::Assembly *assembly) override;
 };
 
+class SymFunction;
+
 class ReturnStatementNode: public JumpStatementNode
 {
 public:
-    explicit ReturnStatementNode(ExprNode *expr);
+    explicit ReturnStatementNode(ExprNode *expr, SymFunction *function);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Generate(Asm::Assembly *assembly) override;
 private:
     ExprNode *expr;
+    SymFunction *function;
 };
 
 class IterationStatementNode: public StatementNode

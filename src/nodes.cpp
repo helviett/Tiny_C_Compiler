@@ -982,11 +982,20 @@ void ReturnStatementNode::Print(std::ostream &os, std::string indent, bool isTai
     if (expr) expr->Print(os, indent, true);
 }
 
-ReturnStatementNode::ReturnStatementNode(ExprNode *expr) : expr(expr) {}
+ReturnStatementNode::ReturnStatementNode(ExprNode *expr, SymFunction *function) : expr(expr), function(function) {}
 
 void ReturnStatementNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    if (!expr) return;
+    expr->Generate(assembly);
+    auto etype = expr->GetType()->GetUnqualified();
+    if (etype->GetTypeKind() == TypeKind::POINTER || etype->GetTypeKind() == TypeKind::BUILTIN)
+    {
+        s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+    }
+    s.AddCommand(CommandName::JMP, function->GetReturnLabel());
 }
 
 void WhileStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1063,7 +1072,7 @@ void ForStatementNode::Generate(Asm::Assembly *assembly)
 void LabelStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
-    os << "label" << std::endl;
+    os << "functionLabel" << std::endl;
     indent.append(isTail ? "    " : "│   ");
     labelName->Print(os, indent, false);
     statement->Print(os, indent, true);
@@ -1943,16 +1952,19 @@ FunctionDefinitionNode::FunctionDefinitionNode(DeclaratorNode *declarator, Compo
 void FunctionDefinitionNode::Generate(Asm::Assembly *assembly)
 {
     auto t = reinterpret_cast<SymFunction *>(GetType());
-    auto l = assembly->MakeFunctionLabel(t->GetName());
-    t->SetLabel(l);
+    auto fl = assembly->MakeFunctionLabel(t->GetName());
+    auto rl = assembly->NextLabel();
+    t->SetLabel(fl);
+    t->SetReturnLabel(rl);
     Asm::Section &s = assembly->TextSection();
-    s.AddLabel(l);
+    s.AddLabel(fl);
     s.AddCommand(Asm::CommandName::PUSH, Asm::Register::EBP, Asm::CommandSuffix::L);
     s.AddCommand(Asm::CommandName::MOV, Asm::Register::ESP, Asm::Register::EBP, Asm::CommandSuffix::L);
     if (t->GetLocalVariablesStorageSize())
         s.AddCommand(Asm::CommandName::SUB, new IntConstNode(t->GetLocalVariablesStorageSize()), Asm::Register::ESP,
                      Asm::CommandSuffix::L);
     body->Generate(assembly);
+    s.AddLabel(rl);
     s.AddCommand(Asm::CommandName::LEAVE);
     s.AddCommand(Asm::CommandName::RET);
 }

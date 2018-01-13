@@ -16,7 +16,7 @@
                 │           │   └── INT32
                 │           └── Initializer 
                 │               └── 10
-                ├── label
+                ├── functionLabel
                 │   ├── label1
                 │   └── ;
                 │       └── +=
@@ -24,7 +24,7 @@
                 │           └── +
                 │               ├── a
                 │               └── 10
-                └── label
+                └── functionLabel
                     ├── label2
                     └── {}
                         └── BlockItemList

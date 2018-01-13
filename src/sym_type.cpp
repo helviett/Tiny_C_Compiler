@@ -272,12 +272,12 @@ void SymFunction::SetOrderedParams(std::vector<SymVariable *> &orderedParams)
 
 void SymFunction::SetLabel(Asm::AsmFunction *label)
 {
-    this->label = label;
+    this->functionLabel = label;
 }
 
 Asm::AsmFunction *SymFunction::GetLabel() const
 {
-    return label;
+    return functionLabel;
 }
 
 SymType *SymFunction::GetUnqualified()
@@ -304,6 +304,16 @@ int32_t SymFunction::GetLocalVariablesStorageSize() const
 int32_t SymFunction::GetArgumentsStorageSize() const
 {
     return argumentsStorageSize;
+}
+
+Asm::AsmLabel *SymFunction::GetReturnLabel() const
+{
+    return returnLabel;
+}
+
+void SymFunction::SetReturnLabel(Asm::AsmLabel *label)
+{
+    returnLabel = label;
 }
 
 SymAlias::SymAlias(std::string name, SymType *type): type(type)

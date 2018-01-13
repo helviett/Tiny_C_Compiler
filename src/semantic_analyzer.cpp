@@ -661,7 +661,7 @@ ReturnStatementNode *SemanticAnalyzer::BuildReturnStatementNode(std::shared_ptr<
     auto utype = (SymFunction *)unqualify(type);
     if (expr && isVoidType(utype->GetReturnType())) throw VoidFunctionBadReturnError(statement);
     if (expr) Convert(&expr, utype->GetReturnType());
-    return new ReturnStatementNode(expr);
+    return new ReturnStatementNode(expr, type);
 }
 
 bool SemanticAnalyzer::isVoidType(SymType *type)
