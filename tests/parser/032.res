@@ -1,1 +1,1 @@
-(12, 28): Invalid operands for '+'
+(13, 12): Required modifiable lvalue

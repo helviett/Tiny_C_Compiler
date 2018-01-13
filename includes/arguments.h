@@ -22,7 +22,7 @@ namespace Asm
 
     enum class Register
     {
-        EAX, EBX, ECX, EDX, EBP, ESP, ST0, BL, CL
+        EAX, EBX, ECX, EDX, EBP, ESP, ST0, BL, CL, ESI, EDI
     };
 
     static std::unordered_map<Register, std::string> RegisterToString =
@@ -31,7 +31,8 @@ namespace Asm
             {Register::ECX, "ecx"}, {Register::EDX, "edx"},
             {Register::EBP, "ebp"}, {Register::ESP, "esp"},
             {Register::ST0, "st(0)"}, {Register::BL, "bl"},
-            {Register::CL, "cl"},
+            {Register::CL, "cl"}, {Register::EDI, "edi"},
+            {Register::ESI, "esi"},
     };
 
     class ArgumentRegister: public Argument
@@ -54,6 +55,8 @@ namespace Asm
             {Register::ST0, new ArgumentRegister(Register::ST0)},
             {Register::BL, new ArgumentRegister(Register::BL)},
             {Register::CL, new ArgumentRegister(Register::CL)},
+            {Register::EDI, new ArgumentRegister(Register::EDI)},
+            {Register::ESI, new ArgumentRegister(Register::ESI)},
     };
 
     class ArgumentAddress: public Argument
@@ -63,6 +66,7 @@ namespace Asm
         explicit ArgumentAddress(Register base);
         ArgumentAddress(int32_t address, Argument *base);
         ArgumentAddress(int32_t address, Register base);
+        ArgumentAddress(int32_t address, Register base, Register index, int32_t multiplier);
         void Print(std::ostream &os) override;
     private:
         int32_t address{0}, multiplier{0};

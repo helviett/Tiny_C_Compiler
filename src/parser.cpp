@@ -718,6 +718,9 @@ ParameterDeclarationNode *Parser::parseParameterDeclaration()
     auto declarator = new DeclaratorNode();
     declarator->SetType(TypeBuilder::Build(parseDeclarationSpecifiers()));
     parseDeclarator(DeclaratorKind::ABSTRACT_OR_NORMAL, declarator);
+    auto type = declarator->GetType()->GetUnqualified();
+    if (type->GetTypeKind() == TypeKind::ARRAY)
+        declarator->SetType(new SymPointer(reinterpret_cast<SymArray *>(type)->GetValueType()));
     return new ParameterDeclarationNode(declarator);
 }
 

@@ -64,6 +64,7 @@ private:
     bool isVoidPointer(SymType *type);
     bool isIntegerType(SymType *type);
     void performLvalueConversion(ExprNode *expr);
+    void performArrayConversion(ExprNode *expr);
     bool isUnsignedIntegerType(SymType *type);
     bool isScalarType(SymType *type);
     bool isModifiableLvalue(ExprNode *expr);

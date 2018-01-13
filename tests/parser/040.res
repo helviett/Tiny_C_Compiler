@@ -38,8 +38,7 @@
                         │           └── Qualified 0
                         │               └── INT8
                         └── a
-                            └── Array of
-                                ├── Qualified 0
-                                │   └── INT32
-                                └── 50
+                            └── Pointer to
+                                └── Qualified 0
+                                    └── INT32
 

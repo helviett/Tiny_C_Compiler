@@ -167,7 +167,11 @@ SymType *SymArray::GetUnqualified()
 
 int32_t SymArray::Size()
 {
-    return 0; // ??
+    auto realSize = reinterpret_cast<IntConstNode *>(size)->GetValue();
+    auto vsize = valueType->Size();
+    vsize = vsize < 4 ? 4 : vsize;
+    if (realSize < 0) throw "";
+    return vsize * realSize;
 }
 
 SymFunction::SymFunction(SymType *returnType): SymType(), returnType(returnType)

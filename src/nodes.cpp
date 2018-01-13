@@ -421,9 +421,10 @@ std::shared_ptr<Token> BinOpNode::GetOperation() const
 void BinOpNode::Generate(Asm::Assembly *assembly)
 {
     left->Generate(assembly);
+    auto ltk = left->GetType()->GetTypeKind();
     if (op->type == TokenType::LOGIC_AND || op->type == TokenType::LOGIC_OR)
         logicalAndOrGenerate(assembly);
-    else if (left->GetType()->GetTypeKind() == TypeKind::BUILTIN)
+    else if (ltk == TypeKind::BUILTIN)
     {
         switch (reinterpret_cast<SymBuiltInType *>(left->GetType())->GetBuiltInTypeKind())
         {
@@ -435,13 +436,14 @@ void BinOpNode::Generate(Asm::Assembly *assembly)
                 break;
         }
     }
+    else if (ltk == TypeKind::POINTER)
+        pointerGenerate(assembly);
 }
 
 void BinOpNode::int32Generate(Asm::Assembly *assembly)
 {
     using namespace Asm;
     Section &section = assembly->TextSection();
-    AsmLabel *l1, *l2;
     static std::unordered_map<TokenType, CommandName> optoasm =
     {
             {TokenType::PLUS, CommandName::ADD}, {TokenType::MINUS, CommandName::SUB},
@@ -515,6 +517,8 @@ void BinOpNode::logicalAndOrGenerate(Asm::Assembly *assembly)
     auto l1 = assembly->NextLabel(), l2 = assembly->NextLabel();
     auto ltype = left->GetType(), rtype = right->GetType();
     auto jmpCommand = op->type == TokenType::LOGIC_AND ? Asm::CommandName::JE : Asm::CommandName::JNE;
+    if (ltype->GetTypeKind() == TypeKind::POINTER) ltype = new SymBuiltInType(BuiltInTypeKind::INT32);
+    if (rtype->GetTypeKind() == TypeKind::POINTER) rtype = new SymBuiltInType(BuiltInTypeKind::INT32);
     static std::unordered_map<BuiltInTypeKind, std::function<void()>> bttoasm =
     {
             {BuiltInTypeKind::INT32,
@@ -556,16 +560,42 @@ bool BinOpNode::isRelop(TokenType type)
             type == TokenType::RELOP_GT || type == TokenType::RELOP_EQ || type == TokenType::RELOP_LT;
 }
 
+void BinOpNode::pointerGenerate(Asm::Assembly *assembly)
+{
+    using namespace Asm;
+    Section &section = assembly->TextSection();
+    right->Generate(assembly);
+    auto rtype = right->GetType();
+    section.AddCommand(CommandName::POP, Register::EBX, CommandSuffix::L);
+    section.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+    auto target = reinterpret_cast<SymPointer *>(type)->GetTarget();
+    if (op->type == TokenType::PLUS || (op->type == TokenType::MINUS && rtype->GetTypeKind() != TypeKind::POINTER))
+    {
+        if (op->type == TokenType::MINUS) section.AddCommand(CommandName::NEG, Register::EBX, CommandSuffix::L);
+        section.AddCommand(CommandName::LEA, MakeAddress(0, Register::EAX, Register::EBX, target->Size()),
+                           Register::EAX, CommandSuffix::L);
+    }
+    else
+    {
+        auto rt = reinterpret_cast<SymPointer *>(right->GetType())->GetTarget();
+        section.AddCommand(CommandName::SUB, Register::EBX, Register::EAX, CommandSuffix::L);
+        section.AddCommand(CommandName::MOV, new IntConstNode(rt->Size()), Register::EBX, CommandSuffix::L);
+        section.AddCommand(CommandName::XOR, Register::EDX, Register::EDX, CommandSuffix::L);
+        section.AddCommand(CommandName::IDIV, Register::EBX, CommandSuffix::L);
+    }
+    section.AddCommand(CommandName::PUSH, Register::EAX, CommandSuffix::L);
+}
+
 void ArrayAccessNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << "[]" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    left->Print(os, indent, false);
-    inBrackets->Print(os, indent, true);
+    array->Print(os, indent, false);
+    index->Print(os, indent, true);
 }
 
-ArrayAccessNode::ArrayAccessNode(ExprNode *left, ExprNode *inBrackets) : left(left), inBrackets(inBrackets) {}
+ArrayAccessNode::ArrayAccessNode(ExprNode *left, ExprNode *inBrackets) : array(left), index(inBrackets) {}
 
 ExprNode *ArrayAccessNode::Eval(Evaluator *evaluator)
 {
@@ -574,7 +604,20 @@ ExprNode *ArrayAccessNode::Eval(Evaluator *evaluator)
 
 void ArrayAccessNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    array->Generate(assembly);
+    index->Generate(assembly);
+    s.AddCommand(CommandName::POP, Register::ESI, CommandSuffix ::L);
+    s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+    s.AddCommand(CommandName::LEA, MakeAddress(0, Register::EAX, Register::ESI, type->Size()), Register::EBX, CommandSuffix::L);
+    if (category == ValueCategory::LVAVLUE)
+        s.AddCommand(CommandName::PUSH, Register::EBX, CommandSuffix::L);
+    else
+    {
+        if (type->GetTypeKind() == TypeKind::BUILTIN)
+            s.AddCommand(CommandName::PUSH, MakeAddress(Register::EBX), CommandSuffix::L);
+    }
 }
 
 void TernaryOperatorNode::Print(std::ostream &os, std::string indent, bool isTail)

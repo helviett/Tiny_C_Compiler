@@ -90,7 +90,7 @@ public:
     ExprNode *Eval(Evaluator *evaluator) override;
     void Generate(Asm::Assembly *assembly) override;
 private:
-    ExprNode *left, *inBrackets;
+    ExprNode *array, *index;
 };
 
 class ArgumentExprListNode: public Node
@@ -208,6 +208,7 @@ private:
     void int32Generate(Asm::Assembly *assembly);
     void floatGenerate(Asm::Assembly *assembly);
     void logicalAndOrGenerate(Asm::Assembly *assembly);
+    void pointerGenerate(Asm::Assembly *assembly);
     bool isRelop(TokenType tokenType);
     ExprNode *left, *right;
     std::shared_ptr<Token> op;

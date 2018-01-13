@@ -352,8 +352,8 @@ bool SemanticAnalyzer::isScalarType(SymType *type)
 BinOpNode *SemanticAnalyzer::BuildBinOpNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> binOp)
 {
     BinOpNode *res = nullptr;
-    performLvalueConversion(left);
-    performLvalueConversion(right);
+    performLvalueConversion(left); performArrayConversion(left);
+    performLvalueConversion(right); performArrayConversion(right);
     auto ltype = left->GetType(), rtype = right->GetType();
     switch (binOp->type)
     {
@@ -448,7 +448,7 @@ SemanticAnalyzer::BuildTernaryOperatorNode(ExprNode *condition, ExprNode *iftrue
 AssignmentNode *SemanticAnalyzer::BuildAssignmentNode(ExprNode *left, ExprNode *right, std::shared_ptr<Token> assignmentOp)
 {
     if (!isModifiableLvalue(left)) throw RequiredModifiableLvalueError(left);
-    performLvalueConversion(right);
+    performLvalueConversion(right); performArrayConversion(right);
     auto ltype = left->GetType(), rtype = right->GetType();
     if (assignmentOp->type != TokenType::ASSIGNMENT)
         right = BuildBinOpNode(left, right, extractArithmeticOperationFromAssignmentBy(assignmentOp));  // TODO redo
@@ -541,6 +541,16 @@ void SemanticAnalyzer::Convert(ExprNode **expr, SymType *type)
     {
         *expr = new TypeCastNode(type, *expr);
         return;
+    }
+    if (etype->GetTypeKind() == TypeKind::ARRAY && isPointerType(type))
+    {
+        auto vt = reinterpret_cast<SymArray *>(etype->GetUnqualified())->GetValueType();
+        auto tt = reinterpret_cast<SymPointer *>(type->GetUnqualified())->GetTarget();
+        if (tt->Equal(vt))
+        {
+            performArrayConversion(*expr);
+            return;
+        }
     }
     throw BadTypeConversionError(*expr, type);
 }
@@ -801,5 +811,17 @@ PrintfNode *SemanticAnalyzer::BuildPrintfNode(StringLiteralNode *format, Argumen
                 arg = new TypeCastNode(new SymBuiltInType(BuiltInTypeKind::DOUBLE), arg);
         }
     return new PrintfNode(format, arguments);
+}
+
+void SemanticAnalyzer::performArrayConversion(ExprNode *expr)
+{
+    auto qt = expr->GetType();
+    auto etype = qt->GetUnqualified();
+    if (etype->GetTypeKind() == TypeKind::ARRAY)
+        if (!etype->IsQualified())
+            expr->SetType(new SymPointer(reinterpret_cast<SymArray *>(etype)->GetValueType()));
+        else
+            expr->SetType(new SymQualifiedType(new SymPointer(reinterpret_cast<SymArray *>(etype)->GetValueType()),
+                                               reinterpret_cast<SymQualifiedType *>(qt)->GetQualifiers()));
 }
 

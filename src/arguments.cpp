@@ -35,7 +35,13 @@ void Asm::ArgumentAddress::Print(std::ostream &os)
 {
     if (address) os << address;
     os << "(";
-    base->Print(os);
+    if (base) base->Print(os);
+    if (index)
+    {
+        os << ", ";
+        index->Print(os);
+        if (multiplier) os << ", " << multiplier;
+    }
     os << ") ";
 }
 
@@ -46,6 +52,9 @@ Asm::ArgumentAddress::ArgumentAddress(Asm::Argument *base): base(base) {}
 Asm::ArgumentAddress::ArgumentAddress(int32_t address, Asm::Register base): address(address), base(Asm::Registers[base]) {}
 
 Asm::ArgumentAddress::ArgumentAddress(Asm::Register base): base(Asm::Registers[base]) {}
+
+Asm::ArgumentAddress::ArgumentAddress(int32_t address, Asm::Register base, Asm::Register index, int32_t multiplier):
+        address(address), base(Registers[base]), index(Registers[index]), multiplier(multiplier) {}
 
 Asm::ArgumentLabel::ArgumentLabel(Asm::AsmLabel *label, bool asAddress): label(label), asAddress(asAddress) {}
 

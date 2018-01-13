@@ -67,7 +67,7 @@
         │       │   └── VOID
         │       └── Params
         │           ├── list
-        │           │   └── Array of
+        │           │   └── Pointer to
         │           │       └── Qualified 0
         │           │           └── INT32
         │           ├── m
