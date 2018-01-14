@@ -13,6 +13,7 @@ class StatementNode: public Node
 public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
     void Generate(Asm::Assembly *assembly) override = 0;
+    void GenerateConditionCheck(Asm::Assembly *assembly, ExprNode *condition);
 };
 
 class ExprStatmentNode: StatementNode
@@ -40,8 +41,8 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Generate(Asm::Assembly *assembly) override;
 protected:
-    ExprNode *expr;
-    StatementNode *then;
+    ExprNode *condition;
+    StatementNode *body;
 };
 
 class IfElseStatementNode: public IfStatementNode
@@ -51,7 +52,7 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Generate(Asm::Assembly *assembly) override;
 private:
-    StatementNode *_else;
+    StatementNode *elseBody;
 };
 
 class JumpStatementNode: public StatementNode
@@ -108,12 +109,34 @@ public:
     void Generate(Asm::Assembly *assembly) override = 0;
     Asm::AsmLabel *ContinueLabel() const;
     Asm::AsmLabel *BreakLabel() const;
-    void GenerateConditionCheck(Asm::Assembly *assembly);
 protected:
     StatementNode *body;
     Asm::AsmLabel *continueLabel, *breakLabel;
     ExprNode *condition;
 };
+
+//void GenerateConditionCheck(Asm::Assembly *assembly, ExprNode *condition)
+//{
+//using namespace Asm;
+//auto &s = assembly->TextSection();
+//auto ctype = condition->GetType()->GetUnqualified();
+//auto btk = ctype->GetTypeKind() == TypeKind::POINTER ? BuiltInTypeKind::INT32 :
+//           reinterpret_cast<SymBuiltInType *>(ctype)->GetBuiltInTypeKind();
+//switch (btk)
+//{
+//case BuiltInTypeKind::INT32:
+//        s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+//s.AddCommand(CommandName::CMP, ConstNode::IntZero(), Register::EAX);
+//break;
+//case BuiltInTypeKind::FLOAT:
+//        s.AddCommand(CommandName::FLD, MakeAddress(Register::ESP), CommandSuffix::S);
+//s.AddCommand(CommandName::FLDZ);
+//s.AddCommand(CommandName::FCOMIP);
+//s.AddCommand(CommandName::FSTP, Register::ST0);
+//s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+//break;
+//}
+//}
 
 class WhileStatementNode: public IterationStatementNode
 {
@@ -121,7 +144,6 @@ public:
     WhileStatementNode(ExprNode *condition, StatementNode *body);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Generate(Asm::Assembly *assembly) override;
-private:
 };
 
 class DoWhileStatementNode: public IterationStatementNode

@@ -181,7 +181,7 @@ void PostfixIncrementNode::Generate(Asm::Assembly *assembly)
     expr->Generate(assembly);
     if (type->GetTypeKind() == TypeKind::BUILTIN)
     {
-        switch (reinterpret_cast<SymBuiltInType *>(type)->GetBuiltInTypeKind())
+        switch (reinterpret_cast<SymBuiltInType *>(type->GetUnqualified())->GetBuiltInTypeKind())
         {
             case BuiltInTypeKind::INT32:
                 s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
@@ -358,7 +358,7 @@ void PrefixDecrementNode::Generate(Asm::Assembly *assembly)
     expr->Generate(assembly);
     if (type->GetTypeKind() == TypeKind::BUILTIN)
     {
-        switch (reinterpret_cast<SymBuiltInType *>(type)->GetBuiltInTypeKind())
+        switch (reinterpret_cast<SymBuiltInType *>(type->GetUnqualified())->GetBuiltInTypeKind())
         {
             case BuiltInTypeKind::INT32:
                 s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
@@ -957,33 +957,51 @@ void IfStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << indent << (isTail ? "└── " : "├── ");
     os << "if" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    expr->Print(os, indent, false);
-    then->Print(os, indent, true);
+    condition->Print(os, indent, false);
+    body->Print(os, indent, true);
 }
 
 void IfStatementNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    auto outLabel = assembly->NextLabel();
+    condition->Generate(assembly);
+    StatementNode::GenerateConditionCheck(assembly, condition);
+    s.AddCommand(CommandName::JE, outLabel);
+    body->Generate(assembly);
+    s.AddLabel(outLabel);
 }
 
-IfStatementNode::IfStatementNode(ExprNode *expr, StatementNode *then) : expr(expr), then(then) {}
+IfStatementNode::IfStatementNode(ExprNode *expr, StatementNode *then) : condition(expr), body(then) {}
 
 void IfElseStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
     os << "if else" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    expr->Print(os, indent, false);
-    then->Print(os, indent, false);
-    _else->Print(os, indent, true);
+    condition->Print(os, indent, false);
+    body->Print(os, indent, false);
+    elseBody->Print(os, indent, true);
 }
 
 IfElseStatementNode::IfElseStatementNode(ExprNode *expr, StatementNode *then, StatementNode *_else) :
-        IfStatementNode(expr, then), _else(_else) {}
+        IfStatementNode(expr, then), elseBody(_else) {}
 
 void IfElseStatementNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    auto outLabel = assembly->NextLabel();
+    auto elseLabel = assembly->NextLabel();
+    condition->Generate(assembly);
+    StatementNode::GenerateConditionCheck(assembly, condition);
+    s.AddCommand(CommandName::JE, elseLabel);
+    body->Generate(assembly);
+    s.AddCommand(CommandName::JMP, outLabel);
+    s.AddLabel(elseLabel);
+    elseBody->Generate(assembly);
+    s.AddLabel(outLabel);
 }
 
 void GotoStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1069,7 +1087,7 @@ void WhileStatementNode::Generate(Asm::Assembly *assembly)
     continueLabel = assembly->NextLabel(), breakLabel = assembly->NextLabel();
     s.AddLabel(continueLabel);
     condition->Generate(assembly);
-    IterationStatementNode::GenerateConditionCheck(assembly);
+    StatementNode::GenerateConditionCheck(assembly, condition);
     s.AddCommand(CommandName::JE, breakLabel);
     if (body) body->Generate(assembly);
     s.AddCommand(CommandName::JMP, continueLabel);
@@ -1106,7 +1124,7 @@ void DoWhileStatementNode::Generate(Asm::Assembly *assembly)
     body->Generate(assembly);
     s.AddLabel(continueLabel);
     condition->Generate(assembly);
-    IterationStatementNode::GenerateConditionCheck(assembly);
+    StatementNode::GenerateConditionCheck(assembly, condition);
     s.AddCommand(CommandName::JNE, begining);
     s.AddLabel(breakLabel);
 }
@@ -1143,18 +1161,25 @@ void ForStatementNode::Generate(Asm::Assembly *assembly)
 {
     using namespace Asm;
     auto &s = assembly->TextSection();
-    if (init) init->Generate(assembly);
+    if (init)
+    {
+        init->Generate(assembly);
+        ExprStatmentNode::CleanStackAfterExpression(init, assembly);
+    }
     continueLabel = assembly->NextLabel(), breakLabel = assembly->NextLabel();
     s.AddLabel(continueLabel);
     if (condition)
     {
         condition->Generate(assembly);
-        IterationStatementNode::GenerateConditionCheck(assembly);
+        StatementNode::GenerateConditionCheck(assembly, condition);
         s.AddCommand(CommandName::JE, breakLabel);
     }
     body->Generate(assembly);
     if (iteration)
+    {
         iteration->Generate(assembly);
+        ExprStatmentNode::CleanStackAfterExpression(iteration, assembly);
+    }
     s.AddCommand(CommandName::JMP, continueLabel);
     s.AddLabel(breakLabel);
 }
@@ -2149,29 +2174,6 @@ Asm::AsmLabel *IterationStatementNode::BreakLabel() const
     return breakLabel;
 }
 
-void IterationStatementNode::GenerateConditionCheck(Asm::Assembly *assembly)
-{
-    using namespace Asm;
-    auto &s = assembly->TextSection();
-    auto ctype = condition->GetType()->GetUnqualified();
-    auto btk = ctype->GetTypeKind() == TypeKind::POINTER ? BuiltInTypeKind::INT32 :
-               reinterpret_cast<SymBuiltInType *>(ctype)->GetBuiltInTypeKind();
-    switch (btk)
-    {
-        case BuiltInTypeKind::INT32:
-            s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
-            s.AddCommand(CommandName::CMP, ConstNode::IntZero(), Register::EAX);
-            break;
-        case BuiltInTypeKind::FLOAT:
-            s.AddCommand(CommandName::FLD, MakeAddress(Register::ESP), CommandSuffix::S);
-            s.AddCommand(CommandName::FLDZ);
-            s.AddCommand(CommandName::FCOMIP);
-            s.AddCommand(CommandName::FSTP, Register::ST0);
-            s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
-            break;
-    }
-}
-
 TypedefIdentifierNode::TypedefIdentifierNode(SymAlias *alias): alias(alias)
 {
     this->kind = SpecifierKind::TYPEDEF;
@@ -2283,4 +2285,27 @@ FloatConstNode *ConstNode::FloatOne()
 {
     static auto one = new FloatConstNode(0.1f);
     return one;
+}
+
+void StatementNode::GenerateConditionCheck(Asm::Assembly *assembly, ExprNode *condition)
+{
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    auto ctype = condition->GetType()->GetUnqualified();
+    auto btk = ctype->GetTypeKind() == TypeKind::POINTER ? BuiltInTypeKind::INT32 :
+               reinterpret_cast<SymBuiltInType *>(ctype)->GetBuiltInTypeKind();
+    switch (btk)
+    {
+        case BuiltInTypeKind::INT32:
+            s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+            s.AddCommand(CommandName::CMP, ConstNode::IntZero(), Register::EAX);
+            break;
+        case BuiltInTypeKind::FLOAT:
+            s.AddCommand(CommandName::FLD, MakeAddress(Register::ESP), CommandSuffix::S);
+            s.AddCommand(CommandName::FLDZ);
+            s.AddCommand(CommandName::FCOMIP);
+            s.AddCommand(CommandName::FSTP, Register::ST0);
+            s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+            break;
+    }
 }

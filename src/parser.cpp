@@ -432,12 +432,13 @@ SelectionStatementNode *Parser::parseSelectionStatement()
 {
     requireKeywordNext(Keyword::IF);
     requireNext(TokenType::LBRACKET);
-    auto expr = parseExpr();
+    auto condition = parseExpr();
+    sematicAnalyzer.CheckSelectionOrIterationStatementCondition(condition);
     requireNext(TokenType::RBRACKET);
-    auto then = parseStatement();
+    auto body = parseStatement();
     if (maybeKeywordNext(Keyword::ELSE))
-        return new IfElseStatementNode(expr, then, parseStatement());
-    return new IfStatementNode(expr, then);
+        return new IfElseStatementNode(condition, body, parseStatement());
+    return new IfStatementNode(condition, body);
 }
 
 //jump-statement ::= goto id ;
@@ -529,7 +530,7 @@ WhileStatementNode *Parser::parseWhileStatement()
     requireKeywordNext(Keyword::WHILE);
     requireNext(TokenType::LBRACKET);
     auto condition = parseExpr();
-    sematicAnalyzer.CheckLoopCondition(condition);
+    sematicAnalyzer.CheckSelectionOrIterationStatementCondition(condition);
     requireNext(TokenType::RBRACKET);
     auto res = new WhileStatementNode(condition, nullptr);
     sematicAnalyzer.ProcessLoop(res);
@@ -550,7 +551,7 @@ DoWhileStatementNode *Parser::parseDoWhileStatement()
     requireKeywordNext(Keyword::WHILE);
     requireNext(TokenType::LBRACKET);
     auto condition = parseExpr();
-    sematicAnalyzer.CheckLoopCondition(condition);
+    sematicAnalyzer.CheckSelectionOrIterationStatementCondition(condition);
     res->SetCondition(condition);
     requireNext(TokenType::RBRACKET);
     requireNext(TokenType::SEMICOLON);
