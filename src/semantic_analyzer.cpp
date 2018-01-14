@@ -825,3 +825,9 @@ void SemanticAnalyzer::performArrayConversion(ExprNode *expr)
                                                reinterpret_cast<SymQualifiedType *>(qt)->GetQualifiers()));
 }
 
+void SemanticAnalyzer::CheckLoopCondition(ExprNode *condition)
+{
+    performLvalueConversion(condition);
+    if (!isScalarType(condition->GetType())) throw RequiredScalarTypeError(condition, condition->GetType());
+}
+

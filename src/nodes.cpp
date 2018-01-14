@@ -225,7 +225,7 @@ void PostfixDecrementNode::Generate(Asm::Assembly *assembly)
     expr->Generate(assembly);
     if (type->GetTypeKind() == TypeKind::BUILTIN)
     {
-        switch (reinterpret_cast<SymBuiltInType *>(type)->GetBuiltInTypeKind())
+        switch (reinterpret_cast<SymBuiltInType *>(type->GetUnqualified())->GetBuiltInTypeKind())
         {
             case BuiltInTypeKind::INT32:
                 s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
@@ -314,7 +314,7 @@ void PrefixIncrementNode::Generate(Asm::Assembly *assembly)
     expr->Generate(assembly);
     if (type->GetTypeKind() == TypeKind::BUILTIN)
     {
-        switch (reinterpret_cast<SymBuiltInType *>(type)->GetBuiltInTypeKind())
+        switch (reinterpret_cast<SymBuiltInType *>(type->GetUnqualified())->GetBuiltInTypeKind())
         {
             case BuiltInTypeKind::INT32:
                 s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
@@ -426,7 +426,7 @@ void BinOpNode::Generate(Asm::Assembly *assembly)
         logicalAndOrGenerate(assembly);
     else if (ltk == TypeKind::BUILTIN)
     {
-        switch (reinterpret_cast<SymBuiltInType *>(left->GetType())->GetBuiltInTypeKind())
+        switch (reinterpret_cast<SymBuiltInType *>(left->GetType()->GetUnqualified())->GetBuiltInTypeKind())
         {
             case BuiltInTypeKind::INT32:
                 int32Generate(assembly);
@@ -675,6 +675,7 @@ void AssignmentNode::Generate(Asm::Assembly *assembly)
     s.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
     s.AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
     s.AddCommand(Asm::CommandName::MOV, Asm::Register::EAX, Asm::MakeAddress(Asm::Register::EBX), Asm::CommandSuffix::L);
+    s.AddCommand(Asm::CommandName::PUSH, Asm::MakeAddress(Asm::Register::EBX), Asm::CommandSuffix::L);
 }
 
 void TypeCastNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -850,11 +851,12 @@ void CommaSeparatedExprs::Print(std::ostream &os, std::string indent, bool isTai
     os << indent << (isTail ? "└── " : "├── ");
     os << "," << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    left->Print(os, indent, false);
-    right->Print(os, indent, true);
+    auto it = expressions.begin();
+    if (expressions.size() > 1)
+        for (; it != --expressions.end(); it++)
+            (*it)->Print(os, indent, false);
+    (*it)->Print(os, indent, true);
 }
-
-CommaSeparatedExprs::CommaSeparatedExprs(ExprNode *left, ExprNode *right) : left(left), right(right) {}
 
 ExprNode *CommaSeparatedExprs::Eval(Evaluator *evaluator)
 {
@@ -863,7 +865,29 @@ ExprNode *CommaSeparatedExprs::Eval(Evaluator *evaluator)
 
 void CommaSeparatedExprs::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    auto it = expressions.begin();
+    for (; it != --expressions.end(); it++)
+    {
+        (*it)->Generate(assembly);
+        ExprStatmentNode::CleanStackAfterExpression((*it), assembly);
+    }
+    expressions.back()->Generate(assembly);
+}
+
+void CommaSeparatedExprs::Add(ExprNode *expr)
+{
+    expressions.push_back(expr);
+    type = expr->GetType();
+}
+
+uint64_t CommaSeparatedExprs::Size()
+{
+    return expressions.size();
+}
+
+std::list<ExprNode *> &CommaSeparatedExprs::List()
+{
+    return expressions;
 }
 
 void PointerNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -900,7 +924,32 @@ ExprStatmentNode::ExprStatmentNode(ExprNode *expr) : expr(expr) {}
 
 void ExprStatmentNode::Generate(Asm::Assembly *assembly)
 {
-    expr->Generate(assembly);
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    if (expr)
+    {
+        expr->Generate(assembly);
+        auto etype = expr->GetType()->GetUnqualified();
+        if (etype->GetTypeKind() == TypeKind::POINTER || etype->GetTypeKind() == TypeKind::BUILTIN)
+        {
+            if (etype->GetTypeKind() == TypeKind::BUILTIN &&
+                    reinterpret_cast<SymBuiltInType *>(etype)->GetBuiltInTypeKind() != BuiltInTypeKind::VOID)
+                s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+        }
+    }
+}
+
+void ExprStatmentNode::CleanStackAfterExpression(ExprNode *expr, Asm::Assembly *assembly)
+{
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    auto etype = expr->GetType()->GetUnqualified();
+    if (etype->GetTypeKind() == TypeKind::POINTER || etype->GetTypeKind() == TypeKind::BUILTIN)
+    {
+        if (etype->GetTypeKind() == TypeKind::BUILTIN &&
+            reinterpret_cast<SymBuiltInType *>(etype)->GetBuiltInTypeKind() != BuiltInTypeKind::VOID)
+            s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+    }
 }
 
 void IfStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1007,14 +1056,24 @@ void WhileStatementNode::Print(std::ostream &os, std::string indent, bool isTail
     body->Print(os, indent, true);
 }
 
-WhileStatementNode::WhileStatementNode(ExprNode *condition, StatementNode *body): condition(condition)
+WhileStatementNode::WhileStatementNode(ExprNode *condition, StatementNode *body)
 {
+    this->condition = condition;
     this->body = body;
 }
 
 void WhileStatementNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    continueLabel = assembly->NextLabel(), breakLabel = assembly->NextLabel();
+    s.AddLabel(continueLabel);
+    condition->Generate(assembly);
+    IterationStatementNode::GenerateConditionCheck(assembly);
+    s.AddCommand(CommandName::JE, breakLabel);
+    if (body) body->Generate(assembly);
+    s.AddCommand(CommandName::JMP, continueLabel);
+    s.AddLabel(breakLabel);
 }
 
 void DoWhileStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1026,8 +1085,9 @@ void DoWhileStatementNode::Print(std::ostream &os, std::string indent, bool isTa
     condition->Print(os, indent, true);
 }
 
-DoWhileStatementNode::DoWhileStatementNode(ExprNode *condition, StatementNode *body): condition(condition)
+DoWhileStatementNode::DoWhileStatementNode(ExprNode *condition, StatementNode *body)
 {
+    this->condition = condition;
     this->body = body;
 }
 
@@ -1038,7 +1098,17 @@ void DoWhileStatementNode::SetCondition(ExprNode *condition)
 
 void DoWhileStatementNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    continueLabel = assembly->NextLabel(), breakLabel = assembly->NextLabel();
+    begining = assembly->NextLabel();
+    s.AddLabel(begining);
+    body->Generate(assembly);
+    s.AddLabel(continueLabel);
+    condition->Generate(assembly);
+    IterationStatementNode::GenerateConditionCheck(assembly);
+    s.AddCommand(CommandName::JNE, begining);
+    s.AddLabel(breakLabel);
 }
 
 void ForStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -1046,9 +1116,14 @@ void ForStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
     os << indent << (isTail ? "└── " : "├── ");
     os << "for" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    init->Print(os, indent, false);
-    condition->Print(os, indent, false);
-
+    if (init)
+        init->Print(os, indent, false);
+    else
+        os << indent << "├── " << std::endl;
+    if (condition)
+        condition->Print(os, indent, false);
+    else
+        os << indent << "├── " << std::endl;
     if (iteration)
         iteration->Print(os, indent, false);
     else
@@ -1057,15 +1132,31 @@ void ForStatementNode::Print(std::ostream &os, std::string indent, bool isTail)
 
 }
 
-ForStatementNode::ForStatementNode(ExprStatmentNode *init, ExprStatmentNode *condition, ExprNode *iteration,
-                                   StatementNode *body) : init(init), condition(condition), iteration(iteration)
+ForStatementNode::ForStatementNode(ExprNode *init, ExprNode *condition, ExprNode *iteration,
+                                   StatementNode *body) : init(init), iteration(iteration)
 {
+    this->condition = condition;
     this->body = body;
 }
 
 void ForStatementNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    if (init) init->Generate(assembly);
+    continueLabel = assembly->NextLabel(), breakLabel = assembly->NextLabel();
+    s.AddLabel(continueLabel);
+    if (condition)
+    {
+        condition->Generate(assembly);
+        IterationStatementNode::GenerateConditionCheck(assembly);
+        s.AddCommand(CommandName::JE, breakLabel);
+    }
+    body->Generate(assembly);
+    if (iteration)
+        iteration->Generate(assembly);
+    s.AddCommand(CommandName::JMP, continueLabel);
+    s.AddLabel(breakLabel);
 }
 
 
@@ -2048,6 +2139,39 @@ void IterationStatementNode::SetBody(StatementNode *body)
     this->body = body;
 }
 
+Asm::AsmLabel *IterationStatementNode::ContinueLabel() const
+{
+    return continueLabel;
+}
+
+Asm::AsmLabel *IterationStatementNode::BreakLabel() const
+{
+    return breakLabel;
+}
+
+void IterationStatementNode::GenerateConditionCheck(Asm::Assembly *assembly)
+{
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    auto ctype = condition->GetType()->GetUnqualified();
+    auto btk = ctype->GetTypeKind() == TypeKind::POINTER ? BuiltInTypeKind::INT32 :
+               reinterpret_cast<SymBuiltInType *>(ctype)->GetBuiltInTypeKind();
+    switch (btk)
+    {
+        case BuiltInTypeKind::INT32:
+            s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+            s.AddCommand(CommandName::CMP, ConstNode::IntZero(), Register::EAX);
+            break;
+        case BuiltInTypeKind::FLOAT:
+            s.AddCommand(CommandName::FLD, MakeAddress(Register::ESP), CommandSuffix::S);
+            s.AddCommand(CommandName::FLDZ);
+            s.AddCommand(CommandName::FCOMIP);
+            s.AddCommand(CommandName::FSTP, Register::ST0);
+            s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+            break;
+    }
+}
+
 TypedefIdentifierNode::TypedefIdentifierNode(SymAlias *alias): alias(alias)
 {
     this->kind = SpecifierKind::TYPEDEF;
@@ -2107,7 +2231,10 @@ void DesignatorNode::SetValue(InitializerNode *value)
 }
 
 PrintfNode::PrintfNode(StringLiteralNode *format, ArgumentExprListNode *arguments):
-        format(format), arguments(arguments) {}
+        format(format), arguments(arguments)
+{
+    type = new SymBuiltInType(BuiltInTypeKind::VOID);
+}
 
 void PrintfNode::Print(std::ostream &os, std::string indent, bool isTail)
 {

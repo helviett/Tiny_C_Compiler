@@ -315,8 +315,14 @@ ExprNode *Parser::parseAssignmentExpr()
 ExprNode *Parser::parseExpr()
 {
     ExprNode *ae = parseAssignmentExpr();
-    while (maybeNext(TokenType::COMMA))
-        ae = new CommaSeparatedExprs(ae, parseExpr());
+    if (maybe(TokenType::COMMA))
+    {
+        auto list = new CommaSeparatedExprs();
+        list->Add(ae);
+        while (maybeNext(TokenType::COMMA))
+            list->Add(parseExpr());
+        return list;
+    }
     return ae;
 }
 
@@ -492,9 +498,13 @@ IterationStatementNode *Parser::parseIterationStatement()
 ForStatementNode *Parser::parseForStatement()
 {
     requireKeywordNext(Keyword::FOR);
+    ExprNode *init = nullptr, *condition = nullptr;
     requireNext(TokenType::LBRACKET);
     ForStatementNode *res = nullptr;
-    auto init = parseExprStatement(), condition = parseExprStatement();
+    if (!maybe(TokenType::SEMICOLON)) init = parseExpr();
+    requireNext(TokenType::SEMICOLON);
+    if (!maybe(TokenType::SEMICOLON)) condition = parseExpr();
+    requireNext(TokenType::SEMICOLON);
     if (maybeNext(TokenType::RBRACKET))
     {
         res = new ForStatementNode(init, condition, nullptr, nullptr);
@@ -519,6 +529,7 @@ WhileStatementNode *Parser::parseWhileStatement()
     requireKeywordNext(Keyword::WHILE);
     requireNext(TokenType::LBRACKET);
     auto condition = parseExpr();
+    sematicAnalyzer.CheckLoopCondition(condition);
     requireNext(TokenType::RBRACKET);
     auto res = new WhileStatementNode(condition, nullptr);
     sematicAnalyzer.ProcessLoop(res);
@@ -535,9 +546,12 @@ DoWhileStatementNode *Parser::parseDoWhileStatement()
     auto res = new DoWhileStatementNode(nullptr, nullptr);
     sematicAnalyzer.ProcessLoop(res);
     res->SetBody(parseStatement());
+    sematicAnalyzer.FinishLastLoopProcessing();
     requireKeywordNext(Keyword::WHILE);
     requireNext(TokenType::LBRACKET);
-    res->SetCondition(parseExpr());
+    auto condition = parseExpr();
+    sematicAnalyzer.CheckLoopCondition(condition);
+    res->SetCondition(condition);
     requireNext(TokenType::RBRACKET);
     requireNext(TokenType::SEMICOLON);
     return res;

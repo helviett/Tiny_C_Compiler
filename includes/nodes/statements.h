@@ -21,6 +21,7 @@ public:
     explicit ExprStatmentNode(ExprNode *expr);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Generate(Asm::Assembly *assembly) override;
+    static void CleanStackAfterExpression(ExprNode *expr, Asm::Assembly *assembly);
 private:
     ExprNode *expr;
 };
@@ -105,8 +106,13 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override = 0;
     void SetBody(StatementNode *body);
     void Generate(Asm::Assembly *assembly) override = 0;
+    Asm::AsmLabel *ContinueLabel() const;
+    Asm::AsmLabel *BreakLabel() const;
+    void GenerateConditionCheck(Asm::Assembly *assembly);
 protected:
     StatementNode *body;
+    Asm::AsmLabel *continueLabel, *breakLabel;
+    ExprNode *condition;
 };
 
 class WhileStatementNode: public IterationStatementNode
@@ -116,7 +122,6 @@ public:
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Generate(Asm::Assembly *assembly) override;
 private:
-    ExprNode *condition{};
 };
 
 class DoWhileStatementNode: public IterationStatementNode
@@ -127,19 +132,18 @@ public:
     void SetCondition(ExprNode *condition);
     void Generate(Asm::Assembly *assembly) override;
 private:
-    ExprNode *condition;
+    Asm::AsmLabel *begining;
 };
 
 class ForStatementNode: public IterationStatementNode
 {
 public:
-    ForStatementNode(ExprStatmentNode *init, ExprStatmentNode *condition,
+    ForStatementNode(ExprNode *init, ExprNode *condition,
                      ExprNode *iteration, StatementNode *body);
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     void Generate(Asm::Assembly *assembly) override;
 private:
-    ExprStatmentNode *init, *condition;
-    ExprNode *iteration{};
+    ExprNode *iteration{}, *init;
 };
 
 class LabeledStatementNode: public StatementNode

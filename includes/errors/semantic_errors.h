@@ -118,6 +118,7 @@ class RequiredScalarTypeError: public SemanticError
 {
 public:
     explicit RequiredScalarTypeError(std::shared_ptr<Token> token, SymType *got);
+    explicit RequiredScalarTypeError(ExprNode *expr, SymType *got);
     const char *what() const throw() override;
 };
 

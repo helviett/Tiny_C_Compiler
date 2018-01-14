@@ -240,12 +240,15 @@ private:
 class CommaSeparatedExprs: public ExprNode
 {
 public:
-    CommaSeparatedExprs(ExprNode *left, ExprNode *right);
+    CommaSeparatedExprs() = default;
     void Print(std::ostream &os, std::string ident, bool isTail) override;
     ExprNode *Eval(Evaluator *evaluator) override;
     void Generate(Asm::Assembly *assembly) override;
+    void Add(ExprNode *expr);
+    uint64_t Size();
+    std::list<ExprNode *> &List();
 private:
-    ExprNode *left, *right;
+    std::list<ExprNode *> expressions;
 };
 
 class SymVariable;

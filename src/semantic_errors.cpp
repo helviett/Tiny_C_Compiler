@@ -172,6 +172,13 @@ RequiredScalarTypeError::RequiredScalarTypeError(std::shared_ptr<Token> token, S
           ") Requaired scalar type in '" + token->stringValue + "'.";
 }
 
+RequiredScalarTypeError::RequiredScalarTypeError(ExprNode *expr, SymType *got)
+{
+    auto pos = expr->GetPosition();
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
+          ") Requaired scalar type.";
+}
+
 const char *BadTypeConversionError::what() const throw()
 {
     return msg.c_str();
