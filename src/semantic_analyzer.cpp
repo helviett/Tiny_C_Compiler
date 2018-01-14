@@ -219,19 +219,18 @@ ArrayAccessNode *SemanticAnalyzer::BuildArrayAccessNode(ExprNode *array, ExprNod
 {
     auto itypeKind = index->GetType()->GetTypeKind();
     if (itypeKind == TypeKind::POINTER || itypeKind == TypeKind::ARRAY)
-    {
-        auto tmp = array;
-        array = index;
-        index = tmp;
-    }
-    if (array->GetType()->GetTypeKind() == TypeKind::ARRAY)
-        array->SetType(((SymArray *)array->GetType())->ToPointer());
-    if (array->GetType()->GetTypeKind() != TypeKind::POINTER) throw BadIndexingError();
+        std::swap(array, index);
     array->SetValueCategory(ValueCategory::LVAVLUE);
+    auto at = array->GetType()->GetUnqualified();
+    if (at->GetTypeKind() != TypeKind::POINTER && at->GetTypeKind() != TypeKind::ARRAY) throw BadIndexingError();
     if (!isIntegerType(index->GetType())) throw BadIndexingError(index);
     auto res = new ArrayAccessNode(array, index);
+    performLvalueConversion(array);
     res->SetValueCategory(ValueCategory::LVAVLUE);
-    res->SetType(((SymPointer *)array->GetType())->GetTarget());
+    if (at->GetTypeKind() == TypeKind::POINTER)
+        res->SetType(((SymPointer *)at)->GetTarget());
+    else
+        res->SetType(reinterpret_cast<SymArray *>(at)->GetValueType());
     return res;
 }
 

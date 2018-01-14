@@ -111,12 +111,12 @@ void IdNode::Generate(Asm::Assembly *assembly)
     Asm::Section &s = assembly->TextSection();
     if (variable)
     {
-        if (GetValueCategory() == ValueCategory::LVAVLUE)
-            s.AddCommand(Asm::CommandName::LEA, Asm::MakeAddress(-variable->GetOffset(), Asm::Register::EBP),
-                         Asm::Register::EAX ,Asm::CommandSuffix::L);
+        if (GetValueCategory() == ValueCategory::LVAVLUE || variable->GetType()->GetTypeKind() == TypeKind::ARRAY)
+            s.AddCommand(Asm::CommandName::LEA, Asm::MakeAddress(variable->GetOffset(), Asm::Register::EBP),
+                         Asm::Register::EAX, Asm::CommandSuffix::L);
         else
-            s.AddCommand(Asm::CommandName::MOV, Asm::MakeAddress(-variable->GetOffset(), Asm::Register::EBP),
-                         Asm::Register::EAX ,Asm::CommandSuffix::L);
+            s.AddCommand(Asm::CommandName::MOV, Asm::MakeAddress(variable->GetOffset(), Asm::Register::EBP),
+                         Asm::Register::EAX, Asm::CommandSuffix::L);
         s.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
     }
 }
@@ -611,7 +611,7 @@ void ArrayAccessNode::Generate(Asm::Assembly *assembly)
     s.AddCommand(CommandName::POP, Register::ESI, CommandSuffix ::L);
     s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
     s.AddCommand(CommandName::LEA, MakeAddress(0, Register::EAX, Register::ESI, type->Size()), Register::EBX, CommandSuffix::L);
-    if (category == ValueCategory::LVAVLUE)
+    if (category == ValueCategory::LVAVLUE || type->GetTypeKind() == TypeKind::ARRAY)
         s.AddCommand(CommandName::PUSH, Register::EBX, CommandSuffix::L);
     else
     {
@@ -797,7 +797,8 @@ void UnaryOpNode::pointerGenerate(Asm::Assembly *assembly)
     auto &s = assembly->TextSection();
     auto ptrType = reinterpret_cast<SymPointer *>(expr->GetType()->GetUnqualified());
     auto target = ptrType->GetTarget();
-    if (target->GetTypeKind() == TypeKind::BUILTIN || target->GetTypeKind() == TypeKind::POINTER)
+    if ((target->GetTypeKind() == TypeKind::BUILTIN || target->GetTypeKind() == TypeKind::POINTER)
+        && category == ValueCategory::RVALUE)
     {
         s.AddCommand(CommandName::POP, Register::EBX, CommandSuffix::L);
         s.AddCommand(CommandName::MOV, MakeAddress(Register::EBX), Register::EAX, CommandSuffix::L);
@@ -1484,7 +1485,7 @@ void InitDeclaratorNode::Generate(Asm::Assembly *assembly)
         Asm::Section &s = assembly->TextSection();
         s.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
         s.AddCommand(Asm::CommandName::MOV, Asm::Register::EAX,
-                     Asm::MakeAddress(-variable->GetOffset(), Asm::Register::EBP), Asm::CommandSuffix::L);
+                     Asm::MakeAddress(variable->GetOffset(), Asm::Register::EBP), Asm::CommandSuffix::L);
     }
 }
 

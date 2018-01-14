@@ -266,8 +266,11 @@ void SymFunction::SetParamsTable(SymbolTable *params)
 void SymFunction::SetOrderedParams(std::vector<SymVariable *> &orderedParams)
 {
     this->orderedParams = orderedParams;
-    for (auto param: this->orderedParams)
-        argumentsStorageSize += param->GetType()->Size() < 4? 4 : param->GetType()->Size();
+    for (auto param = this->orderedParams.rbegin(); param != this->orderedParams.rend(); param++)
+    {
+        argumentsStorageSize += (*param)->GetType()->Size() < 4 ? 4 : (*param)->GetType()->Size();
+        (*param)->SetOffset(argumentsStorageSize);
+    }
 }
 
 void SymFunction::SetLabel(Asm::AsmFunction *label)
@@ -293,7 +296,7 @@ int32_t SymFunction::Size()
 int32_t SymFunction::AllocateVariable(int32_t varSize)
 {
     varSize = varSize < 4 ? 4 : varSize;
-    return (localVariablesStorageSize += varSize);
+    return -(localVariablesStorageSize += varSize);
 }
 
 int32_t SymFunction::GetLocalVariablesStorageSize() const
