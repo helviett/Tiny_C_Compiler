@@ -49,7 +49,8 @@ StructSpecifierNode *SemanticAnalyzer::BuildStructSpecifierNode(IdNode *tag,
     Symbol *s = nullptr;
     if (tag)
     {
-        s = scopeTree.GetActiveScope()->Find("struct " + tag->GetName());
+        s = structDeclarationList ? scopeTree.GetActiveScope()->Find("struct " + tag->GetName()) :
+            scopeTree.Find("struct " + tag->GetName());
         if (s)
         {
             if (s->GetSymbolClass() != SymbolClass::TYPE) throw UnknownError(); // Unreachable
@@ -61,7 +62,11 @@ StructSpecifierNode *SemanticAnalyzer::BuildStructSpecifierNode(IdNode *tag,
                     throw RedifinitionError(tag);
             }
             if (rt)
-                *record = *rt;
+            {
+                record->SetFieldsTable(rt->GetFieldsTable());
+                record->SetOrderedFields(rt->GetOrderedFields());
+//                *record = *rt;
+            }
             return new StructSpecifierNode(record, structToken);
         }
         if (!rt) rt = new SymRecord(tag);
@@ -143,7 +148,7 @@ InitDeclaratorNode *SemanticAnalyzer::BuildInitDeclaratorNode(DeclaratorNode *de
             if (!processingFunctions.empty())
             {
                 auto f = processingFunctions.top();
-                var->SetOffset(f->AllocateVariable(t->Size()));
+                var->SetOffset(f->AllocateVariable(t->GetUnqualified()->Size()));
             }
             scopeTree.GetActiveScope()->Insert(name, var);
         }
@@ -175,6 +180,7 @@ SemanticAnalyzer::BuildStructureOrUnionMemberAccessNode(ExprNode *structure, IdN
     SymVariable *sfield;
     if (!(sfield = (SymVariable *)stype->GetFieldsTable()->Find(field->GetName())))
         throw NonexistentMemberError(stype, field);
+    field->SetVariable(sfield);
     auto res = new StructureOrUnionMemberAccessNode(structure, field);
     res->SetPosition(dot);
     uint32_t squals = type->IsQualified() ? ((SymQualifiedType *)type)->GetQualifiers() : 0;
@@ -192,6 +198,7 @@ StructureOrUnionMemberAccessByPointerNode *
 SemanticAnalyzer::BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, IdNode *field, std::shared_ptr<Token> arrow)
 {
     if (isConstQualified(ptr)) throw InvalidOperandError(arrow, nullptr);
+    performLvalueConversion(ptr);
     if (ptr->GetType()->GetTypeKind() == TypeKind::ARRAY)
         ptr->SetType(((SymArray *)unqualify(ptr->GetType()))->ToPointer());
     if (!isPointerType(ptr->GetType())) throw InvalidOperandError(std::move(arrow), ptr->GetType());
@@ -202,6 +209,7 @@ SemanticAnalyzer::BuildStructureOrUnionMemberAccessByPointerNode(ExprNode *ptr, 
     SymVariable *sfield;
     if (!(sfield = (SymVariable *)stype->GetFieldsTable()->Find(field->GetName())))
         throw NonexistentMemberError(stype, field);
+    field->SetVariable(sfield);
     auto res = new StructureOrUnionMemberAccessByPointerNode(ptr, field);
     res->SetPosition(arrow);
     res->SetValueCategory(ValueCategory::LVAVLUE);

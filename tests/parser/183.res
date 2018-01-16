@@ -4,10 +4,7 @@
     │   │   ├── f
     │   │   └── Function returning
     │   │       └── Pointer to
-    │   │           └── struct 
-    │   │               └── a
-    │   │                   └── Qualified 0
-    │   │                       └── INT32
+    │   │           └── 
     │   │       └── Params
     │   └── {}
     └── FuncDef

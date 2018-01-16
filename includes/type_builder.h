@@ -22,7 +22,7 @@ public:
 private:
     enum class Singed { SINGED, UNSIGNED, DEFAULT};
     enum class ScalaraKind { INTEGER, FLOAT, DOUBLE, UNKNOWN, CHAR };
-    enum class TypeKind { SCALAR, STRUCT, ENUM, NONE, VOID, TYPEDEF};
+    enum class TypeClass { SCALAR, STRUCT, ENUM, NONE, VOID, TYPEDEF};
     static bool isTypeQualifier(SimpleSpecifier *simpleSpecifier);
 
 //    static bool isTypeSpecifier(SimpleSpecifier *simpleSpecifier);

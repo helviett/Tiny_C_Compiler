@@ -251,4 +251,13 @@ public:
     const char *what() const throw() override;
 };
 
+class DeclaratorNode;
+
+class FieldOfIncompleteTypeError: public SemanticError
+{
+public:
+    explicit FieldOfIncompleteTypeError(DeclaratorNode *declarator);
+    const char *what() const throw() override;
+};
+
 #endif //TINY_C_COMPILER_SEMANTIC_ERRORS_H

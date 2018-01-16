@@ -184,6 +184,8 @@ public:
     SymRecord(SymbolTable *fields,  std::vector<SymVariable *> orderedFields);
     SymRecord(SymbolTable *fields,  std::vector<SymVariable *> orderedFields, IdNode *tag);
     void Print(std::ostream &os, std::string indent, bool isTail) override;
+    void SetOrderedFields(std::vector<SymVariable *> &orderedFields);
+    void SetFieldsTable(SymbolTable *table);
     SymbolTable *GetFieldsTable() const;
     bool Equal(SymType *other) override;
     std::vector<SymVariable *> &GetOrderedFields();
@@ -193,6 +195,7 @@ public:
     SymType *GetUnqualified() override;
     int32_t Size() override;
 private:
+    void calculateFieldsOffset();
     IdNode *tag{nullptr};
     SymbolTable *fields{nullptr};
     std::vector<SymVariable *> orderedFields;

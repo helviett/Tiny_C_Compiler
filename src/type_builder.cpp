@@ -6,7 +6,7 @@
 SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers, bool &isTypedef)
 {
     Singed isSinged = Singed::DEFAULT;
-    TypeKind kind = TypeKind::NONE;
+    TypeClass kind = TypeClass::NONE;
     ScalaraKind scalarKind = ScalaraKind::UNKNOWN;
     int longTimes = 0;
     SymType *type = nullptr;
@@ -18,17 +18,17 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers, bo
         {
             auto simple = (SimpleSpecifier *)it;
 
-            if (!isTypeQualifier(simple) && (kind == TypeKind::STRUCT)) throw ManyDataTypesError(simple->Value());
+            if (!isTypeQualifier(simple) && (kind == TypeClass::STRUCT)) throw ManyDataTypesError(simple->Value());
             if (simple->Value()->keyword == Keyword::VOID)
             {
-                if (kind != TypeKind::NONE) throw ManyDataTypesError(simple->Value());
-                kind = TypeKind::VOID;
+                if (kind != TypeClass::NONE) throw ManyDataTypesError(simple->Value());
+                kind = TypeClass::VOID;
                 if (longTimes) throw UnsupportedTypeError(simple->Value());
                 if (isSinged != Singed::DEFAULT) throw UnsupportedTypeError(simple->Value());
                 continue;
             }
 
-            if (!isTypeQualifier(simple) && (kind != TypeKind::SCALAR && kind != TypeKind::NONE))
+            if (!isTypeQualifier(simple) && (kind != TypeClass::SCALAR && kind != TypeClass::NONE))
                 throw ManyDataTypesError(simple->Value());
 
             switch (simple->Value()->keyword)
@@ -38,7 +38,7 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers, bo
                     if (longTimes > 1) throw TooLongError(simple->Value(), longTimes);
                     if (scalarKind != ScalaraKind::INTEGER && scalarKind != ScalaraKind::UNKNOWN)
                         throw UnsupportedTypeError(simple->Value());
-                    kind = TypeKind::SCALAR;
+                    kind = TypeClass::SCALAR;
                     scalarKind = ScalaraKind::INTEGER;
                     break;
                 case Keyword::UNSIGNED:
@@ -46,36 +46,36 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers, bo
                         throw IncompatibleDeclarationSpecifiersError(simple->Value(), "signed");
                     if (isSinged == Singed::UNSIGNED) throw DuplicateError(simple->Value());
                     isSinged = Singed::UNSIGNED;
-                    kind = TypeKind::SCALAR;
+                    kind = TypeClass::SCALAR;
                 break;
                 case Keyword::SIGNED:
                     if (isSinged == Singed::SINGED) DuplicateError(simple->Value());
                     if (isSinged == Singed::UNSIGNED)
                         throw IncompatibleDeclarationSpecifiersError(simple->Value(), "unsigned");
                     isSinged = Singed::SINGED;
-                    kind = TypeKind::SCALAR;
+                    kind = TypeClass::SCALAR;
                     break;
                 case Keyword::FLOAT:
                     if (scalarKind != ScalaraKind::UNKNOWN) throw ManyDataTypesError(simple->Value());
                     scalarKind = ScalaraKind::FLOAT;
                     if (isSinged != Singed::DEFAULT) throw UnsupportedTypeError(simple->Value());
-                    kind = TypeKind::SCALAR;
+                    kind = TypeClass::SCALAR;
                     break;
                 case Keyword::DOUBLE:
                     if (scalarKind != ScalaraKind::UNKNOWN) throw ManyDataTypesError(simple->Value());
                     scalarKind = ScalaraKind::DOUBLE;
                     if (isSinged != Singed::DEFAULT) throw UnsupportedTypeError(simple->Value());
-                    kind = TypeKind::SCALAR;
+                    kind = TypeClass::SCALAR;
                     break;
                 case Keyword::INT:
                     if (scalarKind != ScalaraKind::UNKNOWN) throw ManyDataTypesError(simple->Value());
                     scalarKind = ScalaraKind::INTEGER;
-                    kind = TypeKind::SCALAR;
+                    kind = TypeClass::SCALAR;
                     break;
                 case Keyword::CHAR:
                     if (scalarKind != ScalaraKind::UNKNOWN) throw ManyDataTypesError(simple->Value());
                     scalarKind = ScalaraKind::CHAR;
-                    kind = TypeKind::SCALAR;
+                    kind = TypeClass::SCALAR;
                     break;
                 case Keyword::CONST:
                     typeQuals |= (uint32_t)TypeQualifier::CONST;
@@ -91,29 +91,29 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers, bo
         }
         else if ((*it).Kind() == SpecifierKind::STRUCT)
         {
-            if (kind != TypeKind ::NONE) throw ManyDataTypesError(((StructSpecifierNode *)it)->GetToken());
-            kind = TypeKind::STRUCT;
+            if (kind != TypeClass ::NONE) throw ManyDataTypesError(((StructSpecifierNode *)it)->GetToken());
+            kind = TypeClass::STRUCT;
             type = ((StructSpecifierNode *)it)->GetRecordType();
             // TODO struct and enum
         }
         else if ((*it).Kind() == SpecifierKind::TYPEDEF)
         {
-            if (kind != TypeKind ::NONE) throw ManyDataTypesError(((TypedefIdentifierNode *)it)->GetToken());
-            kind = TypeKind::TYPEDEF;
+            if (kind != TypeClass ::NONE) throw ManyDataTypesError(((TypedefIdentifierNode *)it)->GetToken());
+            kind = TypeClass::TYPEDEF;
             type = ((TypedefIdentifierNode *)it)->GetAlias()->GetType();
         }
         else
         {
-            if (kind != TypeKind ::NONE) throw ManyDataTypesError(((TypedefIdentifierNode *)it)->GetToken());
-            kind = TypeKind::ENUM;
+            if (kind != TypeClass ::NONE) throw ManyDataTypesError(((TypedefIdentifierNode *)it)->GetToken());
+            kind = TypeClass::ENUM;
         }
     }
-    if (kind == TypeKind::NONE) kind = TypeKind::SCALAR;
+    if (kind == TypeClass::NONE) kind = TypeClass::SCALAR;
     if (isSinged == Singed::DEFAULT) isSinged = Singed::SINGED;
     if (scalarKind == ScalaraKind::UNKNOWN) scalarKind = ScalaraKind::INTEGER;
     switch (kind)
     {
-        case TypeKind::SCALAR:
+        case TypeClass::SCALAR:
             switch (scalarKind)
             {
                 case ScalaraKind::INTEGER:
@@ -149,13 +149,13 @@ SymType *TypeBuilder::Build(DeclarationSpecifiersNode *declarationSpecifiers, bo
                             return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::UINT32), typeQuals);
                     }
             }
-        case TypeKind::VOID:
+        case TypeClass::VOID:
             return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::VOID), typeQuals);
-        case TypeKind::STRUCT:
-        case TypeKind::TYPEDEF:
+        case TypeClass::STRUCT:
+        case TypeClass::TYPEDEF:
             if (typeQuals) return new SymQualifiedType(type, typeQuals);
             return type;
-        case TypeKind::ENUM:
+        case TypeClass::ENUM:
             if (typeQuals) return new SymQualifiedType(new SymBuiltInType(BuiltInTypeKind::INT32), typeQuals);
             return new SymBuiltInType(BuiltInTypeKind::INT32);
     }
@@ -173,6 +173,8 @@ SymRecord *TypeBuilder::Build(StructDeclarationListNode *structDeclarationList, 
             std::string name = declarator->GetId() ? declarator->GetId()->GetName() :
                                "#" + std::to_string(orderedFields.size());
             if (fields->Find(name)) throw "";
+            auto dt = declarator->GetType()->GetUnqualified();
+            if (!dt->IsComplete()) throw FieldOfIncompleteTypeError(declarator);
             auto var = new SymVariable(name, (*declarator).GetType(), declarator->GetId());
             orderedFields.push_back(var);
             fields->Insert(name, var);

@@ -50,6 +50,9 @@
                 │       └── InitDeclarator
                 │           ├── a
                 │           └── struct A
+                │               └── a
+                │                   └── Qualified 0
+                │                       └── INT32
                 └── return
                     └── a
 

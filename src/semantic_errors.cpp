@@ -1,6 +1,7 @@
 #include "../includes/errors/semantic_errors.h"
 #include "../includes/symbols/sym_type.h"
 #include "../includes/nodes/initializer.h"
+#include "../includes/nodes/decls.h"
 
 InvalidOperandError::InvalidOperandError(std::shared_ptr<Token> op, SymType *ltype, SymType *rtype)
 {
@@ -413,4 +414,16 @@ UnknownVariableStorageError::UnknownVariableStorageError(SymVariable *variable)
     auto pos = id->GetPosition();
     msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
           "): Storage of '" + id->GetName() + "' isn't known.";
+}
+
+FieldOfIncompleteTypeError::FieldOfIncompleteTypeError(DeclaratorNode *declarator)
+{
+    auto pos = declarator->GetId()->GetPosition();
+    msg = "(" + std::to_string(pos.row) + ", " + std::to_string(pos.col) +
+          "): field '" + declarator->GetId()->GetName() + "' has incomplete type.";
+}
+
+const char *FieldOfIncompleteTypeError::what() const throw()
+{
+    return msg.c_str();
 }

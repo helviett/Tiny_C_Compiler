@@ -42,9 +42,6 @@
                 │           ├── f
                 │           └── Pointer to
                 │               └── struct A
-                │                   └── a
-                │                       └── Qualified 0
-                │                           └── INT32
                 ├── ;
                 │   └── typcast
                 │       ├── Qualified 0
@@ -59,9 +56,6 @@
                 │   └── typcast
                 │       ├── Pointer to
                 │       │   └── struct A
-                │       │       └── a
-                │       │           └── Qualified 0
-                │       │               └── INT32
                 │       └── a
                 ├── ;
                 │   └── typcast

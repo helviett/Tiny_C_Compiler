@@ -263,6 +263,7 @@ public:
     ExprNode *Eval(Evaluator *evaluator) override;
     void Generate(Asm::Assembly *assembly) override;
     void SetVariable(SymVariable *variable);
+    SymVariable *GetVariable() const;
 private:
     SymVariable *variable;
     std::shared_ptr<Token> token;

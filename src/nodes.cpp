@@ -126,6 +126,11 @@ void IdNode::SetVariable(SymVariable *variable)
     this->variable = variable;
 }
 
+SymVariable *IdNode::GetVariable() const
+{
+    return variable;
+}
+
 void StringLiteralNode::Print(std::ostream &os, std::string indent, bool isTail)
 {
     os << indent << (isTail ? "└── " : "├── ");
@@ -263,7 +268,17 @@ ExprNode *StructureOrUnionMemberAccessNode::Eval(Evaluator *evaluator)
 
 void StructureOrUnionMemberAccessNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    structureOrUnion->Generate(assembly);
+    s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+    if (category == ValueCategory::LVAVLUE)
+        s.AddCommand(CommandName::LEA, MakeAddress(member->GetVariable()->GetOffset(), Register::EAX), Register::EBX,
+                     CommandSuffix::L);
+    else
+        s.AddCommand(CommandName::MOV, MakeAddress(member->GetVariable()->GetOffset(), Register::EAX), Register::EBX,
+                     CommandSuffix::L);
+    s.AddCommand(CommandName::PUSH, Register::EBX, CommandSuffix::L);
 }
 
 void StructureOrUnionMemberAccessByPointerNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -286,7 +301,19 @@ ExprNode *StructureOrUnionMemberAccessByPointerNode::Eval(Evaluator *evaluator)
 
 void StructureOrUnionMemberAccessByPointerNode::Generate(Asm::Assembly *assembly)
 {
-    // TODO
+    using namespace Asm;
+    auto &s = assembly->TextSection();
+    structureOrUnion->Generate(assembly);
+    auto ptrType = reinterpret_cast<SymPointer *>(structureOrUnion->GetType()->GetUnqualified());
+    auto target = ptrType->GetTarget();
+    s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+    if (category == ValueCategory::LVAVLUE)
+        s.AddCommand(CommandName::LEA, MakeAddress(member->GetVariable()->GetOffset(), Register::EAX), Register::EBX,
+                     CommandSuffix::L);
+    else
+        s.AddCommand(CommandName::MOV, MakeAddress(member->GetVariable()->GetOffset(), Register::EAX), Register::EBX,
+                     CommandSuffix::L);
+    s.AddCommand(CommandName::PUSH, Register::EBX, CommandSuffix::L);
 }
 
 void PrefixIncrementNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -934,8 +961,9 @@ void ExprStatmentNode::Generate(Asm::Assembly *assembly)
         if (etype->GetTypeKind() == TypeKind::POINTER || etype->GetTypeKind() == TypeKind::BUILTIN)
         {
             if (etype->GetTypeKind() == TypeKind::BUILTIN &&
-                    reinterpret_cast<SymBuiltInType *>(etype)->GetBuiltInTypeKind() != BuiltInTypeKind::VOID)
-                s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+                    reinterpret_cast<SymBuiltInType *>(etype)->GetBuiltInTypeKind() == BuiltInTypeKind::VOID)
+                return;
+            s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
         }
     }
 }
@@ -1418,7 +1446,7 @@ void DeclarationNode::Print(std::ostream &os, std::string indent, bool isTail)
 
 void DeclarationNode::Generate(Asm::Assembly *assembly)
 {
-    list->Generate(assembly);
+    if (list) list->Generate(assembly);
 }
 
 uint64_t InitDeclaratorListNode::Size()

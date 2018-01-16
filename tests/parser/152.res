@@ -14,9 +14,6 @@
                 │           ├── a
                 │           └── Pointer to
                 │               └── struct A
-                │                   └── a
-                │                       └── Qualified 0
-                │                           └── INT32
                 └── Decl
                     └── InitDeclaratorList
                         └── InitDeclarator

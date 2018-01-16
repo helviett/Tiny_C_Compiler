@@ -85,7 +85,10 @@ void SymPointer::Print(std::ostream &os, std::string indent, bool isTail)
     os << indent << (isTail ? "└── " : "├── ");
     os << "Pointer to" << std::endl;
     indent.append(isTail ? "    " : "│   ");
-    (target)->Print(os, indent, true);
+    if (target->GetTypeKind() == TypeKind::STRUCT)
+        os << indent << "└── " << reinterpret_cast<SymRecord *>(target->GetUnqualified())->GetName() << std::endl;
+    else
+        (target)->Print(os, indent, true);
 }
 
 SymType *SymPointer::GetTarget() const
@@ -100,13 +103,26 @@ void SymPointer::SetTarget(SymType *target)
 
 bool SymPointer::Equal(SymType *other)
 {
-    if (other->IsQualified()) other = ((SymQualifiedType *)other)->GetType();
-    return kind == other->GetTypeKind() && target->Equal(((SymPointer *)other)->GetTarget());
+    other = other->GetUnqualified();
+    if (kind == other->GetTypeKind())
+    {
+        auto pother = reinterpret_cast<SymPointer *>(other);
+        if (target->GetTypeKind() == TypeKind::STRUCT && pother->GetTarget()->GetTypeKind() == TypeKind::STRUCT)
+        {
+            auto starget = reinterpret_cast<SymRecord *>(target->GetUnqualified());
+            auto sothertarget = reinterpret_cast<SymRecord *>(pother->GetTarget()->GetUnqualified());
+            if (starget->GetName() == sothertarget->GetName())
+                return true;
+        }
+        else
+            return target->Equal(pother->GetTarget());
+    }
+    return false;
 }
 
 bool SymPointer::IsComplete()
 {
-    return target->IsComplete();
+    return true;
 }
 
 SymType *SymPointer::GetUnqualified()
@@ -266,10 +282,10 @@ void SymFunction::SetParamsTable(SymbolTable *params)
 void SymFunction::SetOrderedParams(std::vector<SymVariable *> &orderedParams)
 {
     this->orderedParams = orderedParams;
-    for (auto param = this->orderedParams.rbegin(); param != this->orderedParams.rend(); param++)
+    for (auto param = this->orderedParams.begin(); param != this->orderedParams.end(); param++)
     {
         argumentsStorageSize += (*param)->GetType()->Size() < 4 ? 4 : (*param)->GetType()->Size();
-        (*param)->SetOffset(argumentsStorageSize);
+        (*param)->SetOffset(argumentsStorageSize + 4);
     }
 }
 
@@ -402,11 +418,7 @@ SymRecord::SymRecord()
 }
 
 SymRecord::SymRecord(SymbolTable *fields, std::vector<SymVariable *> orderedFields):
-        fields(fields), orderedFields(std::move(orderedFields))
-{
-    kind = TypeKind::STRUCT;
-    symbolClass = SymbolClass::TYPE;
-}
+        SymRecord(fields, std::move(orderedFields), nullptr) {}
 
 std::vector<SymVariable *> &SymRecord::GetOrderedFields()
 {
@@ -424,9 +436,12 @@ IdNode *SymRecord::GetTag() const
 }
 
 SymRecord::SymRecord(SymbolTable *fields, std::vector<SymVariable *> orderedFields, IdNode *tag):
-        SymRecord(fields, std::move(orderedFields))
+        fields(fields), orderedFields(std::move(orderedFields))
 {
+    kind = TypeKind::STRUCT;
+    symbolClass = SymbolClass::TYPE;
     this->tag = tag;
+    calculateFieldsOffset();
 }
 
 SymRecord::SymRecord(IdNode *tag): tag(tag)
@@ -452,6 +467,27 @@ int32_t SymRecord::Size()
     for (auto f: orderedFields)
         size += f->GetType()->Size();
     return size;
+}
+
+void SymRecord::calculateFieldsOffset()
+{
+    auto offset = 0;
+    for (auto field: orderedFields)
+    {
+        field->SetOffset(offset);
+        offset += field->GetType()->Size();
+    }
+}
+
+void SymRecord::SetFieldsTable(SymbolTable *table)
+{
+    this->fields = table;
+}
+
+void SymRecord::SetOrderedFields(std::vector<SymVariable *> &orderedFields)
+{
+    this->orderedFields = orderedFields;
+    calculateFieldsOffset();
 }
 
 void SymQualifiedType::Print(std::ostream &os, std::string indent, bool isTail)

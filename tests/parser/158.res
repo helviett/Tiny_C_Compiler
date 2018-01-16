@@ -26,9 +26,6 @@
                 │   └── typcast
                 │       ├── Pointer to
                 │       │   └── struct A
-                │       │       └── a
-                │       │           └── Qualified 0
-                │       │               └── INT32
                 │       └── b
                 └── return
                     └── 0

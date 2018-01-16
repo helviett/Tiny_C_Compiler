@@ -13,10 +13,7 @@
                 │       └── InitDeclarator
                 │           ├── a
                 │           └── Pointer to
-                │               └── struct 
-                │                   └── a
-                │                       └── Qualified 0
-                │                           └── INT32
+                │               └── 
                 └── ;
                     └── &
                         └── ->
