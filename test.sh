@@ -48,25 +48,29 @@ rm tests/parser/temp.txt
 echo "Parser: passed $pi/$pj"
 ci=0
 cj=0
-for file in $(ls tests/generator/ | sort -n)
+for folder in "expr" "stmt";
 do
-	cj=$(($cj + 1))
-	prefix=$( echo "$file" | sed -e "s/\.cpp//g" )
-	eval "./$tccpath tests/generator/$file > tests/generator/asm.s"
-	eval "gcc -m32 tests/generator/asm.s -o tests/generator/a.out"
-	eval "./tests/generator/a.out > tests/generator/tcc.res"
-	eval "gcc -m32 -w tests/generator/$file -o tests/generator/a.out"
-	eval "./tests/generator/a.out > tests/generator/gcc.res"
-	cmp -s "tests/generator/tcc.res" "tests/generator/gcc.res"
-	if [ $? -eq 1 ]; then
-		echo "$file test failed"
-	else
-		echo "$file test succed"
-		ci=$(($ci + 1))
-	fi
-	rm tests/generator/tcc.res tests/generator/gcc.res tests/generator/a.out
-	rm tests/generator/asm.s
+	for file in $(ls $"tests/generator/$folder" | sort -n)
+	do
+		cj=$(($cj + 1))
+		prefix=$( echo "$file" | sed -e "s/\.c//g" )
+		eval "./$tccpath tests/generator/$folder/$file > tests/generator/$folder/asm.s"
+		eval "gcc -m32 tests/generator/$folder/asm.s -o tests/generator/$folder/a.out"
+		eval "./tests/generator/$folder/a.out > tests/generator/$folder/tcc.res"
+		eval "gcc -m32 -w tests/generator/$folder/$file -o tests/generator/$folder/a.out"
+		eval "./tests/generator/$folder/a.out > tests/generator/$folder/gcc.res"
+		cmp -s "tests/generator/$folder/tcc.res" "tests/generator/$folder/gcc.res"
+		if [ $? -eq 1 ]; then
+			echo "$folder\\$file test failed"
+		else
+			echo "$folder\\$file test succed"
+			ci=$(($ci + 1))
+		fi
+		rm $"tests/generator/$folder/tcc.res" $"tests/generator/$folder/gcc.res" $"tests/generator/$folder/a.out"
+		rm $"tests/generator/$folder/asm.s"
+	done	
 done
+
 echo "Generator: passed $ci/$cj"
 echo "Total:  passed $(($pi+$ti+$ci))/$(($tj+$pj+$cj))"
 
