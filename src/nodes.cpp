@@ -1336,13 +1336,16 @@ ExprNode *FunctionCallNode::Eval(Evaluator *evaluator)
 
 void FunctionCallNode::Generate(Asm::Assembly *assembly)
 {
+    using namespace Asm;
     auto &s = assembly->TextSection();
     auto t = reinterpret_cast<SymFunction *>(function->GetType()->GetUnqualified());
     if (arguments) arguments->Generate(assembly);
-    s.AddCommand(Asm::CommandName::CALL, t->GetLabel());
-    if (t->GetArgumentsStorageSize());
-        s.AddCommand(Asm::CommandName::ADD, new IntConstNode(t->GetArgumentsStorageSize()),
-                                                         Asm::Register::ESP, Asm::CommandSuffix::L);
+    auto rt = t->GetReturnType()->GetUnqualified();
+    if (rt->GetTypeKind() == TypeKind::STRUCT)
+        s.AddCommand(CommandName::SUB, new IntConstNode(rt->Size()), Register::ESP, CommandSuffix::L);
+    s.AddCommand(CommandName::CALL, t->GetLabel());
+    if (t->GetArgumentsStorageSize())
+        s.AddCommand(CommandName::ADD, new IntConstNode(t->GetArgumentsStorageSize()), Register::ESP, CommandSuffix::L);
 }
 
 void DeclarationSpecifiersNode::Print(std::ostream &os, std::string indent, bool isTail)

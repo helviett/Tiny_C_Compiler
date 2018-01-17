@@ -234,6 +234,7 @@ ArrayAccessNode *SemanticAnalyzer::BuildArrayAccessNode(ExprNode *array, ExprNod
     if (!isIntegerType(index->GetType())) throw BadIndexingError(index);
     auto res = new ArrayAccessNode(array, index);
     performLvalueConversion(array);
+    performLvalueConversion(index);
     res->SetValueCategory(ValueCategory::LVAVLUE);
     if (at->GetTypeKind() == TypeKind::POINTER)
         res->SetType(((SymPointer *)at)->GetTarget());
@@ -667,7 +668,11 @@ ReturnStatementNode *SemanticAnalyzer::BuildReturnStatementNode(std::shared_ptr<
     auto type = processingFunctions.top();
     auto utype = (SymFunction *)unqualify(type);
     if (expr && isVoidType(utype->GetReturnType())) throw VoidFunctionBadReturnError(statement);
-    if (expr) Convert(&expr, utype->GetReturnType());
+    if (expr)
+    {
+        Convert(&expr, utype->GetReturnType());
+        performLvalueConversion(expr);
+    }
     return new ReturnStatementNode(expr, type);
 }
 
