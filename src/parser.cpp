@@ -1037,7 +1037,12 @@ DeclarationSpecifiersNode *Parser::parseSpecifierQualifierList()
     bool spec;
     while(isTypeQualifier(scanner->Current()) || isTypeSpecifier(scanner->Current()))
     {
-        if (maybeKeyword(Keyword::STRUCT))
+        if (maybe(TokenType::ID) && isTypedefIdentifier(scanner->Current()))
+        {
+            tnn->Add(sematicAnalyzer.BuildTypedefIdentifierNode(scanner->Current()));
+            scanner->Next();
+        }
+        else if (maybeKeyword(Keyword::STRUCT))
             tnn->Add(parseStructSpecifier());
         else if (maybeKeyword(Keyword::ENUM))
             tnn->Add(parseEnumSpecifier());

@@ -233,7 +233,8 @@ ArrayAccessNode *SemanticAnalyzer::BuildArrayAccessNode(ExprNode *array, ExprNod
     if (at->GetTypeKind() != TypeKind::POINTER && at->GetTypeKind() != TypeKind::ARRAY) throw BadIndexingError();
     if (!isIntegerType(index->GetType())) throw BadIndexingError(index);
     auto res = new ArrayAccessNode(array, index);
-    performLvalueConversion(array);
+    if (at->GetTypeKind() == TypeKind::POINTER)
+        performLvalueConversion(array);
     performLvalueConversion(index);
     res->SetValueCategory(ValueCategory::LVAVLUE);
     if (at->GetTypeKind() == TypeKind::POINTER)

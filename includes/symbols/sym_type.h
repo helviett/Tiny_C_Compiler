@@ -118,6 +118,7 @@ public:
     bool IsComplete() override;
     SymType *GetUnqualified() override;
     int32_t Size() override;
+    int32_t NumberOfElements();
 private:
     SymType *valueType;
     ExprNode *size;
@@ -160,6 +161,7 @@ private:
     Asm::AsmLabel *returnLabel;
     int32_t localVariablesStorageSize{0};
     int32_t argumentsStorageSize{0};
+    int32_t returnObjectOffset{0};
 };
 
 class SymAlias: public SymType

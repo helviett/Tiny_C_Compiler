@@ -225,6 +225,9 @@ private:
     ExprNode *condition, *iftrue, *iffalse;
 };
 
+class SymArray;
+class SymRecord;
+
 class AssignmentNode: public ExprNode
 {
 public:
@@ -233,6 +236,8 @@ public:
     ExprNode *Eval(Evaluator *evaluator) override;
     void Generate(Asm::Assembly *assembly) override;
 private:
+    void assignArray(Asm::Assembly *assembly, int32_t offset, SymArray *array);
+    void assignStructure(Asm::Assembly *assembly, int32_t offset, SymRecord *record);
     ExprNode *left, *right;
     std::shared_ptr<Token> assignmentOp;
 };
@@ -265,6 +270,8 @@ public:
     void SetVariable(SymVariable *variable);
     SymVariable *GetVariable() const;
 private:
+    void arrayGenerate(Asm::Assembly *assembly, int32_t offset, SymArray *array);
+    void structureGenerate(Asm::Assembly *assembly, int32_t offset, SymRecord *record);
     SymVariable *variable;
     std::shared_ptr<Token> token;
 };

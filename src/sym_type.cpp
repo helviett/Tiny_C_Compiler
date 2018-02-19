@@ -190,6 +190,11 @@ int32_t SymArray::Size()
     return vsize * realSize;
 }
 
+int32_t SymArray::NumberOfElements()
+{
+    return reinterpret_cast<IntConstNode *>(size)->GetValue();
+}
+
 SymFunction::SymFunction(SymType *returnType): SymType(), returnType(returnType)
 {
     kind = TypeKind::FUNCTION;
@@ -282,10 +287,11 @@ void SymFunction::SetParamsTable(SymbolTable *params)
 void SymFunction::SetOrderedParams(std::vector<SymVariable *> &orderedParams)
 {
     this->orderedParams = orderedParams;
-    for (auto param = this->orderedParams.begin(); param != this->orderedParams.end(); param++)
+    for (auto &orderedParam : this->orderedParams)
     {
-        argumentsStorageSize += (*param)->GetType()->Size() < 4 ? 4 : (*param)->GetType()->Size();
-        (*param)->SetOffset(argumentsStorageSize + 4);
+        argumentsStorageSize += orderedParam->GetType()->Size() < 4 ? 4 : orderedParam->GetType()->Size();
+        orderedParam->SetOffset(argumentsStorageSize + 4);
+        returnObjectOffset = argumentsStorageSize + 8;
     }
 }
 
@@ -472,10 +478,10 @@ int32_t SymRecord::Size()
 void SymRecord::calculateFieldsOffset()
 {
     auto offset = 0;
-    for (auto field: orderedFields)
+    for (auto it = orderedFields.rbegin(); it != orderedFields.rend(); it++)
     {
-        field->SetOffset(offset);
-        offset += field->GetType()->Size();
+        (*it)->SetOffset(offset);
+        offset += (*it)->GetType()->Size();
     }
 }
 

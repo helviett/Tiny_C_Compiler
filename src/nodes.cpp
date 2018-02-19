@@ -108,16 +108,34 @@ ExprNode *IdNode::Eval(Evaluator *evaluator)
 
 void IdNode::Generate(Asm::Assembly *assembly)
 {
-    Asm::Section &s = assembly->TextSection();
+    using namespace Asm;
+    Section &s = assembly->TextSection();
     if (variable)
     {
+        auto vt = variable->GetType()->GetUnqualified();
+        if (vt->GetTypeKind() == TypeKind::STRUCT && category == ValueCategory::RVALUE)
+        {
+            s.AddCommand(CommandName::LEA, MakeAddress(variable->GetOffset(), Register::EBP),
+                         Register::EAX, CommandSuffix::L);
+            for (auto field: reinterpret_cast<SymRecord *>(vt)->GetOrderedFields())
+            {
+                auto ft = field->GetType()->GetUnqualified();
+                if (ft->GetTypeKind() == TypeKind::ARRAY)
+                    arrayGenerate(assembly, field->GetOffset(), reinterpret_cast<SymArray *>(ft));
+                else if (ft->GetTypeKind() == TypeKind::STRUCT)
+                    structureGenerate(assembly, field->GetOffset(), reinterpret_cast<SymRecord *>(ft));
+                else
+                    s.AddCommand(CommandName::PUSH, MakeAddress(field->GetOffset(), Register::EAX), CommandSuffix::L);
+            }
+            return;
+        }
         if (GetValueCategory() == ValueCategory::LVAVLUE || variable->GetType()->GetTypeKind() == TypeKind::ARRAY)
-            s.AddCommand(Asm::CommandName::LEA, Asm::MakeAddress(variable->GetOffset(), Asm::Register::EBP),
-                         Asm::Register::EAX, Asm::CommandSuffix::L);
+            s.AddCommand(CommandName::LEA, MakeAddress(variable->GetOffset(), Register::EBP),
+                         Register::EAX, CommandSuffix::L);
         else
-            s.AddCommand(Asm::CommandName::MOV, Asm::MakeAddress(variable->GetOffset(), Asm::Register::EBP),
-                         Asm::Register::EAX, Asm::CommandSuffix::L);
-        s.AddCommand(Asm::CommandName::PUSH, Asm::Register::EAX, Asm::CommandSuffix::L);
+            s.AddCommand(CommandName::MOV, MakeAddress(variable->GetOffset(), Register::EBP),
+                         Register::EAX, CommandSuffix::L);
+        s.AddCommand(CommandName::PUSH, Register::EAX, CommandSuffix::L);
     }
 }
 
@@ -129,6 +147,42 @@ void IdNode::SetVariable(SymVariable *variable)
 SymVariable *IdNode::GetVariable() const
 {
     return variable;
+}
+
+void IdNode::arrayGenerate(Asm::Assembly *assembly, int32_t offset, SymArray *array)
+{
+    using namespace Asm;
+    Section &s = assembly->TextSection();
+    auto n =  array->NumberOfElements();
+    auto vt = array->GetValueType()->GetUnqualified();
+    auto elemSize = vt->Size();
+    for (int i = n - 1; i >= 0; i--)
+    {
+        if (vt->GetTypeKind() == TypeKind::ARRAY)
+            arrayGenerate(assembly, offset + i * elemSize, reinterpret_cast<SymArray *>(vt));
+        else if (vt->GetTypeKind() == TypeKind::STRUCT)
+            structureGenerate(assembly, offset + i * elemSize, reinterpret_cast<SymRecord *>(vt));
+        else
+            s.AddCommand(CommandName::PUSH, MakeAddress(offset + i * elemSize, Register::EAX), CommandSuffix::L);
+    }
+}
+
+void IdNode::structureGenerate(Asm::Assembly *assembly, int32_t offset, SymRecord *record)
+{
+    using namespace Asm;
+    Section &s = assembly->TextSection();
+    auto &fields = record->GetOrderedFields();
+    auto n =  fields.size();
+    for (int i = static_cast<int>(n - 1); i >= 0; i--)
+    {
+        auto ft = fields[i]->GetType()->GetUnqualified();
+        if (ft->GetTypeKind() == TypeKind::ARRAY)
+            arrayGenerate(assembly, offset + ft->Size(), reinterpret_cast<SymArray *>(ft));
+        else if (ft->GetTypeKind() == TypeKind::STRUCT)
+            structureGenerate(assembly, offset + ft->Size(), reinterpret_cast<SymRecord *>(ft));
+        else
+            s.AddCommand(CommandName::PUSH, MakeAddress(offset + ft->Size(), Register::EAX), CommandSuffix::L);
+    }
 }
 
 void StringLiteralNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -696,13 +750,75 @@ ExprNode *AssignmentNode::Eval(Evaluator *evaluator)
 
 void AssignmentNode::Generate(Asm::Assembly *assembly)
 {
-    Asm::Section &s = assembly->TextSection();
-    left->Generate(assembly);
+    using namespace Asm;
+    Section &s = assembly->TextSection();
     right->Generate(assembly);
-    s.AddCommand(Asm::CommandName::POP, Asm::Register::EAX, Asm::CommandSuffix::L);
-    s.AddCommand(Asm::CommandName::POP, Asm::Register::EBX, Asm::CommandSuffix::L);
-    s.AddCommand(Asm::CommandName::MOV, Asm::Register::EAX, Asm::MakeAddress(Asm::Register::EBX), Asm::CommandSuffix::L);
-    s.AddCommand(Asm::CommandName::PUSH, Asm::MakeAddress(Asm::Register::EBX), Asm::CommandSuffix::L);
+    left->Generate(assembly);
+    s.AddCommand(CommandName::POP, Register::EBX, CommandSuffix::L);
+    if (right->GetType()->GetTypeKind() == TypeKind::STRUCT)
+    {
+        auto rt = reinterpret_cast<SymRecord *>(right->GetType()->GetUnqualified());
+        auto &fields = rt->GetOrderedFields();
+        for (auto it = fields.begin(); it != fields.end(); it++)
+        {
+            auto ft = (*it)->GetType()->GetUnqualified();
+            if (ft->GetTypeKind() == TypeKind::ARRAY)
+                assignArray(assembly, (*it)->GetOffset(), reinterpret_cast<SymArray *>(ft));
+            else if (ft->GetTypeKind() == TypeKind::STRUCT)
+                assignStructure(assembly, (*it)->GetOffset(), reinterpret_cast<SymRecord *>(ft));
+            else
+            {
+                s.AddCommand(CommandName::MOV, MakeAddress((*it)->GetOffset(), Register::ESP), Register::EAX, CommandSuffix::L);
+                s.AddCommand(CommandName::MOV, Register::EAX, MakeAddress((*it)->GetOffset(), Register::EBX), CommandSuffix::L);
+            }
+        }
+        return;
+    }
+    s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+    s.AddCommand(CommandName::MOV, Register::EAX, MakeAddress(Register::EBX), CommandSuffix::L);
+    s.AddCommand(CommandName::PUSH, MakeAddress(Register::EBX), CommandSuffix::L);
+}
+
+void AssignmentNode::assignArray(Asm::Assembly *assembly, int32_t offset, SymArray *array)
+{
+    using namespace Asm;
+    Section &s = assembly->TextSection();
+    auto n =  array->NumberOfElements();
+    auto vt = array->GetValueType()->GetUnqualified();
+    auto elemSize = vt->Size();
+    for (int i = 0; i < n; i++)
+    {
+        offset += i * elemSize;
+        if (vt->GetTypeKind() == TypeKind::ARRAY)
+            assignArray(assembly, offset, reinterpret_cast<SymArray *>(vt));
+        else if (vt->GetTypeKind() == TypeKind::STRUCT)
+            assignStructure(assembly, offset, reinterpret_cast<SymRecord *>(vt));
+        else
+        {
+            s.AddCommand(CommandName::MOV, MakeAddress(offset, Register::ESP), Register::EAX, CommandSuffix::L);
+            s.AddCommand(CommandName::MOV, Register::EAX, MakeAddress(offset, Register::EBX), CommandSuffix::L);
+        }
+    }
+
+}
+
+void AssignmentNode::assignStructure(Asm::Assembly *assembly, int32_t offset, SymRecord *record)
+{
+    using namespace Asm;
+    Section &s = assembly->TextSection();
+    for (auto field: record->GetOrderedFields())
+    {
+        auto ft = field->GetType()->GetUnqualified();
+        if (ft->GetTypeKind() == TypeKind::ARRAY)
+            assignArray(assembly, offset + field->GetOffset(), reinterpret_cast<SymArray *>(ft));
+        else if (ft->GetTypeKind() == TypeKind::STRUCT)
+            assignStructure(assembly, offset + field->GetOffset(), reinterpret_cast<SymRecord *>(ft));
+        else
+        {
+            s.AddCommand(CommandName::MOV, MakeAddress(offset + field->GetOffset(), Register::ESP), Register::EAX, CommandSuffix::L);
+            s.AddCommand(CommandName::MOV, Register::EAX, MakeAddress(offset + field->GetOffset(), Register::EBX), CommandSuffix::L);
+        }
+    }
 }
 
 void TypeCastNode::Print(std::ostream &os, std::string indent, bool isTail)
@@ -976,8 +1092,14 @@ void ExprStatmentNode::CleanStackAfterExpression(ExprNode *expr, Asm::Assembly *
     if (etype->GetTypeKind() == TypeKind::POINTER || etype->GetTypeKind() == TypeKind::BUILTIN)
     {
         if (etype->GetTypeKind() == TypeKind::BUILTIN &&
-            reinterpret_cast<SymBuiltInType *>(etype)->GetBuiltInTypeKind() != BuiltInTypeKind::VOID)
-            s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+            reinterpret_cast<SymBuiltInType *>(etype)->GetBuiltInTypeKind() == BuiltInTypeKind::VOID)
+            return;
+        s.AddCommand(CommandName::POP, Register::EAX, CommandSuffix::L);
+    }
+    else if (etype->GetTypeKind() == TypeKind::STRUCT)
+    {
+        auto rt = reinterpret_cast<SymRecord *>(etype);
+        s.AddCommand(CommandName::ADD, new IntConstNode(rt->Size()), Register::ESP, CommandSuffix::L);
     }
 }
 
@@ -1246,6 +1368,8 @@ void DeclaratorNode::SetType(SymType *type)
 
 SymType *DeclaratorNode::GetType() const
 {
+//    if (type->GetTypeKind() == TypeKind::TYPEDEF)
+//        return reinterpret_cast<>
     return type;
 }
 
@@ -1346,6 +1470,8 @@ void FunctionCallNode::Generate(Asm::Assembly *assembly)
     s.AddCommand(CommandName::CALL, t->GetLabel());
     if (t->GetArgumentsStorageSize())
         s.AddCommand(CommandName::ADD, new IntConstNode(t->GetArgumentsStorageSize()), Register::ESP, CommandSuffix::L);
+    if (rt->GetTypeKind() != TypeKind::STRUCT)
+        s.AddCommand(CommandName::PUSH, Register::EAX, CommandSuffix::L);
 }
 
 void DeclarationSpecifiersNode::Print(std::ostream &os, std::string indent, bool isTail)

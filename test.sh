@@ -1,4 +1,4 @@
-	#!/bin/bash
+#!/bin/bash
 tccpath=$(find -name "tcc" -print0)
 if [ "$tccpath" = "" ];
 then
